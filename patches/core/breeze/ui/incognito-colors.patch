@@ -1,0 +1,40 @@
+--- a/chrome/browser/resources/ntp4/incognito_tab.css
++++ b/chrome/browser/resources/ntp4/incognito_tab.css
+@@ -17,7 +17,7 @@ body {
+ .content {
+   /* This is identical to the default background color. It's necessary to set it
+      for the case when a theme with a background image is installed. */
+-  background-color: rgb(53, 54, 58);
++  background-color: rgb(10, 10, 10);
+   color: rgb(232, 234, 237);  /* --google-grey-200 */
+   font-size: calc(100% - 2px);
+   line-height: calc(100% + 6px);
+@@ -36,7 +36,7 @@ em {
+ }
+ 
+ .learn-more-button {
+-  color: rgb(138, 180, 248);
++  color: rgb(0, 174, 239);
+ }
+ 
+ /** Icon -------------------------------------------------------------------- */
+@@ -104,7 +104,7 @@ em {
+ 
+ #cookie-controls {
+   align-items: center;
+-  background-color: rgb(60, 64, 67); /* --google-grey-800 */
++  background-color: rgb(31, 31, 31); /* --google-grey-800 */
+   border-radius: 4px;
+   box-sizing: border-box;
+   display: flex;
+--- a/chrome/browser/resources/ntp4/incognito_tab_theme.css
++++ b/chrome/browser/resources/ntp4/incognito_tab_theme.css
+@@ -4,7 +4,7 @@
+ 
+ html {
+   background-attachment: fixed;
+-  background-color: $i18n{colorBackground};
++  background-color: rgb(10, 10, 10);
+   background-position: $i18n{backgroundBarDetached};
+   background-repeat: $i18n{backgroundTiling};
+   height: 100%;

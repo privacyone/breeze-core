@@ -1,0 +1,36 @@
+--- a/chrome/browser/ui/views/toolbar/toolbar_view.cc
++++ b/chrome/browser/ui/views/toolbar/toolbar_view.cc
+@@ -241,7 +241,7 @@
+ 
+   std::unique_ptr<ToolbarAccountIconContainerView>
+       toolbar_account_icon_container;
+-  bool show_avatar_toolbar_button = true;
++  bool show_avatar_toolbar_button = false;
+ #if defined(OS_CHROMEOS)
+   if (!base::FeatureList::IsEnabled(chromeos::features::kAvatarToolbarButton)) {
+     // ChromeOS only badges Incognito and Guest icons in the browser window.
+--- a/chrome/browser/profiles/profiles_state.cc
++++ b/chrome/browser/profiles/profiles_state.cc
+@@ -42,10 +42,7 @@
+ namespace profiles {
+ 
+ bool IsMultipleProfilesEnabled() {
+-#if defined(OS_ANDROID)
+   return false;
+-#endif
+-  return true;
+ }
+ 
+ base::FilePath GetDefaultProfileDir(const base::FilePath& user_data_dir) {
+--- a/chrome/browser/resources/settings/people_page/people_page.html
++++ b/chrome/browser/resources/settings/people_page/people_page.html
+@@ -66,8 +66,7 @@
+                   "$i18n{peopleSignInPromptSecondaryWithNoAccount}">
+           </settings-sync-account-control>
+         </template>
+-        <template is="dom-if" if="[[!shouldShowSyncAccountControl_(
+-            syncStatus.syncSystemEnabled, signinAllowed_)]]" restamp>
++        <template is="dom-if" if="[[false]]" restamp>
+           <div id="profile-row" class="cr-row first two-line"
+                   actionable$="[[isProfileActionable_]]"
+                   on-click="onProfileTap_">

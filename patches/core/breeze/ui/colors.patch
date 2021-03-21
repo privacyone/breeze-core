@@ -1,0 +1,148 @@
+--- a/components/flags_ui/resources/flags.css
++++ b/components/flags_ui/resources/flags.css
+@@ -15,12 +15,12 @@ html {
+   --ease-in-out: cubic-bezier(0.4, 0.0, 0.2, 1);
+   --shadow-color: rgba(0, 0, 0, 0.1);
+ 
+-  --google-blue-300-rgb: 138, 180, 248;
++  --google-blue-300-rgb: 0, 174, 239;
+   --google-blue-300: rgb(var(--google-blue-300-rgb));
+-  --google-blue-400: rgb(102, 157, 246);
++  --google-blue-400: rgb(0, 174, 239);
+   --google-blue-500-rgb: 66, 133, 244;
+   --google-blue-500: rgb(var(--google-blue-500-rgb));
+   --google-blue-600: rgb(26, 115, 232);
+-  --google-blue-700: rgb(25, 103, 210);
++  --google-blue-700: rgb(2, 146, 254);
+   --google-grey-100: rgb(241, 243, 244);
+   --google-grey-200: rgb(232, 234, 237);
+@@ -27,10 +27,10 @@ html {
+   --google-grey-300: rgb(218, 220, 224);
+   --google-grey-500: rgb(154, 160, 166);
+   --google-grey-700: rgb(95, 99, 104);
+-  --google-grey-900-rgb: 32, 33, 36;
++  --google-grey-900-rgb: 10, 10, 10;
+   --google-grey-900: rgb(var(--google-grey-900-rgb));
+   /* --google-grey-900 + 4% white blended together. */
+-  --google-grey-900-white-4-percent: #292a2d;
++  --google-grey-900-white-4-percent: #1f1f1f;
+   --google-red-300: rgb(242, 139, 130);
+   --google-red-700: rgb(197, 34, 31);
+ 
+--- a/ui/webui/resources/cr_elements/shared_vars_css.html
++++ b/ui/webui/resources/cr_elements/shared_vars_css.html
+@@ -12,3 +12,3 @@
+     --google-blue-200: rgb(var(--google-blue-200-rgb));
+-    --google-blue-600-rgb: 26, 115, 232;  /* #1a73e8 */
++    --google-blue-600-rgb:  2, 146, 254;  /* #0292FE */
+     --google-blue-600: rgb(var(--google-blue-600-rgb));
+@@ -21,10 +21,10 @@
+     --google-grey-600: rgb(var(--google-grey-600-rgb));
+     --google-grey-800-rgb: 60, 64, 67;  /* #3c4043 */
+     --google-grey-800: rgb(var(--google-grey-800-rgb));
+-    --google-grey-900-rgb: 32, 33, 36;  /* #202124 */
++    --google-grey-900-rgb: 10, 10, 10;  /* #0a0a0a */
+     --google-grey-900: rgb(var(--google-grey-900-rgb));
+     /* --google-grey-900 + 4% white blended together. */
+-    --google-grey-900-white-4-percent: #292a2d;
++    --google-grey-900-white-4-percent: #1f1f1f;
+ 
+     --google-red-600-rgb: 217, 48, 37;  /* #d93025 */
+     --google-red-600: rgb(var(--google-red-600-rgb));
+@@ -35,10 +35,10 @@
+     /* -refresh differentiate from polymer's color.html. */
+     --google-blue-refresh-100-rgb: 210, 227, 252;  /* #d2e3fc */
+     --google-blue-refresh-100: rgb(var(--google-blue-refresh-100-rgb));
+-    --google-blue-refresh-300-rgb: 138, 180, 248;  /* #8ab4f8 */
++    --google-blue-refresh-300-rgb: 0, 174, 239;  /* #00AEEF */
+     --google-blue-refresh-300: rgb(var(--google-blue-refresh-300-rgb));
+     --google-blue-refresh-500-rgb: 66, 133, 244;  /* #4285f4 */
+     --google-blue-refresh-500: rgb(var(--google-blue-refresh-500-rgb));
+-    --google-blue-refresh-700-rgb: 25, 103, 210;  /* #1966d2 */
++    --google-blue-refresh-700-rgb: 2, 146, 254;  /* #0292FE */
+     --google-blue-refresh-700: rgb(var(--google-blue-refresh-700-rgb));
+ 
+--- a/ui/webui/resources/css/md_colors.css
++++ b/ui/webui/resources/css/md_colors.css
+@@ -8,13 +8,13 @@ html {
+   --md-background-color: rgb(248, 249, 250);
+   --md-loading-message-color: #6e6e6e;
+   /* --google-blue-700, rewritten as a native custom property for speed. */
+-  --md-toolbar-color: rgb(51, 103, 214);
++  --md-toolbar-color: rgb(2, 146, 254);
+   --md-toolbar-height: 56px;
+ }
+ 
+ @media (prefers-color-scheme: dark) {
+   html {
+-    --md-background-color: rgb(32, 33, 36);  /* --google-grey-900 */
++    --md-background-color: rgb(10, 10, 10);  /* --google-grey-900 */
+     --md-loading-message-color: #9AA0A6;  /* --google-grey-refresh-500 */
+     /* --cr-separator-line */
+     --md-toolbar-border: 1px solid rgba(255, 255, 255, .1);
+--- a/ui/gfx/color_palette.h
++++ b/ui/gfx/color_palette.h
+@@ -18,10 +18,10 @@ constexpr SkColor kPlaceholderColor = SK_ColorRED;
+ constexpr SkColor kGoogleBlue050 = SkColorSetRGB(0xE8, 0xF0, 0xFE);
+ constexpr SkColor kGoogleBlue100 = SkColorSetRGB(0xD2, 0xE3, 0xFC);
+ constexpr SkColor kGoogleBlue200 = SkColorSetRGB(0xAE, 0xCB, 0xFA);
+-constexpr SkColor kGoogleBlue300 = SkColorSetRGB(0x8A, 0xB4, 0xF8);
+-constexpr SkColor kGoogleBlue400 = SkColorSetRGB(0x66, 0x9D, 0xF6);
++constexpr SkColor kGoogleBlue300 = SkColorSetRGB(0x00, 0xAE, 0xEF);
++constexpr SkColor kGoogleBlue400 = SkColorSetRGB(0x00, 0xAE, 0xEF);
+ constexpr SkColor kGoogleBlue500 = SkColorSetRGB(0x42, 0x85, 0xF4);
+-constexpr SkColor kGoogleBlue600 = SkColorSetRGB(0x1A, 0x73, 0xE8);
+-constexpr SkColor kGoogleBlue700 = SkColorSetRGB(0x19, 0x67, 0xD2);
++constexpr SkColor kGoogleBlue600 = SkColorSetRGB(0x02, 0x92, 0xFE);
++constexpr SkColor kGoogleBlue700 = SkColorSetRGB(0x02, 0x92, 0xFE);
+ constexpr SkColor kGoogleBlue800 = SkColorSetRGB(0x18, 0x5A, 0xBC);
+ constexpr SkColor kGoogleBlue900 = SkColorSetRGB(0x17, 0x4E, 0xA6);
+--- a/chrome/browser/resources/local_ntp/local_ntp.css
++++ b/chrome/browser/resources/local_ntp/local_ntp.css
+@@ -993,8 +993,8 @@
+ #promo > div > a {
+-  color: rgb(51, 103, 214) !important;
++  color: rgb(2, 146, 254) !important;  /* #0292FE */
+   text-decoration: none;
+ }
+ 
+ #promo > div > a:visited {
+-  color: rgb(51, 103, 214) !important;
++  color: rgb(2, 146, 254) !important;  /* #0292FE */
+ }
+--- a/chrome/browser/resources/local_ntp/local_ntp_common.css
++++ b/chrome/browser/resources/local_ntp/local_ntp_common.css
+@@ -24,7 +24,7 @@ html {
+   --GB050-rgb: 232, 240, 254;
+   --GB100-rgb: 210, 227, 252;
+   --GB200-rgb: 174, 203, 250;
+-  --GB300-rgb: 138, 180, 248;
++  --GB300-rgb: 0, 174, 239;
+   --GB400-rgb: 102, 157, 246;
+   --GB500-rgb: 66, 133, 244;
+   --GB600-rgb: 26, 115, 232;
+--- a/components/about_ui/resources/about_credits.tmpl
++++ b/components/about_ui/resources/about_credits.tmpl
+@@ -9,7 +9,7 @@
+ <style>
+ html {
+   --google-blue-50: rgb(232, 240, 254);
+-  --google-blue-300: rgb(138, 180, 248);
++  --google-blue-300: rgb(0, 174, 239);
+   --google-blue-600: rgb(26, 115, 232);
+   --google-blue-900: rgb(23, 78, 166);
+   --google-grey-200: rgb(232, 234, 237);
+--- a/third_party/polymer/v1_0/components-chromium/paper-styles/color.html
++++ b/third_party/polymer/v1_0/components-chromium/paper-styles/color.html
+@@ -33,3 +33,3 @@
+       --google-blue-500: rgb(var(--google-blue-500-rgb));
+-      --google-blue-700-rgb: 51, 103, 214;  /* #3367d6 */
++      --google-blue-700-rgb:  2, 146, 254;  /* #0292FE */
+       --google-blue-700: rgb(var(--google-blue-700-rgb));
+--- a/third_party/polymer/v3_0/components-chromium/paper-styles/color.js
++++ b/third_party/polymer/v3_0/components-chromium/paper-styles/color.js
+@@ -36,3 +36,3 @@
+       --google-blue-500: rgb(var(--google-blue-500-rgb));
+-      --google-blue-700-rgb: 51, 103, 214;  /* #3367d6 */
++      --google-blue-700-rgb:  2, 146, 254;  /* #0292FE */
+       --google-blue-700: rgb(var(--google-blue-700-rgb));

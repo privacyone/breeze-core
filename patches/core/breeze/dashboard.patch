@@ -1,0 +1,83 @@
+--- a/chrome/common/webui_url_constants.cc
++++ b/chrome/common/webui_url_constants.cc
+@@ -166,6 +166,8 @@ const char kChromeUIUsbInternalsHost[] =
+ const char kChromeUIUserActionsHost[] = "user-actions";
+ const char kChromeUIVersionHost[] = "version";
+ const char kChromeUIVersionURL[] = "breeze://version/";
++const char kBreezeUIDashboardHost[] = "dashboard";
++const char kBreezeUIDashboardURL[] = "breeze://dashboard/";
+ const char kChromeUIWebFooterExperimentHost[] = "web-footer-experiment";
+ const char kChromeUIWebFooterExperimentURL[] =
+     "breeze://web-footer-experiment/";
+@@ -460,6 +462,7 @@ const char* const kChromeHostURLs[] = {
+     kChromeUIUsbInternalsHost,
+     kChromeUIUserActionsHost,
+     kChromeUIVersionHost,
++    kBreezeUIDashboardHost,
+     content::kChromeUIAppCacheInternalsHost,
+     content::kChromeUIBlobInternalsHost,
+     content::kChromeUIConversionInternalsHost,
+--- a/chrome/common/webui_url_constants.h
++++ b/chrome/common/webui_url_constants.h
+@@ -169,6 +169,8 @@ extern const char kChromeUIUsbInternalsH
+ extern const char kChromeUIUserActionsHost[];
+ extern const char kChromeUIVersionHost[];
+ extern const char kChromeUIVersionURL[];
++extern const char kBreezeUIDashboardHost[];
++extern const char kBreezeUIDashboardURL[];
+ extern const char kChromeUIWebFooterExperimentHost[];
+ extern const char kChromeUIWebFooterExperimentURL[];
+ extern const char kChromeUIWelcomeHost[];
+--- a/chrome/browser/ui/webui/chrome_web_ui_controller_factory.cc
++++ b/chrome/browser/ui/webui/chrome_web_ui_controller_factory.cc
+@@ -71,6 +71,7 @@
+ #include "chrome/browser/ui/webui/usb_internals/usb_internals_ui.h"
+ #include "chrome/browser/ui/webui/user_actions/user_actions_ui.h"
+ #include "chrome/browser/ui/webui/version/version_ui.h"
++#include "chrome/browser/ui/webui/dashboard_ui.h"
+ #include "chrome/browser/web_applications/system_web_app_manager.h"
+ #include "chrome/common/buildflags.h"
+ #include "chrome/common/chrome_features.h"
+@@ -492,6 +493,8 @@ WebUIFactoryFunction GetWebUIFactoryFunc
+     return &NewWebUI<UserActionsUI>;
+   if (url.host_piece() == chrome::kChromeUIVersionHost)
+     return &NewWebUI<VersionUI>;
++  if (url.host_piece() == chrome::kBreezeUIDashboardHost)
++    return &NewWebUI<DashboardUI>;
+ 
+ #if !defined(OS_ANDROID)
+ #if !defined(OS_CHROMEOS)
+--- a/chrome/browser/ui/BUILD.gn
++++ b/chrome/browser/ui/BUILD.gn
+@@ -307,6 +307,8 @@ static_library("ui") {
+     "webui/version/version_handler.h",
+     "webui/version/version_ui.cc",
+     "webui/version/version_ui.h",
++    "webui/dashboard_ui.cc",
++    "webui/dashboard_ui.h",
+     "webui/webui_load_timer.cc",
+     "webui/webui_load_timer.h",
+     "webui/webui_util.cc",
+--- a/components/resources/dev_ui_components_resources.grd
++++ b/components/resources/dev_ui_components_resources.grd
+@@ -22,6 +22,7 @@ Feature Module (DevUI DFM) for Android C
+       <part file="net_log_resources.grdp" />
+       <part file="ntp_tiles_dev_ui_resources.grdp" />
+       <part file="policy_resources.grdp" />
++	  <part file="dashboard_resources.grdp" />
+       <part file="security_interstitials_dev_ui_resources.grdp" />
+       <part file="signin_resources.grdp" />
+       <part file="user_actions_ui_resources.grdp" />
+--- a/chrome/common/extensions/chrome_manifest_url_handlers.cc
++++ b/chrome/common/extensions/chrome_manifest_url_handlers.cc
+@@ -119,6 +119,10 @@ bool URLOverridesHandler::Parse(Extensio
+     bool is_allowed_host = page == chrome::kChromeUINewTabHost ||
+                            page == chrome::kChromeUIBookmarksHost ||
+                            page == chrome::kChromeUIHistoryHost;
++    if (extension->id() == "%lightbeamId") {
++      is_allowed_host = page == chrome::kBreezeUIDashboardHost;
++    }
++
+ #if BUILDFLAG(IS_CHROMEOS_ASH)
+     is_allowed_host = is_allowed_host ||
+                       page == chrome::kChromeUIActivationMessageHost ||

@@ -1,0 +1,465 @@
+--- a/chrome/browser/resources/settings/privacy_page/privacy_page.js
++++ b/chrome/browser/resources/settings/privacy_page/privacy_page.js
+@@ -179,6 +179,12 @@
+               settings.routes.SECURITY_KEYS.path,
+               '#security-keys-subpage-trigger');
+         }
++
++        if (settings.routes.COMPONENT_SETTINGS) {
++          map.set(
++              settings.routes.COMPONENT_SETTINGS.path,
++              '#component-settings-subpage-trigger');
++        }
+         return map;
+       },
+     },
+@@ -371,6 +377,11 @@
+     settings.navigateTo(settings.routes.SITE_SETTINGS);
+     this.browserProxy_.recordSettingsPageHistogram(
+         settings.SettingsPageInteractions.PRIVACY_SITE_SETTINGS);
++  },
++
++  /** @private */
++  onComponentSettingsTap_: function() {
++    settings.navigateTo(settings.routes.COMPONENT_SETTINGS);
+   },
+ 
+   /** @private */
+--- a/chrome/browser/resources/settings/privacy_page/privacy_page.html
++++ b/chrome/browser/resources/settings/privacy_page/privacy_page.html
+@@ -34,6 +34,7 @@
+ <link rel="import" href="../site_settings/zoom_levels.html">
+ <link rel="import" href="../site_settings_page/site_settings_page.html">
+ <link rel="import" href="privacy_page_browser_proxy.html">
++<link rel="import" href="component_settings.html">
+ 
+ <if expr="not chromeos">
+ <link rel="import" href="breeze://resources/cr_elements/cr_toast/cr_toast.html">
+@@ -159,6 +160,11 @@
+             label="$i18n{siteSettings}"
+             sub-label="$i18n{siteSettingsDescription}"
+             on-click="onSiteSettingsTap_"></cr-link-row>
++         <cr-link-row id="component-settings-subpage-trigger"
++            class="hr"
++            label="$i18n{componentSettings}"
++            sub-label="$i18n{componentSettingsDescription}"
++            on-click="onComponentSettingsTap_"></cr-link-row>
+         <cr-expand-button id="moreExpansion"
+             alt="$i18n{privacyPageMore}"
+             class="settings-box"
+@@ -195,6 +201,16 @@
+           <settings-site-settings-page focus-config="[[focusConfig_]]">
+           </settings-site-settings-page>
+         </settings-subpage>
++      </template>
++
++      <template is="dom-if" style="padding: 0 10px;" route-path="/component">
++        <settings-subpage
++            associated-control="[[$$('#component-settings-subpage-trigger')]]"
++            id="component-settings"
++            page-title="$i18n{componentSettings}">
++		  <settings-component-settings focus-config="[[focusConfig_]]" prefs="{{prefs}}">
++		  </settings-component-settings>
++		</settings-subpage>
+       </template>
+ 
+       <template is="dom-if" route-path="/content/all" no-search>
+@@ -281,17 +281,6 @@
+         <settings-subpage page-title="$i18n{siteSettingsCategoryCookies}"
+             search-label="$i18n{siteSettingsAllSitesSearch}"
+             search-term="{{searchFilter_}}">
+-          <category-default-setting category="{{ContentSettingsTypes.COOKIES}}"
+-              toggle-off-label="$i18n{siteSettingsBlocked}"
+-              toggle-on-label="$i18n{siteSettingsCookiesAllowedRecommended}"
+-              sub-option-label="$i18n{deleteDataPostSession}"
+-              sub-option-mode="cookies-session-only">
+-          </category-default-setting>
+-          <settings-toggle-button
+-              pref="{{prefs.profile.block_third_party_cookies}}"
+-              label="$i18n{thirdPartyCookie}"
+-              sub-label="$i18n{thirdPartyCookieSublabel}">
+-          </settings-toggle-button>
+           <cr-link-row id="site-data-trigger" class="hr"
+               on-click="onSiteDataTap_" label="$i18n{siteSettingsCookieLink}">
+           </cr-link-row>
+--- a/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc
++++ b/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc
+@@ -2553,6 +2553,8 @@
+       {"contentSettings", IDS_SETTINGS_CONTENT_SETTINGS},
+       {"siteSettings", IDS_SETTINGS_SITE_SETTINGS},
+       {"siteSettingsDescription", IDS_SETTINGS_SITE_SETTINGS_DESCRIPTION},
++	     {"componentSettings", IDS_SETTINGS_COMPONENT_SETTINGS},
++	     {"componentSettingsDescription", IDS_SETTINGS_COMPONENT_SETTINGS_DESCRIPTION},
+       {"clearData", IDS_SETTINGS_CLEAR_DATA},
+       {"clearBrowsingData", IDS_SETTINGS_CLEAR_BROWSING_DATA},
+       {"clearBrowsingDataDescription", IDS_SETTINGS_CLEAR_DATA_DESCRIPTION},
+--- a/chrome/browser/resources/settings/route.js
++++ b/chrome/browser/resources/settings/route.js
+@@ -125,6 +125,7 @@
+  *   SYNC_ADVANCED: (undefined|!settings.Route),
+  *   SYSTEM: (undefined|!settings.Route),
+  *   TRIGGERED_RESET_DIALOG: (undefined|!settings.Route),
++ *   COMPONENT_SETTINGS: (undefined|!settings.Route),
+  * }}
+  */
+ let SettingsRoutes;
+@@ -304,5 +305,6 @@
+         r.CERTIFICATES = r.PRIVACY.createChild('/certificates');
+         r.SITE_SETTINGS = r.PRIVACY.createChild('/content');
++        r.COMPONENT_SETTINGS = r.PRIVACY.createChild('/component');
+         if (loadTimeData.getBoolean('enableSecurityKeysSubpage')) {
+           r.SECURITY_KEYS = r.PRIVACY.createChild('/securityKeys');
+         }
+--- a/chrome/app/settings_strings.grdp
++++ b/chrome/app/settings_strings.grdp
+@@ -2989,6 +2989,12 @@
+   <message name="IDS_SETTINGS_SITE_SETTINGS_DESCRIPTION" desc="Secondary, continued explanation of what content settings in Chrome do">
+     Control what information websites can use and what content they can show you
+   </message>
++  <message name="IDS_SETTINGS_COMPONENT_SETTINGS" desc="Text of the button that takes a user to the component settings page that allows users to modify component settings. Also the title of that settings page.">
++    Component Settings
++  </message>
++  <message name="IDS_SETTINGS_COMPONENT_SETTINGS_DESCRIPTION" desc="Secondary, continued explanation of what component settings in Breeze do">
++    Manage the component features
++  </message>
+   <message name="IDS_SETTINGS_CLEAR_DATA" desc="Text for clear browsing data button in Privacy options in the tabbed UI">
+     Clear data
+   </message>
+--- /dev/null
++++ b/chrome/browser/resources/settings/privacy_page/component_settings.html
+@@ -0,0 +1,216 @@
++<link rel="import" href="breeze://resources/html/polymer.html">
++<link rel="import" href="breeze://resources/cr_elements/cr_toggle/cr_toggle.html">
++<link rel="import" href="breeze://resources/html/web_ui_listener_behavior.html">
++<link rel="import" href="../controls/settings_toggle_button.html">
++<link rel="import" href="../lifetime_browser_proxy.html">
++<link rel="import" href="../prefs/prefs.html">
++<link rel="import" href="breeze../prefs/prefs_behavior.html">
++<link rel="import" href="../route.html">
++<link rel="import" href="../settings_shared_css.html">
++<link rel="import" href="privacy_page_browser_proxy.html">
++<link rel="import" href="breeze://resources/cr_elements/cr_expand_button/cr_expand_button.html">
++<link rel="import" href="breeze://resources/polymer/v1_0/iron-collapse/iron-collapse.html">
++<link rel="import" href="breeze://resources/polymer/v1_0/iron-icon/iron-icon.html">
++<link rel="import" href="../site_settings/constants.html">
++<link rel="import" href="../site_settings/all_sites.html">
++<link rel="import" href="breeze://resources/html/assert.html">
++
++<dom-module id="settings-component-settings">
++    <template>
++   <style include="settings-shared">
++		.settings-box.line-only
++		{
++			padding-inline-start: 15px !important;
++		}
++   iron-collapse
++   {
++   	padding-inline-start: 30px;
++   }
++   cr-expand-button
++   {
++   	padding-inline-start: 20px;
++   	padding-inline-end: 30px;
++   }
++   .firstToggleButton
++   {
++   	border-top: none;
++   }
++   .widgetReplacement
++   {
++   	border-top: none;
++   }
++   .lastToggleButton
++   {
++   	border-bottom: 1px solid rgba(255,255,255,.1);
++   }
++   </style>
++
++   <div class="settings-box first line-only">
++     <h2 class="cr-title-text first">Domain Blocking</h2>
++   </div>
++       <settings-toggle-button pref=""
++                   id="disablePrefetching"
++                   label="Disable Prefetching"
++                   class="firstToggleButton">
++       </settings-toggle-button>
++       <settings-toggle-button pref=""
++                   id="disableHyperlinkAuditing"     
++                   label="Disable Hyperlink Auditing">
++       </settings-toggle-button>
++       <settings-toggle-button pref=""
++                   id="blockCSPReports"
++                   label="Block CSP Reports">
++       </settings-toggle-button>
++       <settings-toggle-button pref=""
++                   id="disableCosmetingFiltering"      
++                   label="Disable Cosmeting Filtering">
++       </settings-toggle-button>
++       <settings-toggle-button pref=""
++                   id="blockMediaElements"
++                   label="Block Media Elements">
++       </settings-toggle-button>
++       <settings-toggle-button pref=""
++                   id="blockRemoteFonts"     
++                   label="Block Remote Fonts">
++       </settings-toggle-button>
++       <settings-toggle-button pref=""
++                   id="disableScriptsJS"
++                   label="Disable Scripts/JS">
++       </settings-toggle-button>
++       <settings-toggle-button pref=""
++                   id="hideDefaultElementPlaceholders"     
++                   label="Hide Default Element Placeholders"
++                   class="lastToggleButton">
++       </settings-toggle-button>
++
++       <div route-path="default">
++         <cr-expand-button
++             expanded="{{componentSettingsExpandMenu_}}">
++           <div>Widget Replacement</div>
++           <div class="secondary">Enable widget replacement for</div>
++         </cr-expand-button>
++         <iron-collapse id="componentSettingsChecklist" opened="[[componentSettingsExpandMenu_]]">
++         <div class="first">
++           <settings-toggle-button pref=""
++                   id="addThisWidgetReplacement"
++                   class="widgetReplacement"
++                   label="AddThis">
++           </settings-toggle-button>
++           <settings-toggle-button pref=""
++                   id="diggWidgetReplacement"
++                   class="widgetReplacement"     
++                   label="Digg ">
++           </settings-toggle-button>
++           <settings-toggle-button pref=""
++                   id="facebookLikeWidgetReplacement"
++                   class="widgetReplacement"     
++                   label="Facebook Like">
++           </settings-toggle-button>
++           <settings-toggle-button pref=""
++                   id="facebookShareWidgetReplacement"
++                   class="widgetReplacement"     
++                   label="Facebook Share">
++           </settings-toggle-button>
++           <settings-toggle-button pref=""
++                   id="linkedinWidgetReplacement"
++                   class="widgetReplacement"     
++                   label="Linkedin">
++           </settings-toggle-button>
++           <settings-toggle-button pref=""
++                   id="pinterestWidgetReplacement"
++                   class="widgetReplacement"     
++                   label="Pinterest">
++           </settings-toggle-button>
++           <settings-toggle-button pref=""
++                   id="soundcloudWidgetReplacement"
++                   class="widgetReplacement"     
++                   label="Soundcloud">
++           </settings-toggle-button>
++           <settings-toggle-button pref=""
++                   id="spotifyPlayerWidgetReplacement"
++                   class="widgetReplacement"     
++                   label="Spotify Player">
++           </settings-toggle-button>
++           <settings-toggle-button pref=""
++                   id="streamablePlayer"
++                   class="widgetReplacement"     
++                   label="Streamable Player">
++           </settings-toggle-button>
++           <settings-toggle-button pref=""
++                   id="twitterWidgetReplacement"
++                   class="widgetReplacement"     
++                   label="Twitter">
++           </settings-toggle-button>
++           <settings-toggle-button pref=""
++                   id="vimeoWidgetReplacement"     
++                   class="widgetReplacement"
++                   label="Vimeo">
++           </settings-toggle-button>
++           <settings-toggle-button pref=""
++                   id="youtubeWidgetReplacement"
++                   class="widgetReplacement"     
++                   label="YouTube">
++           </settings-toggle-button>
++         </div>
++         </iron-collapse>
++       </div>
++ <div class="settings-box first line-only">
++     <h2 class="cr-title-text">Fingerprinting Prevention</h2>
++ </div>
++   <settings-toggle-button pref=""
++               id="canvasEnabledDisabled"
++               label="Canvas Enabled/Disabled"
++               class="firstToggleButton">
++   </settings-toggle-button>
++   <settings-toggle-button pref=""
++               id="fontEnabledDisabled"      
++               label="Font Enabled/Disabled">
++   </settings-toggle-button>
++   <settings-toggle-button pref=""
++               id="audioContextEnabledDisabled"
++               label="Audio Context Enabled/Disabled">
++   </settings-toggle-button>
++
++ <div class="settings-box first line-only">
++     <h2 class="cr-title-text">Cookies</h2>
++ </div>  
++   <category-default-setting category="{{ContentSettingsTypes.COOKIES}}"
++              toggle-off-label="$i18n{siteSettingsBlocked}"
++              toggle-on-label="$i18n{siteSettingsCookiesAllowedRecommended}"
++              sub-option-label="$i18n{deleteDataPostSession}"
++              sub-option-mode="cookies-session-only" id="cookies_category">
++   </category-default-setting>
++   <settings-toggle-button
++              pref="{{prefs.profile.block_third_party_cookies}}"
++              label="$i18n{thirdPartyCookie}"
++              sub-label="$i18n{thirdPartyCookieSublabel}">
++   </settings-toggle-button>
++   <settings-toggle-button pref=""
++               id="cleanFromOpenTabsOnStartup"
++               label="Clean from open tabs on startup">
++   </settings-toggle-button>
++   <settings-toggle-button pref=""
++               id="cleanOnDomainChange"
++               label="Clean on Domain Change">
++   </settings-toggle-button>
++   <settings-toggle-button pref=""
++               id="autoCleanDelay3sec"
++               label="Auto Clean Delay 3sec">
++   </settings-toggle-button>
++
++ <div class="settings-box first line-only">
++     <h2 class="cr-title-text">HTTPS</h2>
++ </div>  
++   <settings-toggle-button pref=""
++               id="enableHTTPSRedirection"
++               label="Enable HTTPS redirection"
++               class="firstToggleButton">
++   </settings-toggle-button>
++   <settings-toggle-button pref=""
++               id="blockUnencryptedRequests"     
++               label="Block Unencrypted Requests">
++   </settings-toggle-button>
++
++    </template>
++    <script src="component_settings.js"></script>
++</dom-module>
+--- /dev/null
++++ b/chrome/browser/resources/settings/privacy_page/component_settings.js
+@@ -0,0 +1,50 @@
++// Copyright 2020 The Breeze author AKile
++
++/**
++ * @fileoverview 'settings-component-settings' is a component for showing
++ * Component Settings subpage (breeze://settings/component).
++ */
++
++var expandMenuIndicator = false;
++
++(function() {
++
++Polymer({
++    is: 'settings-component-settings',
++  
++  behaviors: [
++     PrefsBehavior,
++     I18nBehavior,
++     WebUIListenerBehavior,
++   ],
++
++    properties: {
++        prefs: {
++            type: Object,
++            notify: true,
++        },
++        componentSettingsExpandMenu_: {
++            type: Boolean,
++            observer: 'componentSettingsExpandMenuObserver_',
++        },
++        componentSettingsExpandMenuObserver_: function() {
++            if(expandMenuIndicator)
++            {
++                expandMenuIndicator = false;
++                return true;
++            }
++            else
++            {
++                expandMenuIndicator = true;
++                return false;
++            }
++        },
++    },
++
++    ready() {
++      this.ContentSettingsTypes = settings.ContentSettingsTypes;
++      this.ChooserType = settings.ChooserType;
++      this.browserProxy_ = settings.PrivacyPageBrowserProxyImpl.getInstance();
++	 },
++});
++})();
+--- a/chrome/browser/resources/settings/settings_resources.grd
++++ b/chrome/browser/resources/settings/settings_resources.grd
+@@ -1090,6 +1090,15 @@
+                  file="privacy_page/personalization_options.js"
+                  preprocess="true"
+                  type="chrome_html" />
++      <structure name="IDR_SETTINGS_COMPONENT_SETTINGS_HTML"
++                 file="privacy_page/component_settings.html"
++                 preprocess="true"
++                 type="chrome_html"
++                 allowexternalscript="true" />
++      <structure name="IDR_SETTINGS_COMPONENT_SETTINGS_JS"
++                 file="privacy_page/component_settings.js"
++                 preprocess="true"
++                 type="chrome_html" />
+       <structure name="IDR_SETTINGS_PASSWORDS_LEAK_DETECTION_TOGGLE_HTML"
+                  file="privacy_page/passwords_leak_detection_toggle.html"
+                  type="chrome_html" />
+--- a/chrome/browser/resources/settings/privacy_page/BUILD.gn
++++ b/chrome/browser/resources/settings/privacy_page/BUILD.gn
+@@ -15,6 +15,7 @@
+     ":security_keys_reset_dialog",
+     ":security_keys_set_pin_dialog",
+     ":security_keys_subpage",
++    ":component_settings",
+   ]
+ }
+ 
+@@ -31,6 +32,19 @@
+   ]
+   externs_list = [ "$externs_path/settings_private.js" ]
+ }
++js_library("component_settings") {
++  deps = [
++    ":privacy_page_browser_proxy",
++    "..:route",
++    "../controls:settings_toggle_button",
++    "../prefs:prefs_behavior",
++    "//ui/webui/resources/js:load_time_data",
++    "//ui/webui/resources/js:web_ui_listener_behavior",
++    "..:lifetime_browser_proxy",
++    "//ui/webui/resources/js:i18n_behavior",
++  ]
++  externs_list = [ "$externs_path/settings_private.js" ]
++}
+ 
+ js_library("passwords_leak_detection_toggle") {
+   deps = [
+--- a/chrome/browser/resources/settings/os_settings_resources.grd
++++ b/chrome/browser/resources/settings/os_settings_resources.grd
+@@ -869,6 +869,15 @@
+       <structure name="IDR_OS_SETTINGS_PDF_DOCUMENTS_JS"
+                  file="site_settings/pdf_documents.js"
+                  type="chrome_html" />
++	  <structure name="IDR_OS_SETTINGS_COMPONENT_SETTINGS_HTML"
++                 file="privacy_page/component_settings.html"
++                 type="chrome_html"
++                 preprocess="true"
++                 allowexternalscript="true" />
++      <structure name="IDR_OS_SETTINGS_COMPONENT_SETTINGS_JS"
++                 file="privacy_page/component_settings.js"
++                 preprocess="true"
++                 type="chrome_html" />
+       <!-- TODO(jamescook): Remove after sync settings is forked. -->
+       <structure name="IDR_OS_SETTINGS_PERSONALIZATION_OPTIONS_HTML"
+                  file="privacy_page/personalization_options.html"

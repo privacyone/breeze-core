@@ -1,0 +1,462 @@
+--- a/chrome/browser/resources/local_ntp/local_ntp.js
++++ b/chrome/browser/resources/local_ntp/local_ntp.js
+@@ -910,7 +910,7 @@
+       setRealboxIcon(undefined);
+ 
+       const realboxEl = $(IDS.REALBOX);
+-      realboxEl.placeholder = configData.translatedStrings.searchboxPlaceholder;
++      realboxEl.placeholder = "Search "+ configData.defaultSearchProvider + " or type a URL";
+       // Using .onmousedown instead of addEventListener('mousedown') to support
+       // tests.
+       realboxEl.onmousedown = onRealboxMouseDown;
+@@ -929,12 +929,6 @@
+       searchboxApiHandle.autocompletematchimageavailable =
+           autocompleteMatchImageAvailable;
+ 
+-      if (!iframesAndVoiceSearchDisabledForTesting) {
+-        speech.init(
+-            configData.googleBaseUrl, configData.translatedStrings,
+-            $(IDS.REALBOX_MICROPHONE), searchboxApiHandle);
+-      }
+-
+       utils.disableOutlineOnMouseClick($(IDS.REALBOX_MICROPHONE));
+     } else {
+       // Set up the fakebox (which only exists on the Google NTP).
+@@ -948,12 +942,6 @@
+       $(IDS.FAKEBOX_TEXT).textContent =
+           configData.translatedStrings.searchboxPlaceholder;
+ 
+-      if (!iframesAndVoiceSearchDisabledForTesting) {
+-        speech.init(
+-            configData.googleBaseUrl, configData.translatedStrings,
+-            $(IDS.FAKEBOX_MICROPHONE), searchboxApiHandle);
+-      }
+-
+       // Listener for updating the key capture state.
+       document.body.onmousedown = function(event) {
+         if (isFakeboxClick(event)) {
+@@ -999,8 +987,6 @@
+         searchboxApiHandle.startCapturingKeyStrokes();
+       }
+     }
+-
+-    doodles.init();
+   } else {
+     document.body.classList.add(CLASSES.NON_GOOGLE_PAGE);
+   }
+@@ -1956,26 +1943,56 @@
+         '--logo-color', convertToRGBAColor(theme.logoColor));
+   }
+ 
+-  // The doodle shouldn't be shown for non-default backgrounds. This  includes
+-  // non-white backgrounds, excluding dark mode gray if dark mode is enabled.
+-  document.body.classList.toggle(
+-      CLASSES.DONT_SHOW_DOODLE, !theme.usingDefaultTheme || !!theme.imageUrl);
+-
+   // If a custom background has been selected the image will be applied to the
+   // custom-background element instead of the body.
+-  if (!theme.customBackgroundConfigured) {
+-    document.body.style.background = [
+-      convertToRGBAColor(theme.backgroundColorRgba), theme.imageUrl,
+-      theme.imageTiling, theme.imageHorizontalAlignment,
+-      theme.imageVerticalAlignment
+-    ].join(' ').trim();
++  if (theme.customBackgroundConfigured) {
++    let imageUrl = theme.imageUrl;
++
++    if (!$(IDS.CUSTOM_BG).style.backgroundImage.includes(imageUrl)) 
++    {
++      const imageWithOverlay = [
++        customize.CUSTOM_BACKGROUND_OVERLAY, 'url(' + imageUrl + ')'
++      ].join(',').trim();
++      // If the theme update is because of uploading a local image then we
++      // should close the customization menu. Closing the menu before the image
++      // is selected doesn't look good.
++      const localImageFileName = 'background.jpg';
++      if (!configData.richerPicker &&
++          imageWithOverlay.includes(localImageFileName)) {
++        customize.closeCustomizationDialog();
++      }
++      // |image| and |imageWithOverlay| use the same url as their source.
++      // Waiting to display the custom background until |image| is fully
++      // loaded ensures that |imageWithOverlay| is also loaded.
++      $(IDS.CUSTOM_BG).style.backgroundImage = imageWithOverlay;
++      const image = new Image();
++      image.onload = function() {
++        $(IDS.CUSTOM_BG).style.opacity = '1';
++      };
++      image.src = imageUrl;
++    document.body.style.backgroundColor = convertToRGBAColor(theme.backgroundColorRgba);
++    }
+ 
+-    $(IDS.CUSTOM_BG).style.opacity = '0';
+-    $(IDS.CUSTOM_BG).style.backgroundImage = '';
+     customize.clearAttribution();
+   } else {
+-    // Do anything only if the custom background changed.
+-    const imageUrl = assert(theme.imageUrl);
++    // Default background.
++    let MarioKristiani = ["DSC_3796.webp", "DSC0014.webp",
++                          "DSC0189.webp", "DSC0253.webp", "DSC0322.webp",
++                          "DSC0489.webp", "DSC0548.webp", "DSC0563.webp", "DSC0573.webp",
++                          "DSC0733.webp", "DSC0813.webp", "DSC1073.webp",
++                          "DSC1120.webp", "DSC2915.webp", "DSC2951.webp",
++                          "DSC2994.webp", "DSC3287.webp", "DSC4614.webp"];
++    let unsplashedLength = 0; //navigator.onLine ? 6 : 0;
++    let bgRatio = Math.floor(Math.random() * (MarioKristiani.length + unsplashedLength));
++    let imageUrl = "";
++    if(bgRatio < MarioKristiani.length)
++    {
++      imageUrl = "chrome-search://local-ntp/" +MarioKristiani[bgRatio];
++    }
++    else
++    {
++      imageUrl = "https://source.unsplash.com/collection/10542588/1920x1080";
++    }
+     if (!$(IDS.CUSTOM_BG).style.backgroundImage.includes(imageUrl)) {
+       const imageWithOverlay = [
+         customize.CUSTOM_BACKGROUND_OVERLAY, 'url(' + imageUrl + ')'
+@@ -1997,11 +2014,18 @@
+         $(IDS.CUSTOM_BG).style.opacity = '1';
+       };
+       image.src = imageUrl;
++    document.body.style.backgroundColor = convertToRGBAColor(theme.backgroundColorRgba);
+ 
+       customize.clearAttribution();
+-      customize.setAttribution(
+-          '' + theme.attribution1, '' + theme.attribution2,
+-          '' + theme.attributionActionUrl);
++      if(bgRatio < MarioKristiani.length)
++      {
++        theme.attribution1 = "Photo by Mario Kristiani";
++        theme.attribution2 = "";
++        theme.attributionActionUrl = "https://www.instagram.com/mario_kristiani";
++        customize.setAttribution(
++            '' + theme.attribution1, '' + theme.attribution2,
++            '' + theme.attributionActionUrl);
++      }
+     }
+   }
+ 
+@@ -2143,12 +2167,7 @@
+   message.iconBackgroundColor = convertToRGBAColor(info.iconBackgroundColor);
+   message.useWhiteAddIcon = info.useWhiteAddIcon;
+ 
+-  let titleColor = NTP_DESIGN.titleColor;
+-  if (!info.usingDefaultTheme && info.textColorRgba) {
+-    titleColor = info.textColorRgba;
+-  } else if (info.isNtpBackgroundDark) {
+-    titleColor = NTP_DESIGN.titleColorAgainstDark;
+-  }
++  let titleColor = [248,249,250,255]; //always white
+   message.tileTitleColor = convertToRGBAColor(titleColor);
+ 
+   const iframe = $(IDS.TILES_IFRAME);
+@@ -2228,6 +2247,7 @@
+ function setRealboxIcon(match) {
+   const realboxIcon = $(IDS.REALBOX_ICON);
+   if (match && !match.isSearchType) {
++    realboxIcon.style.backgroundImage = '';
+     // if the selected match is a navigation match and has a favicon loaded,
+     // display the favicon. Otherwise display the match icon.
+     if (faviconOrImageUrlToDataUrlCache[match.destinationUrl]) {
+@@ -2239,8 +2259,14 @@
+       // Document matches use colored SVG icons.
+       setBackgroundImageByUrl(realboxIcon, realboxIcon.dataset.icon);
+     } else {
+-      realboxIcon.dataset.icon = match.iconUrl;
+-      setWebkitMaskImageByUrl(realboxIcon, realboxIcon.dataset.icon);
++      if(configData.defaultEngine) {
++        setBackgroundImageByUrl(
++          realboxIcon, configData.defaultEngine);
++      }
++      else {
++        realboxIcon.dataset.icon = match.iconUrl;
++        setWebkitMaskImageByUrl(realboxIcon, realboxIcon.dataset.icon);
++      }
+     }
+   } else if (configData.useGoogleGIcon) {
+     // if google_g icon should be used (as the default icon and search matches),
+@@ -2248,7 +2274,11 @@
+     /** @suppress {missingProperties} */
+     realboxIcon.dataset.icon = realboxIcon.dataset.defaultIcon;
+     setBackgroundImageByUrl(realboxIcon, realboxIcon.dataset.icon);
++  } else if(configData.defaultEngine) {
++    setBackgroundImageByUrl(
++          realboxIcon, configData.defaultEngine);
+   } else {
++    realboxIcon.style.backgroundImage = '';
+     // if no match is selected, display the default icon. Otherwise display the
+     // match icon.
+     /** @suppress {missingProperties} */
+--- a/chrome/browser/search/local_ntp_source.cc
++++ b/chrome/browser/search/local_ntp_source.cc
+@@ -135,6 +135,25 @@ const struct Resource{
+     {kPromoScriptFilename, kLocalResource, "text/javascript"},
+     {kSearchSuggestionsScriptFilename, kLocalResource, "text/javascript"},
+     {kThemeCSSFilename, kLocalResource, "text/css"},
++	// Photos by Mario Kristiani
++    {"DSC_3796.webp", IDR_MK_DSC_3796,"images/webp"},
++    {"DSC0548.webp", IDR_MK_DSC0548,"images/webp"},
++    {"DSC0489.webp", IDR_MK_DSC0489,"images/webp"},
++    {"DSC0563.webp", IDR_MK_DSC0563,"images/webp"},
++    {"DSC0573.webp", IDR_MK_DSC0573,"images/webp"},
++    {"DSC0733.webp", IDR_MK_DSC0733,"images/webp"},
++    {"DSC0813.webp", IDR_MK_DSC0813,"images/webp"},
++    {"DSC1073.webp", IDR_MK_DSC1073,"images/webp"},
++    {"DSC1120.webp", IDR_MK_DSC1120,"images/webp"},
++    {"DSC2915.webp", IDR_MK_DSC2915,"images/webp"},
++    {"DSC2951.webp", IDR_MK_DSC2951,"images/webp"},
++    {"DSC2994.webp", IDR_MK_DSC2994,"images/webp"},
++    {"DSC3287.webp", IDR_MK_DSC3287,"images/webp"},
++    {"DSC4614.webp", IDR_MK_DSC4614,"images/webp"},
++    {"DSC0014.webp", IDR_MK_DSC0014,"images/webp"},
++    {"DSC0189.webp", IDR_MK_DSC0189,"images/webp"},
++    {"DSC0253.webp", IDR_MK_DSC0253,"images/webp"},
++    {"DSC0322.webp", IDR_MK_DSC0322,"images/webp"},
+     // Image may not be a jpeg but the .jpg extension here still works for other
+     // filetypes. Special handling for different extensions isn't worth the
+     // added complexity.
+@@ -636,10 +636,14 @@ class LocalNtpSource::SearchConfiguratio
+     bool is_google = search::DefaultSearchProviderIsGoogle(service_);
+     const GURL google_base_url =
+         GURL(service_->search_terms_data().GoogleBaseURLValue());
++    auto default_engine = service_->GetDefaultSearchManager().GetDefaultSearchEngine(nullptr)->favicon_url;
++    auto search_provider_name = service_->GetDefaultSearchProvider()->short_name();
+     base::DictionaryValue config_data;
+     config_data.Set("translatedStrings", GetTranslatedStrings(is_google));
+     config_data.SetBoolean("isGooglePage", is_google);
+     config_data.SetString("googleBaseUrl", google_base_url.spec());
++    config_data.SetString("defaultEngine", default_engine.spec());
++    config_data.SetString("defaultSearchProvider", search_provider_name);
+     config_data.SetBoolean("isAccessibleBrowser",
+                            content::BrowserAccessibilityState::GetInstance()
+                                ->IsAccessibleBrowser());
+--- a/chrome/browser/resources/local_ntp/local_ntp.css
++++ b/chrome/browser/resources/local_ntp/local_ntp.css
+@@ -17,7 +17,7 @@ html {
+ 
+   --logo-color: #eee; /* Background color for alternative logo. */
+   --logo-height: 200px; /* Normal height of a doodle. */
+-  --logo-margin-top: 56px; /* Expected OGB height, so logo doesn't overlap. */
++  --logo-margin-top: 0px; /* Expected OGB height, so logo doesn't overlap. */
+   --logo-margin-bottom: 38px; /* Between logo and fakebox. */
+ 
+   /* Initial height determines the margin between the logo and the fakebox. If
+@@ -213,10 +213,10 @@ body.hide-fakebox #fakebox {
+   -webkit-mask-position: center;
+   -webkit-mask-repeat: no-repeat;
+   -webkit-mask-size: 16px;
+-  background-color: var(--search-box-icon, rgb(117, 117, 117));
++  background-color: var(--search-box-icon, rgb(117, 117, 117, 0));
+   background-position: center center;
+   background-repeat: no-repeat;
+-  background-size: 16px;
++  background-size: 20px;
+   bottom: 0;
+   left: 16px;
+   margin: auto;
+--- a/components/search_engines/template_url_service.h
++++ b/components/search_engines/template_url_service.h
+@@ -400,6 +400,8 @@ class TemplateURLService : public WebDat
+   const SearchTermsData& search_terms_data() const {
+     return *search_terms_data_;
+   }
++  
++  DefaultSearchManager& GetDefaultSearchManager() { return default_search_manager_; }
+ 
+   // Returns a SyncData with a sync representation of the search engine data
+   // from |turl|.
+--- a/chrome/browser/resources/local_ntp/local_ntp.html
++++ b/chrome/browser/resources/local_ntp/local_ntp.html
+@@ -40,21 +40,6 @@
+ 
+   <div id="ntp-contents">
+     <div id="logo">
+-      <!-- The logo that is displayed in the absence of a doodle. -->
+-      <div id="logo-default" title="Google"></div>
+-      <!-- Logo displayed when theme prevents doodles. Doesn't fade. -->
+-      <div id="logo-non-white" title="Google"></div>
+-      <!-- A doodle, if any: its link and image. -->
+-      <div id="logo-doodle">
+-        <div id="logo-doodle-container">
+-          <div id="logo-doodle-wrapper">
+-            <button id="logo-doodle-button">
+-              <img id="logo-doodle-image" tabindex="-1"></img>
+-            </button>
+-          </div>
+-        </div>
+-        <iframe id="logo-doodle-iframe" scrolling="no"></iframe>
+-      </div>
+     </div>
+ 
+     <div id="fakebox-container" $i18n{hiddenIfRealboxEnabled}>
+--- a/chrome/browser/history/top_sites_factory.cc
++++ b/chrome/browser/history/top_sites_factory.cc
+@@ -54,39 +54,6 @@ struct RawPrepopulatedPage {
+                          // roughly match favicon).
+ };
+ 
+-#if !defined(OS_ANDROID)
+-// Android does not use prepopulated pages.
+-const RawPrepopulatedPage kRawPrepopulatedPages[] = {
+-    {
+-        IDS_WEBSTORE_URL,
+-        IDS_EXTENSION_WEB_STORE_TITLE_SHORT,
+-        IDR_WEBSTORE_ICON_32,
+-        SkColorSetRGB(63, 132, 197),
+-    },
+-};
+-#endif
+-
+-void InitializePrepopulatedPageList(
+-    Profile* profile,
+-    history::PrepopulatedPageList* prepopulated_pages) {
+-#if !defined(OS_ANDROID)
+-  DCHECK(prepopulated_pages);
+-  PrefService* pref_service = profile->GetPrefs();
+-  bool hide_web_store_icon = pref_service->GetBoolean(prefs::kHideWebStoreIcon);
+-
+-  prepopulated_pages->reserve(base::size(kRawPrepopulatedPages));
+-  for (size_t i = 0; i < base::size(kRawPrepopulatedPages); ++i) {
+-    const RawPrepopulatedPage& page = kRawPrepopulatedPages[i];
+-    if (hide_web_store_icon && page.url_id == IDS_WEBSTORE_URL)
+-      continue;
+-
+-    prepopulated_pages->push_back(history::PrepopulatedPage(
+-        GURL(l10n_util::GetStringUTF8(page.url_id)),
+-        l10n_util::GetStringUTF16(page.title_id), page.favicon_id, page.color));
+-  }
+-#endif
+-}
+-
+ }  // namespace
+ 
+ // static
+@@ -135,8 +102,6 @@ TopSitesFactory::~TopSitesFactory() {
+ scoped_refptr<RefcountedKeyedService> TopSitesFactory::BuildServiceInstanceFor(
+     content::BrowserContext* context) const {
+   history::PrepopulatedPageList prepopulated_pages;
+-  InitializePrepopulatedPageList(Profile::FromBrowserContext(context),
+-                                 &prepopulated_pages);
+   return BuildTopSites(context, prepopulated_pages);
+ }
+ 
+--- a/chrome/browser/resources/local_ntp/most_visited_single.css
++++ b/chrome/browser/resources/local_ntp/most_visited_single.css
+@@ -22,7 +22,7 @@ html {
+ 
+   /* May be overridden by themes (on the body element). */
+   --icon-background-color: rgb(var(--GG100-rgb));
+-  --tile-title-color: rgb(var(--GG800-rgb));
++  --tile-title-color: rgba(248,249,250,1);
+ }
+ 
+ body {
+@@ -79,6 +79,7 @@ a:visited {
+ 
+ .grid-tile {
+   transition: transform 300ms ease-in-out;
++  filter: drop-shadow(1px 3px 4px #1a1a1a);
+ }
+ 
+ /* Prevent transitions on the held tile in order for it to smoothly follow the
+@@ -95,6 +96,7 @@ a:visited {
+   border-radius: 4px;
+   box-sizing: border-box;
+   color: rgb(var(--tile-title-color));
++  text-shadow: 0px 0px 1px black;
+   cursor: pointer;
+   height: var(--md-tile-size);
+   margin-bottom: var(--md-tile-margin);
+--- a/chrome/browser/resources/local_ntp/customize.css
++++ b/chrome/browser/resources/local_ntp/customize.css
+@@ -14,7 +14,7 @@
+   padding: 0;
+   position: fixed;
+   top: 0;
+-  transition: opacity 700ms;
++  transition: opacity 500ms;
+   width: 100%;
+ }
+ 
+--- a/chrome/browser/resources/local_ntp/local_ntp_resources.grd
++++ b/chrome/browser/resources/local_ntp/local_ntp_resources.grd
+@@ -8,6 +8,25 @@
+   </outputs>
+   <release seq="1">
+     <includes>
++      <include name="IDR_MK_DSC_3796" file="images\DSC_3796.webp" type="BINDATA" />
++      <include name="IDR_MK_DSC0014" file="images\DSC0014.webp" type="BINDATA" />
++      <include name="IDR_MK_DSC0189" file="images\DSC0189.webp" type="BINDATA" />
++      <include name="IDR_MK_DSC0253" file="images\DSC0253.webp" type="BINDATA" />
++      <include name="IDR_MK_DSC0322" file="images\DSC0322.webp" type="BINDATA" />
++      <include name="IDR_MK_DSC0489" file="images\DSC0489.webp" type="BINDATA" />
++      <include name="IDR_MK_DSC0548" file="images\DSC0548.webp" type="BINDATA" />
++      <include name="IDR_MK_DSC0563" file="images\DSC0563.webp" type="BINDATA" />
++      <include name="IDR_MK_DSC0573" file="images\DSC0573.webp" type="BINDATA" />
++      <include name="IDR_MK_DSC0733" file="images\DSC0733.webp" type="BINDATA" />
++      <include name="IDR_MK_DSC0813" file="images\DSC0813.webp" type="BINDATA" />
++      <include name="IDR_MK_DSC1073" file="images\DSC1073.webp" type="BINDATA" />
++      <include name="IDR_MK_DSC1120" file="images\DSC1120.webp" type="BINDATA" />
++      <include name="IDR_MK_DSC2915" file="images\DSC2915.webp" type="BINDATA" />
++      <include name="IDR_MK_DSC2951" file="images\DSC2951.webp" type="BINDATA" />
++      <include name="IDR_MK_DSC2994" file="images\DSC2994.webp" type="BINDATA" />
++      <include name="IDR_MK_DSC3287" file="images\DSC3287.webp" type="BINDATA" />
++      <include name="IDR_MK_DSC4614" file="images\DSC4614.webp" type="BINDATA" />
++	  
+       <include name="IDR_CUSTOM_LINKS_ADD_SVG" file="icons\add_link.svg" type="BINDATA" />
+       <include name="IDR_CUSTOM_LINKS_ADD_WHITE_SVG" file="icons\add_link_white.svg" type="BINDATA" />
+       <include name="IDR_CUSTOM_LINKS_EDIT_HTML" file="custom_links_edit.html" type="BINDATA" />
+--- a/components/search/search.cc
++++ b/components/search/search.cc
+@@ -28,9 +28,7 @@ bool DefaultSearchProviderIsGoogle(
+       template_url_service->GetDefaultSearchProvider();
+   if (!default_provider)
+     return false;
+-  return default_provider->GetEngineType(
+-             template_url_service->search_terms_data()) ==
+-         SearchEngineType::SEARCH_ENGINE_GOOGLE;
++  return true;
+ }
+ 
+ }  // namespace search
+--- a/chrome/browser/resources/local_ntp/doodles.js
++++ b/chrome/browser/resources/local_ntp/doodles.js
+@@ -404,9 +404,6 @@ doodles.showLogoOrDoodle = function(fromCache) {
+       }
+     }
+     $(doodles.IDS.LOGO_DOODLE).classList.add(doodles.CLASSES.SHOW_LOGO);
+-  } else {
+-    // No doodle. Just show the default logo.
+-    $(doodles.IDS.LOGO_DEFAULT).classList.add(doodles.CLASSES.SHOW_LOGO);
+   }
+ };
+ 
+--- a/chrome/browser/search/local_ntp_source.cc
++++ b/chrome/browser/search/local_ntp_source.cc
+@@ -617,7 +617,7 @@ class LocalNtpSource::SearchConfigurationProvider
+   }
+ 
+   bool DefaultSearchProviderIsGoogle() {
+-    return search::DefaultSearchProviderIsGoogle(service_);
++    return false;
+   }
+ 
+   ~SearchConfigurationProvider() override {
+--- a/chrome/app/generated_resources.grd
++++ b/chrome/app/generated_resources.grd
+@@ -5514,3 +5514,3 @@
+       <message name="IDS_NTP_CUSTOMIZE_NO_BACKGROUND_LABEL" desc="The label for the 'No background' tile in the customization menu on the New Tab Page">
+-        No background
++        Default background images
+       </message>
+--- a/components/search/ntp_features.cc
++++ b/components/search/ntp_features.cc
+@@ -66,5 +66,5 @@
+ // If enabled, the WebUI new tab page will load when a new tab is created
+ // instead of the local NTP.
+-const base::Feature kWebUI{"NtpWebUI", base::FEATURE_ENABLED_BY_DEFAULT};
++const base::Feature kWebUI{"NtpWebUI", base::FEATURE_DISABLED_BY_DEFAULT};
+ 
+ // If enabled, the Doodle will be shown on themed and dark mode NTPs.

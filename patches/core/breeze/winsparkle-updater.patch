@@ -1,0 +1,37 @@
+--- a/chrome/BUILD.gn
++++ b/chrome/BUILD.gn
+@@ -147,6 +147,7 @@ if (!is_android && !is_mac) {
+         "//third_party/breakpad:breakpad_handler",
+         "//third_party/breakpad:breakpad_sender",
+         "//third_party/crashpad/crashpad/util",
++        ":win_sparkle",
+       ]
+       data_deps = [
+         "//chrome/app/version_assembly:version_assembly_manifest",
+@@ -1445,6 +1446,16 @@ if (!is_android) {
+   }
+ }
+ 
++if (is_win) {
++  copy("win_sparkle") {
++    sources = [ "//third_party/WinSparkle/x64/Release/WinSparkle.dll",
++                "//third_party/WinSparkle/x64/Release/WinSparkle.lib",
++                "//third_party/WinSparkle/x64/Release/WinSparkle.pdb", ]
++
++    outputs = ["$root_out_dir/{{source_file_part}}"]
++  }  
++}
++
+ if (is_mac) {
+   bundle_data("chrome_framework_sparkle") {
+       public_deps = [":packed_resources",]
+--- a/chrome/installer/mini_installer/chrome.release
++++ b/chrome/installer/mini_installer/chrome.release
+@@ -34,6 +34,7 @@ nacl_irt_x86_32.nexe: %(VersionDir)s\
+ nacl_irt_x86_64.nexe: %(VersionDir)s\
+ notification_helper.exe: %(VersionDir)s\
+ resources.pak: %(VersionDir)s\
++WinSparkle.dll: %(VersionDir)s\
+ v8_context_snapshot.bin: %(VersionDir)s\
+ #
+ # Sub directories living in the version dir

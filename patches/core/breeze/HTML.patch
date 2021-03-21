@@ -1,0 +1,325 @@
+--- a/chrome/app/generated_resources.grd
++++ b/chrome/app/generated_resources.grd
+@@ -421,5 +421,5 @@ are declared in tools/grit/grit_rule.gni.
+       </message>
+       <message name="IDS_HISTORY_HISTORY_MENU_ITEM" desc="Label displayed in history sidebar button to display history.">
+-        Chrome history
++        Breeze history
+       </message>
+       <message name="IDS_HISTORY_NO_SYNCED_RESULTS" desc="Text indicating that there are no synced tabs from other devices.">
+@@ -3760,5 +3760,5 @@ are declared in tools/grit/grit_rule.gni.
+       </message>
+       <message name="IDS_EXTENSION_EXTERNAL_INSTALL_PROMPT_TITLE_APP" desc="Titlebar of the prompt window for an externally installed app">
+-        Another program on your computer added an app that may change the way Chrome works.
++        Another program on your computer added an app that may change the way Breeze works.
+ 
+ 
+@@ -3766,10 +3766,10 @@ are declared in tools/grit/grit_rule.gni.
+       </message>
+       <message name="IDS_EXTENSION_EXTERNAL_INSTALL_PROMPT_TITLE_EXTENSION" desc="Titlebar of the prompt window for an externally installed extension">
+-        Another program on your computer added an extension that may change the way Chrome works.
++        Another program on your computer added an extension that may change the way Breeze works.
+ 
+ <ph name="EXTENSION_NAME">$1<ex>Babylon Toolbar</ex></ph>
+       </message>
+       <message name="IDS_EXTENSION_EXTERNAL_INSTALL_PROMPT_TITLE_THEME" desc="Titlebar of the prompt window for an externally installed theme">
+-        Another program on your computer added a theme that may change the way Chrome works.
++        Another program on your computer added a theme that may change the way Breeze works.
+ 
+ <ph name="EXTENSION_NAME">$1<ex>Babylon Toolbar</ex></ph>
+@@ -3798,5 +3798,5 @@ are declared in tools/grit/grit_rule.gni.
+       </if>
+       <message name="IDS_EXTENSION_EXTERNAL_INSTALL_PROMPT_ABORT_BUTTON" desc="Button on the external install prompt to remove an extension installed by a third party.">
+-        Remove from Chrome
++        Remove from Breeze
+       </message>
+ 
+@@ -4632,11 +4632,11 @@ Keep your key file in a safe place. You will need it to create new versions of y
+       </message>
+       <message name="IDS_EXTENSION_EXTERNAL_INSTALL_ALERT_BUBBLE_HEADING_APP" desc="The heading text (below the title) for the bubble that alerts the user that a new external app was installed.">
+-        Another program on your computer added an app that may change the way Chrome works.
++        Another program on your computer added an app that may change the way Breeze works.
+       </message>
+       <message name="IDS_EXTENSION_EXTERNAL_INSTALL_ALERT_BUBBLE_HEADING_EXTENSION" desc="The heading text (below the title) for the bubble that alerts the user that a new external extension was installed.">
+-        Another program on your computer added an extension that may change the way Chrome works.
++        Another program on your computer added an extension that may change the way Breeze works.
+       </message>
+       <message name="IDS_EXTENSION_EXTERNAL_INSTALL_ALERT_BUBBLE_HEADING_THEME" desc="The heading text (below the title) for the bubble that alerts the user that a new external theme was installed.">
+-        Another program on your computer added a theme that may change the way Chrome works.
++        Another program on your computer added a theme that may change the way Breeze works.
+       </message>
+ 
+--- a/chrome/app/settings_chromium_strings.grdp
++++ b/chrome/app/settings_chromium_strings.grdp
+@@ -181,5 +181,5 @@
+ <if expr="not chromeos">
+   <message name="IDS_SETTINGS_PROFILE_NAME_AND_PICTURE" desc="Label of the link that takes you to the page to edit your name and picture for your chrome profile.">
+-    Breeze name and picture
++    Profile name and photo
+   </message>
+ </if>
+--- a/chrome/app/settings_strings.grdp
++++ b/chrome/app/settings_strings.grdp
+@@ -1934,8 +1934,8 @@
+   </message>
+   <message name="IDS_SETTINGS_SITE_SETTINGS_PAYMENT_HANDLER" desc="Label for the payment handler site settings.">
+-    Payment Handlers
++    Payments
+   </message>
+   <message name="IDS_SETTINGS_SITE_SETTINGS_PAYMENT_HANDLER_ALLOW" desc="The allow label for payment handler installation in site settings.">
+-    Allow sites to install payment handlers
++    Change the way sites are allowed to view, process and handle payment data
+   </message>
+   <message name="IDS_SETTINGS_SITE_SETTINGS_PAYMENT_HANDLER_ALLOW_RECOMMENDED" desc="The allow label for payment handler installation in site settings (with the 'recommended' suffix).">
+@@ -1949,5 +1949,5 @@
+   </message>
+   <message name="IDS_SETTINGS_SITE_SETTINGS_PDF_DOWNLOAD_PDFS" desc="Label for downloading PDF documents instead of automatically opening them in Chrome.">
+-    Download PDF files instead of automatically opening them in Chrome
++    Download PDF files instead of automatically opening them in Breeze
+   </message>
+   <message name="IDS_SETTINGS_SITE_SETTINGS_POPUPS" desc="Label for the pop-ups and redirects site settings.">
+@@ -2720,5 +2720,5 @@
+     <!-- Import Settings Dialog -->
+     <message name="IDS_SETTINGS_IMPORT_SETTINGS_TITLE" desc="Dialog title for import dialog.">
+-      Import bookmarks and settings
++      Import bookmarks and settings from another browser
+     </message>
+     <message name="IDS_SETTINGS_IMPORT_FROM_LABEL" desc="Label before profile select combo box">
+--- a/chrome/browser/autocomplete/chrome_autocomplete_provider_client.cc
++++ b/chrome/browser/autocomplete/chrome_autocomplete_provider_client.cc
+@@ -107,7 +107,7 @@ const char* const kChromeSettingsSubPages[] = {
+     chrome::kAddressesSubPage,        chrome::kAutofillSubPage,
+     chrome::kClearBrowserDataSubPage, chrome::kContentSettingsSubPage,
+-    chrome::kLanguageOptionsSubPage,  chrome::kPasswordManagerSubPage,
+-    chrome::kPaymentsSubPage,         chrome::kResetProfileSettingsSubPage,
+-    chrome::kSearchEnginesSubPage,    chrome::kSyncSetupSubPage,
++    chrome::kPasswordManagerSubPage,  chrome::kPaymentsSubPage,         
++	   chrome::kResetProfileSettingsSubPage, 
++    chrome::kSearchEnginesSubPage,
+ #if !defined(OS_CHROMEOS)
+     chrome::kCreateProfileSubPage,    chrome::kImportDataSubPage,
+--- a/chrome/browser/resources/settings/autofill_page/passwords_section.html
++++ b/chrome/browser/resources/settings/autofill_page/passwords_section.html
+@@ -142,9 +142,4 @@
+       </cr-icon-button>
+     </div>
+-    <div id="manageLink" class="cr-row two-line"
+-        hidden$="[[hidePasswordsLink_]]">
+-      <!-- This div lays out the link correctly, relative to the text. -->
+-      <div class="cr-padded-text">$i18nRaw{managePasswordsLabel}</div>
+-    </div>
+     <div class="cr-row first">
+       <h2 id="savedPasswordsHeading" class="flex">
+--- a/chrome/browser/resources/settings/autofill_page/passwords_section.js
++++ b/chrome/browser/resources/settings/autofill_page/passwords_section.js
+@@ -676,7 +676,9 @@ Polymer({
+     // element, with additional entries that correspond to subpage trigger
+     // elements residing in this element's Shadow DOM.
++    if (false) {
+     this.focusConfig.set(assert(routes.CHECK_PASSWORDS).path, () => {
+       focusWithoutInk(assert(this.$$('#icon')));
+     });
++    }
+   },
+ });
+--- a/chrome/browser/resources/settings/autofill_page/payments_section.html
++++ b/chrome/browser/resources/settings/autofill_page/payments_section.html
+@@ -54,9 +54,4 @@
+     </template>
+ 
+-    <div id="manageLink" class="cr-row first">
+-      <!-- This span lays out the link correctly, relative to the text. -->
+-      <div class="cr-padded-text">$i18nRaw{manageCreditCardsLabel}</div>
+-    </div>
+-
+     <div class="cr-row continuation">
+       <h2 class="flex">$i18n{creditCards}</h2>
+--- a/chrome/browser/resources/settings/basic_page/basic_page.html
++++ b/chrome/browser/resources/settings/basic_page/basic_page.html
+@@ -163,4 +163,5 @@
+               currentRoute_, inSearchMode, hasExpandedSection_,
+               advancedToggleExpanded)]]">
++<if expr="false">
+             <template is="dom-if" if="[[showPage_(pageVisibility.languages)]]"
+                 restamp>
+@@ -171,4 +172,5 @@
+               </settings-section>
+             </template>
++</if>
+             <template is="dom-if" if="[[showPage_(pageVisibility.downloads)]]"
+                 restamp>
+--- a/chrome/browser/resources/settings/downloads_page/downloads_page.html
++++ b/chrome/browser/resources/settings/downloads_page/downloads_page.html
+@@ -28,4 +28,10 @@
+         pref="{{prefs.download.prompt_for_download}}"
+         label="$i18n{promptForDownload}">
++    </settings-toggle-button>
++	<settings-toggle-button
++        id="toggle"
++        class="hr"
++        label="$i18n{siteSettingsPdfDownloadPdfs}"
++        pref="{{prefs.plugins.always_open_pdf_externally}}">
+     </settings-toggle-button>
+     <template is="dom-if" if="[[autoOpenDownloads_]]" restamp>
+--- a/chrome/browser/resources/settings/languages_page/languages_page.html
++++ b/chrome/browser/resources/settings/languages_page/languages_page.html
+@@ -136,4 +136,5 @@
+       }
+     </style>
++<if expr="false">
+     <settings-languages languages="{{languages}}" prefs="{{prefs}}"
+         language-helper="{{languageHelper}}">
+@@ -406,2 +407,4 @@
+       </settings-add-languages-dialog>
+     </template>
++</if>
++<div></div>
+--- a/chrome/browser/resources/settings/people_page/people_page.html
++++ b/chrome/browser/resources/settings/people_page/people_page.html
+@@ -104,11 +104,4 @@ shown on non-ChromeOS platforms -->
+         </template> <!-- if="[[!shouldShowSyncAccountControl_()]]" -->
+ 
+-        <cr-link-row id="sync-setup"
+-            label="$i18n{syncAndNonPersonalizedServices}"
+-            sub-label="[[getSyncAndGoogleServicesSubtext_(syncStatus)]]"
+-            on-click="onSyncTap_"
+-            role-description="$i18n{subpageArrowRoleDescription}">
+-        </cr-link-row>
+-
+ <if expr="not chromeos">
+         <template is="dom-if" if="[[signinAllowed_]]">
+@@ -133,5 +126,5 @@
+ <if expr="not chromeos">
+         <cr-link-row id="importDataDialogTrigger"
+-            label="$i18n{importTitle}"
++            label="$i18n{importTitle}" class="cr-row first"
+             on-click="onImportDataTap_"></cr-link-row>
+ </if>
+--- a/chrome/browser/resources/settings/people_page/sync_page.html
++++ b/chrome/browser/resources/settings/people_page/sync_page.html
+@@ -207,7 +207,4 @@
+       </h2>
+     </div>
+-    <settings-personalization-options class="list-frame" prefs="{{prefs}}"
+-        page-visibility="[[pageVisibility]]" sync-status="[[syncStatus]]">
+-    </settings-personalization-options>
+ 
+ <if expr="not chromeos">
+--- a/chrome/browser/resources/settings/privacy_page/privacy_page.html
++++ b/chrome/browser/resources/settings/privacy_page/privacy_page.html
+@@ -863,4 +858,10 @@
+               search-label="$i18n{siteSettingsAllSitesSearch}"
+               search-term="{{searchFilter_}}">
++			       <settings-toggle-button id="canMakePaymentToggle" class="first"
++                aria-label="$i18n{canMakePaymentToggleLabel}"
++                label="$i18n{canMakePaymentToggleLabel}"
++                pref="{{prefs.payments.can_make_payment_enabled}}"
++                on-settings-boolean-control-change="onCanMakePaymentChange_">
++            </settings-toggle-button>
+             <category-default-setting
+                 toggle-off-label="$i18n{siteSettingsBluetoothScanningBlock}"
+--- a/chrome/browser/resources/settings/reset_page/reset_page.html
++++ b/chrome/browser/resources/settings/reset_page/reset_page.html
+@@ -2,6 +2,11 @@
+     <settings-animated-pages id="reset-pages" section="reset">
+       <div route-path="default">
+-        <cr-link-row id="resetProfile" label="$i18n{resetTrigger}"
+-            on-click="onShowResetProfileDialog_"></cr-link-row>
++        <cr-link-row id="clearBrowsingData"
++          class="hr"
++          label="$i18n{clearBrowsingData}"
++          sub-label="$i18n{clearBrowsingDataDescription}"
++          on-click="onClearBrowsingDataTap_"></cr-link-row>
++        <cr-link-row id="resetProfile" class="hr" label="$i18n{resetTrigger}"
++          on-click="onShowResetProfileDialog_"></cr-link-row>
+         <!-- Keep a single instance of reset-profile-dialog on purpose, to
+           preserve state across show/hide operations. -->
+--- a/chrome/browser/resources/settings/reset_page/reset_page.js
++++ b/chrome/browser/resources/settings/reset_page/reset_page.js
+@@ -13,4 +13,6 @@ import '../settings_page/settings_animated_pages.m.js';
+ import '../settings_shared_css.m.js';
+ 
++import '../clear_browsing_data_dialog/clear_browsing_data_dialog.js';
++
+ // <if expr="_google_chrome and is_win">
+ import '../chrome_cleanup_page/chrome_cleanup_page.js';
+@@ -83,4 +85,9 @@ Polymer({
+   },
+ 
++  /** @private */
++  onClearBrowsingDataTap_() {
++
++    Router.getInstance().navigateTo(routes.CLEAR_BROWSER_DATA);
++  },
+   // <if expr="_google_chrome and is_win">
+   /** @private */
+--- a/chrome/browser/resources/settings/route.js
++++ b/chrome/browser/resources/settings/route.js
+@@ -68,5 +68,4 @@ function addPrivacyChildRoutes(r) {
+   }
+   r.SITE_SETTINGS_ZOOM_LEVELS = r.SITE_SETTINGS.createChild('zoomLevels');
+-  r.SITE_SETTINGS_PDF_DOCUMENTS = r.SITE_SETTINGS.createChild('pdfDocuments');
+   r.SITE_SETTINGS_PROTECTED_CONTENT =
+       r.SITE_SETTINGS.createChild('protectedContent');
+@@ -105,6 +104,4 @@ function createBrowserSettingsRoutes() {
+   if (!loadTimeData.getBoolean('isGuest')) {
+     r.PEOPLE = r.BASIC.createSection('/people', 'people');
+-    r.SYNC = r.PEOPLE.createChild('/syncSetup');
+-    r.SYNC_ADVANCED = r.SYNC.createChild('/syncSetup/advanced');
+   }
+ 
+@@ -164,9 +161,4 @@ function createBrowserSettingsRoutes() {
+     r.ADVANCED = new Route('/advanced');
+ 
+-    r.LANGUAGES = r.ADVANCED.createSection('/languages', 'languages');
+-    // <if expr="not is_macosx">
+-    r.EDIT_DICTIONARY = r.LANGUAGES.createChild('/editDictionary');
+-    // </if>
+-
+     if (visibility.downloads !== false) {
+       r.DOWNLOADS = r.ADVANCED.createSection('/downloads', 'downloads');
+--- a/chrome/browser/resources/settings/settings_menu/settings_menu.html
++++ b/chrome/browser/resources/settings/settings_menu/settings_menu.html
+@@ -144,9 +144,4 @@
+             <iron-selector id="subMenu" selectable="a" attr-for-selected="href"
+                 role="navigation" on-click="onLinkClick_">
+-              <a role="menuitem" href="/languages"
+-                disabled$="[[!advancedOpened]]">
+-                <iron-icon icon="settings:language"></iron-icon>
+-                $i18n{languagesPageTitle}
+-              </a>
+               <a role="menuitem" href="/downloads"
+                   disabled$="[[!advancedOpened]]">
+--- a/chrome/browser/resources/settings/site_settings_page/site_settings_page.js
++++ b/chrome/browser/resources/settings/site_settings_page/site_settings_page.js
+@@ -218,14 +218,8 @@ function getCategoryItemMap() {
+       icon: 'settings:payment-handler',
+       enabledLabel: 'siteSettingsPaymentHandlerAllow',
+-      disabledLabel: 'siteSettingsPaymentHandlerBlock',
++      disabledLabel: 'siteSettingsPaymentHandlerAllow',
+       shouldShow: () =>
+           loadTimeData.getBoolean('enablePaymentHandlerContentSetting'),
+     },
+-    {
+-      route: routes.SITE_SETTINGS_PDF_DOCUMENTS,
+-      id: 'pdfDocuments',
+-      label: 'siteSettingsPdfDocuments',
+-      icon: 'settings:pdf',
+-    },
+     {
+       route: routes.SITE_SETTINGS_FLASH,
+@@ -402,5 +396,4 @@ Polymer({
+             Id.ADS,
+             Id.ZOOM_LEVELS,
+-            'pdfDocuments',
+             Id.PROTECTED_CONTENT,
+             Id.MIXEDSCRIPT,
+--- a/components/version_ui/resources/about_version.html
++++ b/components/version_ui/resources/about_version.html
+@@ -43,5 +43,5 @@ about:version template page
+           <source srcset="breeze://theme/IDR_PRODUCT_LOGO_WHITE" media="(prefers-color-scheme: dark)">
+           <source srcset="breeze://theme/IDR_PRODUCT_LOGO" media="(prefers-color-scheme: light), (prefers-color-scheme: no-preference)">
+-          <img alt="$i18n{logo_alt_text}" src="breeze://theme/IDR_PRODUCT_LOGO">
++          <img alt="$i18n{logo_alt_text}" src="breeze://theme/IDR_PRODUCT_LOGO" style="width:275px;">
+         </picture>
+ </if>

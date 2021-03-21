@@ -1,0 +1,73 @@
+--- a/third_party/blink/renderer/bindings/BUILD.gn
++++ b/third_party/blink/renderer/bindings/BUILD.gn
+@@ -198,7 +198,5 @@
+ generate_bindings("generate_bindings_all") {
+-  targets = [ "enumeration" ]
+-  outputs = generated_enumeration_sources_in_core +
+-            generated_enumeration_sources_in_modules +
+-            generated_enumeration_sources_for_testing_in_core
++  targets = []
++  outputs = []
+   if (use_blink_v8_binding_new_idl_dictionary) {
+     targets += [ "dictionary" ]
+--- a/third_party/blink/renderer/bindings/core/v8/BUILD.gn
++++ b/third_party/blink/renderer/bindings/core/v8/BUILD.gn
+@@ -16,7 +16,7 @@
+   visibility = []
+   visibility = [ "//third_party/blink/renderer/core" ]
+ 
+-  sources = generated_enumeration_sources_in_core
++  sources = []
+   if (use_blink_v8_binding_new_idl_dictionary) {
+     sources += generated_dictionary_sources_in_core
+   }
+@@ -37,7 +37,7 @@
+     "//third_party/blink/renderer:inside_blink",
+   ]
+ 
+-  sources = generated_enumeration_sources_for_testing_in_core
++  sources = []
+   if (use_blink_v8_binding_new_idl_interface) {
+     sources += generated_interface_sources_for_testing_in_core
+   }
+--- a/third_party/blink/renderer/bindings/modules/v8/BUILD.gn
++++ b/third_party/blink/renderer/bindings/modules/v8/BUILD.gn
+@@ -15,7 +15,7 @@
+   visibility = []
+   visibility = [ "//third_party/blink/renderer/modules" ]
+ 
+-  sources = generated_enumeration_sources_in_modules
++  sources = []
+   if (use_blink_v8_binding_new_idl_interface) {
+     sources += generated_interface_sources_in_modules
+   }
+@@ -67,7 +67,7 @@
+   ]
+ 
+   public_deps =
+-      [ "//third_party/blink/renderer/bindings:generate_bindings_all" ]
++      [ "//third_party/blink/renderer/bindings:generate_bindings_all" ]
+ }
+ 
+ group("bindings_modules_v8_generated") {
+   }
+--- a/third_party/blink/renderer/core/BUILD.gn
++++ b/third_party/blink/renderer/core/BUILD.gn
+@@ -73,7 +73,6 @@ source_set("generated") {
+     "//skia",
+     "//third_party/angle:translator",
+     "//third_party/blink/public/mojom:mojom_broadcastchannel_bindings_blink",
+-    "//third_party/blink/renderer/bindings/core/v8:generated",
+     "//third_party/blink/renderer/core/animation:buildflags",
+     "//third_party/blink/renderer/core/inspector:generated",
+     "//third_party/blink/renderer/core/probe:generated",
+--- a/third_party/blink/renderer/modules/BUILD.gn
++++ b/third_party/blink/renderer/modules/BUILD.gn
+@@ -172,7 +172,6 @@ jumbo_component("modules") {
+     "//third_party/blink/renderer/bindings/modules:generated",
+     "//third_party/blink/renderer/bindings/modules/v8:bindings_modules_impl",
+     "//third_party/blink/renderer/bindings/modules/v8:bindings_modules_origin_trial_features",
+-    "//third_party/blink/renderer/bindings/modules/v8:generated",
+     "//third_party/blink/renderer/core",
+     "//third_party/icu",
+     "//third_party/webrtc_overrides:webrtc_component",

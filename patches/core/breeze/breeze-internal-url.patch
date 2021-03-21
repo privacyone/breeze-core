@@ -1,0 +1,78 @@
+--- a/chrome/common/webui_url_constants.cc
++++ b/chrome/common/webui_url_constants.cc
+@@ -34,2 +34,2 @@
+-const char kChromeUIChromeSigninHost[] = "chrome-signin";
+-const char kChromeUIChromeSigninURL[] = "breeze://chrome-signin/";
++const char kChromeUIChromeSigninHost[] = "breeze-signin";
++const char kChromeUIChromeSigninURL[] = "breeze://breeze-signin/";
+@@ -178,4 +178,4 @@
+-const char kChromeUINativeBookmarksURL[] = "chrome-native://bookmarks/";
+-const char kChromeUINativeExploreURL[] = "chrome-native://explore";
+-const char kChromeUINativeHistoryURL[] = "chrome-native://history/";
+-const char kChromeUINativeNewTabURL[] = "chrome-native://newtab/";
++const char kChromeUINativeBookmarksURL[] = "breeze-native://bookmarks/";
++const char kChromeUINativeExploreURL[] = "breeze-native://explore";
++const char kChromeUINativeHistoryURL[] = "breeze-native://history/";
++const char kChromeUINativeNewTabURL[] = "breeze-native://newtab/";
+--- a/components/content_settings/core/browser/content_settings_utils.h
++++ b/components/content_settings/core/browser/content_settings_utils.h
+@@ -43,8 +43,8 @@
+ // These constants are copied from extensions/common/extension_constants.h and
+ // content/public/common/url_constants.h to avoid complicated dependencies.
+ const char kChromeDevToolsScheme[] = "devtools";
+-const char kChromeUIScheme[] = "chrome";
+-const char kExtensionScheme[] = "chrome-extension";
++const char kChromeUIScheme[] = "breeze";
++const char kExtensionScheme[] = "breeze-extension";
+ 
+ std::string ContentSettingToString(ContentSetting setting);
+ 
+--- a/components/ukm/ukm_recorder_impl.cc
++++ b/components/ukm/ukm_recorder_impl.cc
+@@ -128,7 +128,7 @@
+   remove_params.ClearPassword();
+   // breeze:// and about: URLs params are never used for navigation, only to
+   // prepopulate data on the page, so don't include their params.
+-  if (url.SchemeIs(url::kAboutScheme) || url.SchemeIs("chrome")) {
++  if (url.SchemeIs(url::kAboutScheme) || url.SchemeIs("breeze")) {
+     remove_params.ClearQuery();
+   }
+   if (url.SchemeIs(kExtensionScheme)) {
+--- a/components/ukm/scheme_constants.cc
++++ b/components/ukm/scheme_constants.cc
+@@ -7,7 +7,7 @@
+ namespace ukm {
+ 
+ const char kAppScheme[] = "app";
+-const char kChromeUIScheme[] = "chrome";
+-const char kExtensionScheme[] = "chrome-extension";
++const char kChromeUIScheme[] = "breeze";
++const char kExtensionScheme[] = "breeze-extension";
+ 
+ }  // namespace ukm
+--- a/components/url_formatter/url_fixer.cc
++++ b/components/url_formatter/url_fixer.cc
+@@ -33,8 +33,8 @@
+ namespace {
+ 
+ // Hardcode these constants to avoid dependences on //chrome and //content.
+-const char kChromeUIScheme[] = "chrome";
++const char kChromeUIScheme[] = "breeze";
+ const char kDevToolsScheme[] = "devtools";
+ const char kChromeUIDefaultHost[] = "version";
+ const char kViewSourceScheme[] = "view-source";
+ 
+--- a/content/public/common/url_constants.cc
++++ b/content/public/common/url_constants.cc
+@@ -11,9 +11,9 @@
+ // There are security implications associated with introducing new schemes.
+ const char kChromeDevToolsScheme[] = "devtools";
+ const char kChromeErrorScheme[] = "breeze-error";
+-const char kChromeUIScheme[] = "chrome";
++const char kChromeUIScheme[] = "breeze";
+ const char kChromeUIUntrustedScheme[] = "chrome-untrusted";
+-const char kGuestScheme[] = "chrome-guest";
++const char kGuestScheme[] = "breeze-guest";
+ const char kViewSourceScheme[] = "view-source";
+ #if defined(OS_CHROMEOS)
+ const char kExternalFileScheme[] = "externalfile";

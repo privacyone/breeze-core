@@ -1,0 +1,576 @@
+--- a/chrome/BUILD.gn
++++ b/chrome/BUILD.gn
+@@ -42,6 +42,9 @@
+   import("//content/public/app/mac_helpers.gni")
+   import("//media/cdm/library_cdm/cdm_paths.gni")
+   import("//third_party/icu/config.gni")
++  # Sparkle
++  import("//build/config/sparklecfg.gni")
++  import("//build/mac/sparkle_tweak_info_plist.gni")
+ }
+ 
+ declare_args() {
+@@ -403,10 +406,24 @@
+     ]
+   }
+ 
++  sparkle_tweak_info_plist("sparkle_app_plist") {
++    info_plist = "$root_gen_dir/chrome/chrome_app_plist_tweaked.plist"
++
++    args = [
++      "--breeze_product_dir_name=" + breeze_product_dir_name,
++      "--breeze_feed_url=" + breeze_feed_url,
++      "--breeze_ed_key=" + breeze_ed_key,
++    ]
++
++    deps = [
++      "//chrome:chrome_app_plist",
++    ]
++  }
++
+   mac_app_bundle("chrome_app") {
+     output_name = chrome_product_full_name
+ 
+-    info_plist_target = ":chrome_app_plist"
++    info_plist_target = ":sparkle_app_plist"
+     extra_substitutions = [
+       "CHROMIUM_BUNDLE_ID=$chrome_mac_bundle_id",
+       "CHROMIUM_SHORT_NAME=$chrome_product_short_name",
+@@ -577,6 +594,17 @@
+     ]
+   }
+ 
++  sparkle_tweak_info_plist("sparkle_helper_plist") {
++    info_plist = "$root_gen_dir/chrome/chrome_helper_plist_tweaked.plist"
++    args = [
++      "--breeze_product_dir_name=" + breeze_product_dir_name,
++    ]
++
++    deps = [
++      "//chrome:chrome_helper_plist"
++    ]
++  }
++
+   compile_entitlements("entitlements") {
+     entitlements_templates = [ "app/app-entitlements.plist" ]
+     output_name = "$target_gen_dir/app-entitlements.plist"
+@@ -594,7 +623,7 @@
+ 
+       output_name = chrome_helper_name + invoker.helper_name_suffix
+ 
+-      info_plist_target = ":chrome_helper_plist"
++      info_plist_target = ":sparkle_helper_plist"
+       extra_substitutions = [
+         "CHROMIUM_BUNDLE_ID=$chrome_mac_bundle_id",
+         "CHROMIUM_SHORT_NAME=$chrome_product_short_name",
+@@ -951,6 +980,7 @@
+       "Resources",
+       "XPCServices",
+       "Default Extensions",
++      "Frameworks",
+     ]
+ 
+     if (is_chrome_branded) {
+@@ -985,6 +1015,7 @@
+       ":swiftshader_library",
+       ":widevine_cdm_library",
+       ":default_extensions",
++      ":chrome_framework_sparkle",
+     ]
+ 
+     if (is_chrome_branded) {
+@@ -1411,6 +1442,17 @@
+   }
+ }
+ 
++if (is_mac) {
++  bundle_data("chrome_framework_sparkle") {
++      public_deps = [":packed_resources",]
++      sources = [
++        "//third_party/Sparkle/Sparkle.framework",
++      ]
++      outputs = [
++        "{{bundle_contents_dir}}/Frameworks/{{source_file_part}}",
++      ]
++    }
++}
+ if (!is_android) {
+   chrome_paks("packed_resources") {
+     if (is_mac) {
+--- a/chrome/browser/chrome_browser_main_mac.mm
++++ b/chrome/browser/chrome_browser_main_mac.mm
+@@ -48,6 +48,12 @@
+ #include "ui/base/resource/resource_handle.h"
+ #include "ui/native_theme/native_theme_mac.h"
+ 
++#include "build/build_config.h"
++//Sparkle:
++#if defined(OS_MAC)
++#import "chrome/browser/mac/sparkle_glue.h"
++#endif // defined(OS_MAC)
++
+ #if BUILDFLAG(ENABLE_CHROMIUM_UPDATER)
+ #include "chrome/browser/mac/install_updater.h"
+ #endif  // BUILDFLAG(ENABLE_CHROMIUM_UPDATER)
+@@ -335,6 +338,12 @@
+       @"NSWindowRestoresWorkspaceAtLaunch" : @YES
+     }];
+   }
++
++  //Sparkle init
++#if defined(OS_MAC)
++  [[SparkleGlue sharedSparkleGlue] registerWithSparkle];
++#endif // defined(OS_MAC)
++
+ }
+ 
+ void ChromeBrowserMainPartsMac::PostMainMessageLoopStart() {
+--- a/chrome/browser/BUILD.gn
++++ b/chrome/browser/BUILD.gn
+@@ -651,6 +651,13 @@
+       "mac/install_from_dmg.mm",
+       "mac/keystone_glue.h",
+       "mac/keystone_glue.mm",
++      # Begin Sparkle
++      "mac/sparkle_glue.h",
++      "mac/sparkle_glue.mm",
++      "mac/su_updater.h",
++      "update_util.cc",
++      "update_util.h",
++      # End Sparkle
+       "mac/keystone_registration.h",
+       "mac/keystone_registration.mm",
+       "mac/mac_startup_profiler.cc",
+--- a/chrome/common/chrome_switches.cc
++++ b/chrome/common/chrome_switches.cc
+@@ -760,6 +760,10 @@
+ // Indicates whether Chrome should be set as the default browser during
+ // installation.
+ const char kMakeChromeDefault[] = "make-chrome-default";
++
++// This switch disables update module(Sparkle).
++const char kDisableBreezeUpdate[] = "disable-breeze-update";
++
+ #endif  // defined(OS_MAC)
+ 
+ #if defined(OS_WIN)
+--- a/chrome/common/chrome_switches.h
++++ b/chrome/common/chrome_switches.h
+@@ -228,6 +228,8 @@
+ extern const char kRelauncherProcess[];
+ extern const char kRelauncherProcessDMGDevice[];
+ extern const char kMakeChromeDefault[];
++extern const char kDisableBreezeUpdate[];
++
+ #endif  // defined(OS_MAC)
+ 
+ #if defined(OS_WIN)
+--- a/chrome/browser/ui/webui/help/version_updater_mac.mm
++++ b/chrome/browser/ui/webui/help/version_updater_mac.mm
+@@ -17,6 +17,9 @@
+ #include "net/base/escape.h"
+ #include "ui/base/l10n/l10n_util.h"
+ 
++// Sparkle
++#import "chrome/browser/mac/sparkle_glue.h"
++
+ // KeystoneObserver is a simple notification observer for Keystone status
+ // updates. It will be created and managed by VersionUpdaterMac.
+ @interface KeystoneObserver : NSObject {
+@@ -58,7 +61,7 @@
+ @end  // @implementation KeystoneObserver
+ 
+ VersionUpdater* VersionUpdater::Create(
+-    content::WebContents* /* web_contents */) {
++    content::WebContents* web_contents) {
+   return new VersionUpdaterMac;
+ }
+ 
+@@ -76,26 +79,26 @@
+   return;
+ #else
+   status_callback_ = std::move(status_callback);
+-  promote_callback_ = std::move(promote_callback);
++  //promote_callback_ = std::move(promote_callback);
+ 
+-  KeystoneGlue* keystone_glue = [KeystoneGlue defaultKeystoneGlue];
+-  if (keystone_glue && ![keystone_glue isOnReadOnlyFilesystem]) {
+-    AutoupdateStatus recent_status = [keystone_glue recentStatus];
+-    if ([keystone_glue asyncOperationPending] ||
+-        recent_status == kAutoupdateRegisterFailed ||
+-        recent_status == kAutoupdateNeedsPromotion) {
++  SparkleGlue* sparkle_glue = [SparkleGlue sharedSparkleGlue];
++  if (sparkle_glue) {
++    AutoupdateStatus recent_status = [sparkle_glue recentStatus];
++    if ([sparkle_glue asyncOperationPending] ||
++        recent_status == kAutoupdateInstalled ||
++        recent_status == kAutoupdateRegisterFailed) {
+       // If an asynchronous update operation is currently pending, such as a
+       // check for updates or an update installation attempt, set the status
+       // up correspondingly without launching a new update check.
+       //
+       // If registration failed, no other operations make sense, so just go
+       // straight to the error.
+-      UpdateStatus([[keystone_glue recentNotification] userInfo]);
++      UpdateStatus([[sparkle_glue recentNotification] userInfo]);
+     } else {
+       // Launch a new update check, even if one was already completed, because
+       // a new update may be available or a new update may have been installed
+       // in the background since the last time the Help page was displayed.
+-      [keystone_glue checkForUpdate];
++      [sparkle_glue checkForUpdates];
+ 
+       // Immediately, kAutoupdateStatusNotification will be posted, with status
+       // kAutoupdateChecking.
+@@ -104,7 +107,7 @@
+       // status indicating the result of the check.
+     }
+ 
+-    UpdateShowPromoteButton();
++    // UpdateShowPromoteButton();
+   } else {
+     // There is no glue, or the application is on a read-only filesystem.
+     // Updates and promotions are impossible.
+@@ -114,8 +117,9 @@
+ }
+ 
+ void VersionUpdaterMac::PromoteUpdater() const {
++   NOTIMPLEMENTED();
+   // Tell Keystone to make software updates available for all users.
+-  [[KeystoneGlue defaultKeystoneGlue] promoteTicket];
++  // [[KeystoneGlue defaultKeystoneGlue] promoteTicket];
+ 
+   // Immediately, kAutoupdateStatusNotification will be posted, and
+   // UpdateStatus() will be called with status kAutoupdatePromoting.
+@@ -130,30 +134,30 @@
+ }
+ 
+ void VersionUpdaterMac::UpdateStatus(NSDictionary* dictionary) {
+-  AutoupdateStatus keystone_status =
++  AutoupdateStatus sparkle_status =
+       static_cast<AutoupdateStatus>([base::mac::ObjCCastStrict<NSNumber>(
+           [dictionary objectForKey:kAutoupdateStatusStatus]) intValue]);
+   std::string error_messages =
+       base::SysNSStringToUTF8(base::mac::ObjCCastStrict<NSString>(
+           [dictionary objectForKey:kAutoupdateStatusErrorMessages]));
+ 
+-  bool enable_promote_button = true;
++  //bool enable_promote_button = true;
+   base::string16 message;
+ 
+   Status status;
+-  switch (keystone_status) {
++  switch (sparkle_status) {
+     case kAutoupdateRegistering:
+     case kAutoupdateChecking:
+       status = CHECKING;
+-      enable_promote_button = false;
++      //enable_promote_button = false;
+       break;
+ 
+     case kAutoupdateRegistered:
+-    case kAutoupdatePromoted:
+-      UpdateShowPromoteButton();
++    //case kAutoupdatePromoted:
++    //  UpdateShowPromoteButton();
+       // Go straight into an update check. Return immediately, this routine
+       // will be re-entered shortly with kAutoupdateChecking.
+-      [[KeystoneGlue defaultKeystoneGlue] checkForUpdate];
++      [[SparkleGlue sharedSparkleGlue] checkForUpdates];
+       return;
+ 
+     case kAutoupdateCurrent:
+@@ -163,19 +167,19 @@
+     case kAutoupdateAvailable:
+       // Install the update automatically. Return immediately, this routine
+       // will be re-entered shortly with kAutoupdateInstalling.
+-      [[KeystoneGlue defaultKeystoneGlue] installUpdate];
++      //[[KeystoneGlue defaultKeystoneGlue] installUpdate];
+       return;
+ 
+     case kAutoupdateInstalling:
+       status = UPDATING;
+-      enable_promote_button = false;
++      //enable_promote_button = false;
+       break;
+ 
+     case kAutoupdateInstalled:
+       status = NEARLY_UPDATED;
+       break;
+ 
+-    case kAutoupdatePromoting:
++    //case kAutoupdatePromoting:
+       // TODO(mark): KSRegistration currently handles the promotion
+       // synchronously, meaning that the main thread's loop doesn't spin,
+       // meaning that animations and other updates to the window won't occur
+@@ -183,17 +187,17 @@
+       // and probably qualifies as "jank." For now, there just won't be any
+       // visual feedback while promotion is in progress, but it should complete
+       // (or fail) very quickly.  http://b/2290009.
+-      return;
++      //return;
+ 
+     case kAutoupdateRegisterFailed:
+-      enable_promote_button = false;
+-      FALLTHROUGH;
++      //enable_promote_button = false;
++      //FALLTHROUGH;
+     case kAutoupdateCheckFailed:
+     case kAutoupdateInstallFailed:
+-    case kAutoupdatePromoteFailed:
++    //case kAutoupdatePromoteFailed:
+       status = FAILED;
+       message =
+-          l10n_util::GetStringFUTF16Int(IDS_UPGRADE_ERROR, keystone_status);
++          l10n_util::GetStringFUTF16Int(IDS_UPGRADE_ERROR, sparkle_status);
+       break;
+ 
+     case kAutoupdateNeedsPromotion:
+@@ -233,45 +237,46 @@
+   if (!status_callback_.is_null())
+     status_callback_.Run(status, 0, false, std::string(), 0, message);
+ 
+-  PromotionState promotion_state;
+-  if (!promote_callback_.is_null()) {
+-    KeystoneGlue* keystone_glue = [KeystoneGlue defaultKeystoneGlue];
+-    if (keystone_glue && [keystone_glue isAutoupdateEnabledForAllUsers]) {
+-      promotion_state = PROMOTED;
+-    } else {
+-      promotion_state = PROMOTE_HIDDEN;
+-
+-      if (show_promote_button_) {
+-        promotion_state =
+-            enable_promote_button ? PROMOTE_ENABLED : PROMOTE_DISABLED;
+-      }
+-    }
+-
+-    promote_callback_.Run(promotion_state);
+-  }
++  //  PromotionState promotion_state;
++  //  if (!promote_callback_.is_null()) {
++  //    KeystoneGlue* keystone_glue = [KeystoneGlue defaultKeystoneGlue];
++  //    if (keystone_glue && [keystone_glue isAutoupdateEnabledForAllUsers]) {
++  //      promotion_state = PROMOTED;
++  //    } else {
++  //      promotion_state = PROMOTE_HIDDEN;
++  //
++  //      if (show_promote_button_) {
++  //        promotion_state =
++  //            enable_promote_button ? PROMOTE_ENABLED : PROMOTE_DISABLED;
++  //      }
++  //    }
++  //
++  //    promote_callback_.Run(promotion_state);
++  //  }
+ }
+ 
+ void VersionUpdaterMac::UpdateShowPromoteButton() {
+-  if (ObsoleteSystem::IsObsoleteNowOrSoon()) {
++  NOTIMPLEMENTED();
++  //if (ObsoleteSystem::IsObsoleteNowOrSoon()) {
+     // Promotion is moot upon reaching the end of the line.
+-    show_promote_button_ = false;
+-    return;
+-  }
+-
+-  KeystoneGlue* keystone_glue = [KeystoneGlue defaultKeystoneGlue];
+-  AutoupdateStatus recent_status = [keystone_glue recentStatus];
+-  if (recent_status == kAutoupdateRegistering ||
+-      recent_status == kAutoupdateRegisterFailed ||
+-      recent_status == kAutoupdatePromoted) {
++    //show_promote_button_ = false;
++    //return;
++  //}
++
++  //KeystoneGlue* keystone_glue = [KeystoneGlue defaultKeystoneGlue];
++  //AutoupdateStatus recent_status = [keystone_glue recentStatus];
++  //if (recent_status == kAutoupdateRegistering ||
++  //    recent_status == kAutoupdateRegisterFailed ||
++  //    recent_status == kAutoupdatePromoted) {
+     // Promotion isn't possible at this point.
+-    show_promote_button_ = false;
+-  } else if (recent_status == kAutoupdatePromoting ||
+-             recent_status == kAutoupdatePromoteFailed) {
++  //  show_promote_button_ = false;
++  //} else if (recent_status == kAutoupdatePromoting ||
++  //           recent_status == kAutoupdatePromoteFailed) {
+     // Show promotion UI because the user either just clicked that button or
+     // because the user should be able to click it again.
+-    show_promote_button_ = true;
+-  } else {
++  //  show_promote_button_ = true;
++  //} else {
+     // Show the promote button if promotion is a possibility.
+-    show_promote_button_ = [keystone_glue wantsPromotion];
+-  }
++  //  show_promote_button_ = [keystone_glue wantsPromotion];
++  //}
+ }
+--- a/chrome/browser/mac/keystone_glue.mm
++++ b/chrome/browser/mac/keystone_glue.mm
+@@ -36,6 +36,10 @@
+ #include "ui/base/l10n/l10n_util.h"
+ #include "ui/base/l10n/l10n_util_mac.h"
+ 
++#if defined(OS_MAC)
++#include "chrome/browser/mac/sparkle_glue.h"
++#endif
++
+ namespace {
+ 
+ namespace ksr = keystone_registration;
+@@ -1191,13 +1195,19 @@
+ }
+ 
+ bool KeystoneEnabled() {
+-  return [KeystoneGlue defaultKeystoneGlue] != nil;
++#if defined(OS_MAC)
++  return sparkle_glue::SparkleEnabled();
++#else
++    return false;
++#endif // defined(OS_MAC)
+ }
+ 
+ base::string16 CurrentlyInstalledVersion() {
+-  KeystoneGlue* keystoneGlue = [KeystoneGlue defaultKeystoneGlue];
+-  NSString* version = [keystoneGlue currentlyInstalledVersion];
+-  return base::SysNSStringToUTF16(version);
++#if defined(OS_MAC)
++  return sparkle_glue::CurrentlyInstalledVersion();
++#else
++  return base::string16();
++#endif // defined(OS_MAC)
+ }
+ 
+ }  // namespace keystone_glue
+--- a/chrome/browser/ui/views/frame/browser_view.cc
++++ b/chrome/browser/ui/views/frame/browser_view.cc
+@@ -199,6 +199,8 @@
+ #if defined(OS_MAC)
+ #include "chrome/browser/global_keyboard_shortcuts_mac.h"
+ #include "chrome/browser/ui/views/frame/browser_view_commands_mac.h"
++// Sparkle
++#include "chrome/browser/ui/views/update_recommended_message_box_mac.h"
+ #endif
+ 
+ #if defined(USE_AURA)
+@@ -1547,7 +1549,12 @@
+ }
+ 
+ void BrowserView::ShowUpdateChromeDialog() {
++ #if defined(OS_MAC)
++  // On mac, sparkle frameworks's relaunch api is used.
++  UpdateRecommendedMessageBoxMac::Show(GetNativeWindow());
++ #else
+   UpdateRecommendedMessageBox::Show(GetNativeWindow());
++ #endif
+ }
+ 
+ void BrowserView::ShowIntentPickerBubble(
+--- a/chrome/browser/ui/webui/settings/settings_ui.cc
++++ b/chrome/browser/ui/webui/settings/settings_ui.cc
+@@ -132,6 +132,10 @@
+ #include "chrome/browser/ui/webui/settings/printing_handler.h"
+ #endif
+ 
++#if defined(OS_MAC)
++#include "chrome/browser/ui/webui/settings/relaunch_handler_mac.h"
++#endif
++
+ namespace settings {
+ 
+ #if !BUILDFLAG(OPTIMIZE_WEBUI)
+@@ -367,6 +371,11 @@
+                    profile, chrome::FaviconUrlFormat::kFavicon2));
+ 
+   TryShowHatsSurveyWithTimeout();
++
++  #if defined(OS_MAC)
++  // Sparkle
++  web_ui->AddMessageHandler(std::make_unique<RelaunchHandler>());
++  #endif
+ }
+ 
+ SettingsUI::~SettingsUI() = default;
+--- a/chrome/browser/ui/BUILD.gn
++++ b/chrome/browser/ui/BUILD.gn
+@@ -1349,6 +1349,10 @@
+       "webui/page_not_available_for_guest/page_not_available_for_guest_ui.h",
+       "webui/plural_string_handler.cc",
+       "webui/plural_string_handler.h",
++      # Begin Sparkle
++      "webui/settings/relaunch_handler_mac.mm",
++      "webui/settings/relaunch_handler_mac.h",
++      # End Sparkle
+       "webui/policy_indicator_localized_strings_provider.cc",
+       "webui/policy_indicator_localized_strings_provider.h",
+       "webui/profile_info_watcher.cc",
+@@ -3471,6 +3475,10 @@
+       "views/translate/translate_icon_view.h",
+       "views/update_recommended_message_box.cc",
+       "views/update_recommended_message_box.h",
++      # Begin Sparkle
++      "views/update_recommended_message_box_mac.mm",
++      "views/update_recommended_message_box_mac.h",
++      # End Sparkle
+       "views/user_education/feature_promo_bubble_params.cc",
+       "views/user_education/feature_promo_bubble_params.h",
+       "views/user_education/feature_promo_bubble_timeout.cc",
+--- a/chrome/browser/resources/settings/lifetime_browser_proxy.js
++++ b/chrome/browser/resources/settings/lifetime_browser_proxy.js
+@@ -15,6 +15,13 @@
+     // Triggers a browser relaunch.
+     relaunch() {}
+ 
++     // <if expr="is_macosx">
++     // Use separate api for relaunch after update on Mac.
++     // Chromium's relaunch api isn't compatible with sparkle framework.
++     // So, sparkle framework's relaunch api is used on Mac.
++     relaunchOnMac() {}
++     // </if>
++
+     // <if expr="chromeos">
+     // First signs out current user and then performs a restart.
+     signOutAndRestart() {}
+@@ -40,6 +47,13 @@
+     relaunch() {
+       chrome.send('relaunch');
+     }
++
++    // <if expr="is_macosx">
++     /** @override */
++     relaunchOnMac() {
++       chrome.send('relaunchOnMac');
++     }
++    // </if>
+ 
+     // <if expr="chromeos">
+     /** @override */
+--- a/chrome/browser/resources/settings/about_page/about_page.js
++++ b/chrome/browser/resources/settings/about_page/about_page.js
+@@ -213,7 +213,14 @@
+ 
+   /** @private */
+   onRelaunchTap_() {
+-    this.lifetimeBrowserProxy_.relaunch();
++     // <if expr="is_macosx">
++     // Sparkle framework's relaunch api is used.
++     this.lifetimeBrowserProxy_.relaunchOnMac();
++     // </if>
++ 
++     // <if expr="not is_macosx">
++     this.lifetimeBrowserProxy_.relaunch();
++     // </if>
+   },
+ 
+   // <if expr="not chromeos">
+--- a/chrome/browser/ui/views/update_recommended_message_box.h
++++ b/chrome/browser/ui/views/update_recommended_message_box.h
+@@ -20,6 +20,7 @@
+   static void Show(gfx::NativeWindow parent_window);
+ 
+  private:
++  friend class UpdateRecommendedMessageBoxMac;
+   UpdateRecommendedMessageBox();
+   ~UpdateRecommendedMessageBox() override;
+ 

@@ -1,0 +1,40 @@
+--- a/chrome/browser/ui/views/tabs/alert_indicator.h
++++ b/chrome/browser/ui/views/tabs/alert_indicator.h
+@@ -49,6 +49,7 @@
+  private:
+   friend class AlertIndicatorTest;
+   friend class TabTest;
++  friend class AlertIndicatorMuteTab;
+   class FadeAnimationDelegate;
+ 
+   // Resets the images to display on the button to reflect |state| and the
+--- a/chrome/browser/ui/views/tabs/tab.cc
++++ b/chrome/browser/ui/views/tabs/tab.cc
+@@ -35,6 +35,7 @@
+ #include "chrome/browser/ui/views/chrome_layout_provider.h"
+ #include "chrome/browser/ui/views/frame/browser_view.h"
+ #include "chrome/browser/ui/views/tabs/alert_indicator.h"
++#include "chrome/browser/ui/views/tabs/alert_indicator_mute_tab.h"
+ #include "chrome/browser/ui/views/tabs/browser_tab_strip_controller.h"
+ #include "chrome/browser/ui/views/tabs/tab_close_button.h"
+ #include "chrome/browser/ui/views/tabs/tab_controller.h"
+@@ -212,7 +213,7 @@
+   icon_ = new TabIcon;
+   AddChildView(icon_);
+ 
+-  alert_indicator_ = new AlertIndicator(this);
++  alert_indicator_ = new AlertIndicatorMuteTab(this);
+   AddChildView(alert_indicator_);
+ 
+   // Unretained is safe here because this class outlives its close button, and
+--- a/chrome/browser/ui/BUILD.gn
++++ b/chrome/browser/ui/BUILD.gn
+@@ -3359,6 +3359,8 @@
+       "views/tab_sharing/tab_sharing_ui_views.h",
+       "views/tabs/alert_indicator.cc",
+       "views/tabs/alert_indicator.h",
++      "views/tabs/alert_indicator_mute_tab.cc",
++      "views/tabs/alert_indicator_mute_tab.h",
+       "views/tabs/browser_tab_strip_controller.cc",
+       "views/tabs/browser_tab_strip_controller.h",
+       "views/tabs/color_picker_view.cc",

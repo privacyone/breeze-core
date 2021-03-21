@@ -1,0 +1,102 @@
+--- a/remoting/branding_Chromium
++++ b/remoting/branding_Chromium
+@@ -4,7 +4,7 @@
+ IOS_BUNDLE_ID=com.google.ChromeRemoteDesktop.dev
+ IOS_DISPLAY_NAME=Chromoting
+ IOS_PRODUCT_NAME=Chromoting
+-MAC_BUNDLE_ID=org.chromium.Chromium
++MAC_BUNDLE_ID=io.privacyone.Breeze
+ MAC_CREATOR=Cr24
+ MAC_HOST_BUNDLE_ID=org.chromium.chromoting.me2me-host
+ MAC_HOST_BUNDLE_NAME=ChromotingHost.app
+--- a/tools/gn/src/base/files/file_util_posix.cc
++++ b/tools/gn/src/base/files/file_util_posix.cc
+@@ -110,7 +110,7 @@
+ }
+ 
+ std::string TempFileName() {
+-  return std::string(".org.chromium.Chromium.XXXXXX");
++  return std::string(".io.privacyone.Breeze.XXXXXX");
+ }
+ 
+ #if !defined(OS_MACOSX)
+--- a/third_party/cros_system_api/dbus/service_constants.h
++++ b/third_party/cros_system_api/dbus/service_constants.h
+@@ -111,7 +111,7 @@
+ }  // namespace speech_synthesis
+ 
+ namespace chromium {
+-const char kChromiumInterface[] = "org.chromium.Chromium";
++const char kChromiumInterface[] = "io.privacyone.Breeze";
+ // Text-to-speech service signals.
+ const char kTTSReadySignal[] = "TTSReady";
+ const char kTTSFailedSignal[] = "TTSFailed";
+--- a/third_party/catapult/tracing/tracing/extras/importer/trace_event_importer_test.html
++++ b/third_party/catapult/tracing/tracing/extras/importer/trace_event_importer_test.html
+@@ -3599,7 +3599,7 @@
+           protectionFlags: VMRegion.PROTECTION_FLAG_READ |
+                            VMRegion.PROTECTION_FLAG_WRITE |
+                            VMRegion.PROTECTION_FLAG_MAYSHARE,
+-          mappedFile: '/run/shm/.org.chromium.Chromium.sqqN11 (deleted)',
++          mappedFile: '/run/shm/.io.privacyone.Breeze.sqqN11 (deleted)',
+           byteStats: {
+             privateCleanResident: 0,
+             privateDirtyResident: 262144,
+@@ -3665,7 +3665,7 @@
+                   sa: '7ff10ff4b000',
+                   sz: '40000',
+                   pf: 134,
+-                  mf: '/run/shm/.org.chromium.Chromium.sqqN11 (deleted)',
++                  mf: '/run/shm/.io.privacyone.Breeze.sqqN11 (deleted)',
+                   bs: {
+                     pss: '40000',
+                     pc: '0',
+--- a/chrome/app/theme/chromium/BRANDING
++++ b/chrome/app/theme/chromium/BRANDING
+@@ -6,5 +6,5 @@
+ PRODUCT_INSTALLER_SHORTNAME=Breeze Installer
+ COPYRIGHT=Copyright 2020 Privacy One LLC. All rights reserved.
+-MAC_BUNDLE_ID=org.chromium.Chromium
++MAC_BUNDLE_ID=io.privacyone.Breeze
+ MAC_CREATOR_CODE=Cr24
+ MAC_TEAM_ID=G64LM97BC6
+--- a/chrome/updater/branding.gni
++++ b/chrome/updater/branding.gni
+@@ -25,3 +25,3 @@
+   mac_updater_bundle_identifier = "org.chromium.ChromiumUpdater"
+-  mac_browser_bundle_identifier = "org.chromium.Chromium"
++  mac_browser_bundle_identifier = "io.privacyone.Breeze"
+ }
+--- a/chrome/common/service_process_util_posix.cc
++++ b/chrome/common/service_process_util_posix.cc
+@@ -41,7 +41,7 @@
+ #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
+   static const char kShmem[] = "com.google.Chrome.shmem.";
+ #else
+-  static const char kShmem[] = "org.chromium.Chromium.shmem.";
++  static const char kShmem[] = "io.privacyone.Breeze.shmem.";
+ #endif
+   *path = temp_dir.AppendASCII(kShmem + mem_name);
+   return true;
+--- a/base/mac/foundation_util.mm
++++ b/base/mac/foundation_util.mm
+@@ -249,7 +249,7 @@
+ #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
+   return "com.google.Chrome";
+ #else
+-  return "org.chromium.Chromium";
++  return "io.privacyone.Breeze";
+ #endif
+ }
+
+--- a/base/files/file_util_posix.cc
++++ b/base/files/file_util_posix.cc
+@@ -115,7 +115,7 @@
+ #elif BUILDFLAG(GOOGLE_CHROME_BRANDING)
+   StringPiece prefix = "com.google.Chrome";
+ #else
+-  StringPiece prefix = "org.chromium.Chromium";
++  StringPiece prefix = "io.privacyone.Breeze";
+ #endif
+   return FilePath(StrCat({".", prefix, ".", identifier}));
+ }

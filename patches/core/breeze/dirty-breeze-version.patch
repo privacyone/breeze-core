@@ -1,0 +1,116 @@
+--- a/components/version_ui/resources/about_version.html
++++ b/components/version_ui/resources/about_version.html
+@@ -54,7 +54,7 @@
+       <table id="inner" cellpadding="0" cellspacing="0" border="0">
+         <tr><td class="label">$i18n{application_label}</td>
+           <td class="version" id="version">
+-            <span>$i18n{version}</span>
++            <span>%breezeVersion Chromium: $i18n{version}</span>
+             (<span>$i18n{official}</span>)
+             <span>$i18n{version_modifier}</span>
+             <span>$i18n{version_bitsize}</span>
+--- a/chrome/browser/ui/webui/version/version_ui.cc
++++ b/chrome/browser/ui/webui/version/version_ui.cc
+@@ -161,3 +161,3 @@
+   html_source->AddString(version_ui::kVersion,
+-                         version_info::GetVersionNumber());
++                         version_info::GetChromiumVersionNumber());
+   html_source->AddString(version_ui::kVersionModifier,
+--- a/chrome/app/settings_strings.grdp
++++ b/chrome/app/settings_strings.grdp
+@@ -13,7 +13,7 @@
+ 
+   <!-- About Page -->
+   <message name="IDS_SETTINGS_ABOUT_PAGE_BROWSER_VERSION" desc="The text label describing the version of the browser, example: Version 57.0.2937.0 (Developer Build) unknown (64-bit)">
+-    Version <ph name="PRODUCT_VERSION">$1<ex>15.0.865.0</ex></ph> (<ph name="PRODUCT_CHANNEL">$2<ex>Developer Build</ex></ph>) <ph name="PRODUCT_MODIFIER">$3</ph> <ph name="PRODUCT_VERSION_BITS">$4</ph>
++    Version: %breezeVersion Chromium: <ph name="CHROMIUM_PRODUCT_VERSION">$1<ex>15.0.865.0</ex></ph> (<ph name="PRODUCT_CHANNEL">$2<ex>Developer Build</ex></ph>) <ph name="PRODUCT_MODIFIER">$3</ph> <ph name="PRODUCT_VERSION_BITS">$4</ph>
+   </message>
+   <if expr="not chromeos">
+     <message name="IDS_SETTINGS_ABOUT_PAGE_RELAUNCH" desc="The label for the relaunch button that relaunches the browser once update is complete">
+--- a/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc
++++ b/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc
+@@ -274,7 +274,7 @@ void AddAboutStrings(content::WebUIDataSource* html_source, Profile* profile) {
+       "aboutBrowserVersion",
+       l10n_util::GetStringFUTF16(
+           IDS_SETTINGS_ABOUT_PAGE_BROWSER_VERSION,
+-          base::UTF8ToUTF16(version_info::GetVersionNumber()),
++          base::UTF8ToUTF16(version_info::GetChromiumVersionNumber()),
+           l10n_util::GetStringUTF16(version_info::IsOfficialBuild()
+                                         ? IDS_VERSION_UI_OFFICIAL
+                                         : IDS_VERSION_UI_UNOFFICIAL),
+--- a/components/version_ui_strings.grdp
++++ b/components/version_ui_strings.grdp
+@@ -4,7 +4,7 @@
+     About Version
+   </message>
+   <message name="IDS_VERSION_UI_OFFICIAL" desc="official build on the about:version page">
+-    Official Build
++    Beta
+   </message>
+   <message name="IDS_VERSION_UI_UNOFFICIAL" desc="unofficial build on the about:version page">
+     Developer Build
+--- a/components/version_info/version_info.cc
++++ b/components/version_info/version_info.cc
+@@ -16,7 +16,7 @@
+ namespace version_info {
+ 
+ std::string GetProductNameAndVersionForUserAgent() {
+-  return "Chrome/" + GetVersionNumber();
++  return "Chrome/" + GetChromiumVersionNumber();
+ }
+ 
+ std::string GetProductName() {
+@@ -28,6 +28,10 @@
+   return PRODUCT_VERSION;
+ }
+ 
++std::string GetChromiumVersionNumber() {
++  return CHROMIUM_PRODUCT_VERSION;
++}
++
+ std::string GetMajorVersionNumber() {
+   DCHECK(version_info::GetVersion().IsValid());
+   return base::NumberToString(version_info::GetVersion().components()[0]);
+@@ -37,7 +41,10 @@
+   static const base::NoDestructor<base::Version> version(GetVersionNumber());
+   return *version;
+ }
+-
++const base::Version& GetChromiumVersion() {
++  static const base::NoDestructor<base::Version> version(GetChromiumVersionNumber());
++  return *version;
++}
+ std::string GetLastChange() {
+   return LAST_CHANGE;
+ }
+--- a/components/version_info/version_info.h
++++ b/components/version_info/version_info.h
+@@ -25,12 +25,18 @@ std::string GetProductName();
+ // Returns the version number, e.g. "6.0.490.1".
+ std::string GetVersionNumber();
+ 
++// Returns the version number, e.g. "6.0.490.1".
++std::string GetChromiumVersionNumber();
++
+ // Returns the major component of the version, e.g. "6".
+ std::string GetMajorVersionNumber();
+ 
+ // Returns the result of GetVersionNumber() as a base::Version.
+ const base::Version& GetVersion();
+ 
++// Returns the result of GetChromiumVersionNumber() as a base::Version.
++const base::Version& GetChromiumVersion();
++
+ // Returns a version control specific identifier of this release.
+ std::string GetLastChange();
+ 
+--- a/components/version_info/version_info_values.h.version
++++ b/components/version_info/version_info_values.h.version
+@@ -7,6 +7,7 @@
+ 
+ #define PRODUCT_NAME "@PRODUCT_FULLNAME@"
+ #define PRODUCT_VERSION "@MAJOR@.@MINOR@.@BUILD@.@PATCH@"
++#define CHROMIUM_PRODUCT_VERSION "%chromiumVersion"
+ #define LAST_CHANGE "@LASTCHANGE@"
+ #define IS_OFFICIAL_BUILD @OFFICIAL_BUILD@
+ 

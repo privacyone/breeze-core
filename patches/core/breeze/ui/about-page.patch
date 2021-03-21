@@ -1,0 +1,75 @@
+--- a/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc
++++ b/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc
+@@ -291,7 +291,15 @@
+   base::string16 license = l10n_util::GetStringFUTF16(
+       IDS_VERSION_UI_LICENSE, base::ASCIIToUTF16(chrome::kChromiumProjectURL),
+-      base::ASCIIToUTF16(chrome::kChromeUICreditsURL));
++      base::ASCIIToUTF16(chrome::kUngoogledChromiumURL),
++      base::ASCIIToUTF16(chrome::kChromeUICreditsURL),
++      base::ASCIIToUTF16(chrome::kChromeUITermsURL));
+   html_source->AddString("aboutProductLicense", license);
++ 
++  base::string16 our_mission = l10n_util::GetStringFUTF16(
++      IDS_OUR_MISSION, base::ASCIIToUTF16(chrome::kBreezeOurTeamURL),
++      base::ASCIIToUTF16(chrome::kBreezeContributersURL),
++      base::ASCIIToUTF16(chrome::kBreezeOurMissionURL));
++  html_source->AddString("aboutOurMissiom", our_mission);
+
+   html_source->AddBoolean("aboutObsoleteNowOrSoon",
+                           ObsoleteSystem::IsObsoleteNowOrSoon());
+--- a/chrome/browser/resources/settings/settings_page/settings_subpage.js
++++ b/chrome/browser/resources/settings/settings_page/settings_subpage.js
+@@ -22,8 +22,6 @@
+ 
+     titleIcon: String,
+ 
+-    learnMoreUrl: String,
+-
+     /** Setting a |searchLabel| will enable search. */
+     searchLabel: String,
+ 
+--- a/chrome/browser/resources/settings/about_page/about_page.html
++++ b/chrome/browser/resources/settings/about_page/about_page.html
+@@ -47,7 +47,7 @@
+                     breeze://theme/current-channel-logo@2x 2x"
+             alt="$i18n{aboutProductLogoAlt}"
+             role="presentation">
+-        <h1 class="product-title">$i18n{aboutProductTitle}</h1>
++        <h1 class="product-title">Breeze Beta</h1>
+       </div>
+       <div class="cr-row two-line">
+         <!-- TODO(dpapad): Investigate why vulcanize does not handle well
+@@ -148,8 +148,15 @@
+           <div class="secondary">$i18nRaw{aboutProductLicense}</div>
+         </div>
++<if expr="false">
++        <div class="info-section">
++          <div class="secondary">$i18nRaw{aboutProprietaryComponents}</div>
++        </div>
++</if>
+-<if expr="_google_chrome">
+         <div class="secondary">
+-          <a href="$i18n{aboutTermsURL}">$i18n{aboutProductTos}</a>
++          <a target="_blank" href="https://www.breezebrowser.io/breeze/legal/in-app/terms-of-use">Terms of Use</a>
++          <span style="padding-left: 20px;"></span>
++          <a target="_blank" href="https://www.breezebrowser.io/breeze/legal/in-app/privacy-policy">Privacy Policy</a>
++          <span style="padding-left: 20px;"></span>
++          <a target="_blank" href="https://public-git.privacyone.io/">Source Code</a>
+         </div>
+-</if>
+       </div>
+--- a/components/components_chromium_strings.grd
++++ b/components/components_chromium_strings.grd
+@@ -281,3 +281,3 @@
+       <message name="IDS_VERSION_UI_LICENSE" desc="The label below the copyright message, containing the URLs.">
+-        Chromium is made possible by the <ph name="BEGIN_LINK_CHROMIUM">&lt;a target="_blank" href="$1"&gt;</ph>Chromium<ph name="END_LINK_CHROMIUM">&lt;/a&gt;</ph> open source project and other <ph name="BEGIN_LINK_OSS">&lt;a target="_blank" href="$2"&gt;</ph>open source software<ph name="END_LINK_OSS">&lt;/a&gt;</ph>.
++        Breeze is made possible by the <ph name="BEGIN_LINK_CHROMIUM">&lt;a target="_blank" href="$1"&gt;</ph>Chromium<ph name="END_LINK_CHROMIUM">&lt;/a&gt;</ph> open source project, the <ph name="BEGIN_LINK_UC">&lt;a target="_blank" href="$2"&gt;</ph>ungoogled chromium<ph name="END_LINK_UC">&lt;/a&gt;</ph> project, and other <ph name="BEGIN_LINK_OSS">&lt;a target="_blank" href="$3"&gt;</ph>open source software<ph name="END_LINK_OSS">&lt;/a&gt;</ph>. Breeze also incorporates some <ph name="BEGIN_LINK_TERMS">&lt;a target="_blank" href="$4"&gt;</ph>proprietary components<ph name="END_LINK_TERMS">&lt;/a&gt;</ph> to enhance compatibility.
+       </message>
+@@ -293,2 +293,7 @@
+       </message>
++
++      <!-- Breeze added -->
++      <message name="IDS_OUR_MISSION" desc="Gives credit to contributors and shows our mission.">
++        Breeze development is a deep collaborative effort between our <ph name="BEGIN_LINK_INTERNAL_DEV">&lt;a target="_blank" href="$1"&gt;</ph>internal team<ph name="END_LINK_INTERNAL_DEV">&lt;/a&gt;</ph> and <ph name="BEGIN_LINK_CONTRIBUTORS">&lt;a target="_blank" href="$2"&gt;</ph>open source enthusiast developers<ph name="END_LINK_CONTRIBUTORS">&lt;/a&gt;</ph> working to make Breeze better and advance <ph name="BEGIN_LINK_OUR_MISSION">&lt;a target="_blank" href="$3"&gt;</ph>our mission<ph name="END_LINK_OUR_MISSION">&lt;/a&gt;</ph> around the world.
++      </message>
+     </messages>

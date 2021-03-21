@@ -1,0 +1,623 @@
+--- a/chrome/browser/importer/importer_uma.cc
++++ b/chrome/browser/importer/importer_uma.cc
+@@ -59,6 +59,9 @@ void LogImporterUseToMetrics(const std::
+     case TYPE_BOOKMARKS_FILE:
+       metrics_type = IMPORTER_METRICS_BOOKMARKS_FILE;
+       break;
++	case TYPE_CHROME:
++      //Recording metrics, we don't do that.
++      break;
+   }
+ 
+   // Note: This leaks memory, which is the expected behavior as the factory
+--- a/chrome/browser/importer/importer_list.cc
++++ b/chrome/browser/importer/importer_list.cc
+@@ -6,6 +6,11 @@
+ 
+ #include <stdint.h>
+ 
++#include "base/files/file_path.h"
++#include "base/strings/utf_string_conversions.h"
++#include "base/values.h"
++#include "chrome/common/importer/chrome_importer_utils.h"
++
+ #include "base/bind.h"
+ #include "base/task/post_task.h"
+ #include "base/task/task_traits.h"
+@@ -142,6 +147,121 @@ void DetectFirefoxProfiles(const std::st
+   }
+ }
+ 
++// Chrome
++void AddChromeToProfiles(std::vector<importer::SourceProfile>* profiles,
++                         base::ListValue* chrome_profiles,
++                         const base::FilePath& user_data_folder,
++                         const std::string& brand) {
++  if(chrome_profiles->GetSize() == 1)
++  {
++    const base::DictionaryValue* dict;
++    if (!chrome_profiles->GetList()[0].GetAsDictionary(&dict))
++    {
++      delete chrome_profiles;
++      return;
++    }
++    uint16_t items = importer::NONE;
++    std::string profile;
++    std::string name="";
++    dict->GetString("id", &profile);
++    base::FilePath path = user_data_folder;
++    if (!ChromeImporterCanImport(path.Append(
++      base::FilePath::StringType(profile.begin(), profile.end())), &items))
++    {
++      delete chrome_profiles;
++      return;
++    }
++    importer::SourceProfile chrome;
++    std::string importer_name(brand);
++    importer_name.append(name);
++    chrome.importer_name = base::UTF8ToUTF16(importer_name);
++    chrome.importer_type = importer::TYPE_CHROME;
++    chrome.services_supported = items;
++    chrome.source_path =
++      user_data_folder.Append(
++        base::FilePath::StringType(profile.begin(), profile.end()));
++    profiles->push_back(chrome);
++  }
++
++  else
++  {
++  for (const auto& value : *chrome_profiles) {
++    const base::DictionaryValue* dict;
++    if (!value.GetAsDictionary(&dict))
++      continue;
++    uint16_t items = importer::NONE;
++    std::string profile;
++    std::string name;
++    dict->GetString("id", &profile);
++    dict->GetString("name", &name);
++    base::FilePath path = user_data_folder;
++    if (!ChromeImporterCanImport(path.Append(
++      base::FilePath::StringType(profile.begin(), profile.end())), &items))
++      continue;
++    importer::SourceProfile chrome;
++    std::string importer_name(brand);
++    importer_name.append(name);
++    chrome.importer_name = base::UTF8ToUTF16(importer_name);
++    chrome.importer_type = importer::TYPE_CHROME;
++    chrome.services_supported = items;
++    chrome.source_path =
++      user_data_folder.Append(
++        base::FilePath::StringType(profile.begin(), profile.end()));
++    profiles->push_back(chrome);
++  }
++}
++  delete chrome_profiles;
++}
++
++void DetectChromeProfiles(std::vector<importer::SourceProfile>* profiles) {
++  base::ScopedBlockingCall scoped_blocking_call(FROM_HERE,
++                                                base::BlockingType::WILL_BLOCK);
++  const base::FilePath chrome_user_data_folder = GetChromeUserDataFolder();
++  base::ListValue* chrome_profiles =
++      GetChromeSourceProfiles(chrome_user_data_folder);
++  const std::string brand_chrome("Chrome ");
++  AddChromeToProfiles(profiles, chrome_profiles, chrome_user_data_folder,
++                      brand_chrome);
++
++#if !defined(OS_LINUX)
++  const base::FilePath canary_user_data_folder = GetCanaryUserDataFolder();
++  base::ListValue* canary_profiles =
++      GetChromeSourceProfiles(canary_user_data_folder);
++  const std::string brandCanary("Chrome Canary ");
++  AddChromeToProfiles(profiles, canary_profiles, canary_user_data_folder,
++                      brandCanary);
++#endif
++
++  const base::FilePath chromium_user_data_folder = GetChromiumUserDataFolder();
++  base::ListValue* chromium_profiles =
++      GetChromeSourceProfiles(chromium_user_data_folder);
++  const std::string brandChromium("Chromium ");
++  AddChromeToProfiles(profiles, chromium_profiles, chromium_user_data_folder,
++                      brandChromium);
++
++  const base::FilePath opera_user_data_folder = GetOperaUserDataFolder();
++  base::ListValue* opera_profiles =
++      GetOperaSourceProfiles(opera_user_data_folder);
++  const std::string brandOpera("Opera ");
++  AddChromeToProfiles(profiles, opera_profiles, opera_user_data_folder,
++                      brandOpera);
++
++#if defined(OS_MAC)
++  const base::FilePath edge_user_data_folder = GetEdgeUserDataFolder();
++  base::ListValue* edge_profiles =
++      GetChromeSourceProfiles(edge_user_data_folder);
++  const std::string brandEdge("Edge ");
++  AddChromeToProfiles(profiles, edge_profiles, edge_user_data_folder,
++                      brandEdge);
++#endif
++  const base::FilePath brave_user_data_folder = GetBraveUserDataFolder();
++  base::ListValue* brave_profiles =
++      GetChromeSourceProfiles(brave_user_data_folder);
++  const std::string brandBrave("Brave ");
++  AddChromeToProfiles(profiles, brave_profiles, brave_user_data_folder,
++                      brandBrave);
++}
++
+ std::vector<importer::SourceProfile> DetectSourceProfilesWorker(
+     const std::string& locale,
+     bool include_interactive_profiles) {
+@@ -156,20 +276,33 @@ std::vector<importer::SourceProfile> Det
+   if (shell_integration::IsFirefoxDefaultBrowser()) {
+     DetectFirefoxProfiles(locale, &profiles);
+     DetectBuiltinWindowsProfiles(&profiles);
++	   DetectChromeProfiles(&profiles);
+   } else {
+     DetectBuiltinWindowsProfiles(&profiles);
+     DetectFirefoxProfiles(locale, &profiles);
++	   DetectChromeProfiles(&profiles);
+   }
+ #elif defined(OS_MAC)
+   if (shell_integration::IsFirefoxDefaultBrowser()) {
+     DetectFirefoxProfiles(locale, &profiles);
+     DetectSafariProfiles(&profiles);
++	   DetectChromeProfiles(&profiles);
+   } else {
+     DetectSafariProfiles(&profiles);
+     DetectFirefoxProfiles(locale, &profiles);
++	   DetectChromeProfiles(&profiles);
+   }
+ #else
+-  DetectFirefoxProfiles(locale, &profiles);
++  if (shell_integration::IsFirefoxDefaultBrowser()) 
++  { 
++    DetectFirefoxProfiles(locale, &profiles);
++    DetectChromeProfiles(&profiles);
++  } 
++  else 
++  {
++    DetectChromeProfiles(&profiles);
++    DetectFirefoxProfiles(locale, &profiles);
++  }
+ #endif
+   if (include_interactive_profiles) {
+     importer::SourceProfile bookmarks_profile;
+--- a/chrome/browser/importer/in_process_importer_bridge.cc
++++ b/chrome/browser/importer/in_process_importer_bridge.cc
+@@ -54,6 +54,8 @@ history::VisitSource ConvertImporterVisi
+       return history::SOURCE_IE_IMPORTED;
+     case importer::VISIT_SOURCE_SAFARI_IMPORTED:
+       return history::SOURCE_SAFARI_IMPORTED;
++	case importer::VISIT_SOURCE_CHROME_IMPORTED:
++      return history::SOURCE_CHROME_IMPORTED;
+   }
+   NOTREACHED();
+   return history::SOURCE_SYNCED;
+--- a/chrome/common/importer/BUILD.gn
++++ b/chrome/common/importer/BUILD.gn
+@@ -76,5 +76,7 @@
+ source_set("importer") {
+   sources = [
++    "chrome_importer_utils.cc",
++    "chrome_importer_utils.h",
+     "firefox_importer_utils.cc",
+     "firefox_importer_utils.h",
+     "imported_bookmark_entry.cc",
+@@ -92,12 +94,16 @@
+     "pstore_declarations.h",
+   ]
+   if (is_chromeos || is_linux) {
+-    sources += [ "firefox_importer_utils_linux.cc" ]
++    sources += [ 
++      "firefox_importer_utils_linux.cc", 
++      "chrome_importer_utils_linux.cc", 
++    ]
+   } else if (is_mac) {
+     sources += [
+       "firefox_importer_utils_mac.mm",
+       "safari_importer_utils.h",
+       "safari_importer_utils.mm",
++      "chrome_importer_utils_mac.mm",
+     ]
+   } else if (is_win) {
+     sources += [
+@@ -108,6 +114,7 @@
+       "ie_importer_utils_win.h",
+       "importer_test_registry_overrider_win.cc",
+       "importer_test_registry_overrider_win.h",
++      "chrome_importer_utils_win.cc",
+     ]
+   }
+   deps = [
+--- a/chrome/common/importer/importer_type.h
++++ b/chrome/common/importer/importer_type.h
+@@ -19,6 +19,8 @@ enum ImporterType {
+   TYPE_IE              = 0,
+ #endif
+   // Value 1 was the (now deleted) Firefox 2 profile importer.
++  // Then we will use it for Chrome.
++  TYPE_CHROME		   = 1,
+   TYPE_FIREFOX         = 2,
+ #if defined(OS_MAC)
+   TYPE_SAFARI          = 3,
+--- a/chrome/common/importer/importer_data_types.h
++++ b/chrome/common/importer/importer_data_types.h
+@@ -84,6 +84,7 @@ enum VisitSource {
+   VISIT_SOURCE_FIREFOX_IMPORTED = 1,
+   VISIT_SOURCE_IE_IMPORTED = 2,
+   VISIT_SOURCE_SAFARI_IMPORTED = 3,
++  VISIT_SOURCE_CHROME_IMPORTED = 4,
+ };
+ 
+ }  // namespace importer
+--- a/chrome/utility/BUILD.gn
++++ b/chrome/utility/BUILD.gn
+@@ -84,6 +84,8 @@ static_library("utility") {
+       "importer/favicon_reencode.h",
+       "importer/firefox_importer.cc",
+       "importer/firefox_importer.h",
++      "importer/chrome_importer.cc",
++      "importer/chrome_importer.h",
+       "importer/importer.cc",
+       "importer/importer.h",
+       "importer/importer_creator.cc",
+--- a/components/history/core/browser/history_types.h
++++ b/components/history/core/browser/history_types.h
+@@ -55,6 +55,7 @@ enum VisitSource {
+   SOURCE_FIREFOX_IMPORTED = 3,
+   SOURCE_IE_IMPORTED = 4,
+   SOURCE_SAFARI_IMPORTED = 5,
++  SOURCE_CHROME_IMPORTED = 6,
+ };
+ 
+ typedef int64_t VisitID;
+--- a/chrome/utility/importer/importer_creator.cc
++++ b/chrome/utility/importer/importer_creator.cc
+@@ -8,6 +8,7 @@
+ #include "build/build_config.h"
+ #include "chrome/utility/importer/bookmarks_file_importer.h"
+ #include "chrome/utility/importer/firefox_importer.h"
++#include "chrome/utility/importer/chrome_importer.h"
+ 
+ #if defined(OS_WIN)
+ #include "chrome/common/importer/edge_importer_utils_win.h"
+@@ -39,6 +40,8 @@ scoped_refptr<Importer> CreateImporterBy
+       return new BookmarksFileImporter();
+     case TYPE_FIREFOX:
+       return new FirefoxImporter();
++	case TYPE_CHROME:
++      return new ChromeImporter();
+ #if defined(OS_MAC)
+     case TYPE_SAFARI:
+       return new SafariImporter(base::mac::GetUserLibraryPath());
+--- a/chrome/utility/importer/profile_import_impl.cc
++++ b/chrome/utility/importer/profile_import_impl.cc
+@@ -22,6 +22,9 @@
+ #include "mojo/public/cpp/bindings/remote.h"
+ #include "mojo/public/cpp/bindings/shared_remote.h"
+ 
++#include "base/command_line.h"
++#include "base/strings/utf_string_conversions.h"
++
+ #if defined(OS_MAC)
+ #include <stdlib.h>
+ 
+@@ -55,6 +58,34 @@ void ProfileImportImpl::StartImport(
+   }
+ 
+   items_to_import_ = items;
++  
++  // Change signal for Chrome/Chromium
++  base::CommandLine* command_line = base::CommandLine::ForCurrentProcess();
++  if (base::StartsWith(base::UTF16ToUTF8(source_profile.importer_name),
++                       "Chrome", base::CompareCase::SENSITIVE)) 
++  {
++    command_line->AppendSwitch("import-chrome");
++  } 
++  else if (base::StartsWith(base::UTF16ToUTF8(source_profile.importer_name),
++                              "Chromium", base::CompareCase::SENSITIVE)) 
++  {
++    command_line->AppendSwitch("import-chromium");
++  }
++  else if (base::StartsWith(base::UTF16ToUTF8(source_profile.importer_name),
++                              "Opera", base::CompareCase::SENSITIVE)) 
++  {
++    command_line->AppendSwitch("import-opera");
++  }
++  else if (base::StartsWith(base::UTF16ToUTF8(source_profile.importer_name),
++                              "Edge", base::CompareCase::SENSITIVE)) 
++  {
++    command_line->AppendSwitch("import-edge");
++  }
++  else if (base::StartsWith(base::UTF16ToUTF8(source_profile.importer_name),
++                              "Brave", base::CompareCase::SENSITIVE)) 
++  {
++    command_line->AppendSwitch("import-brave");
++  }
+ 
+   // Create worker thread in which importer runs.
+   import_thread_.reset(new base::Thread("import_thread"));
+--- a/components/os_crypt/key_storage_libsecret.cc
++++ b/components/os_crypt/key_storage_libsecret.cc
+@@ -12,12 +12,14 @@
+ #include "build/branding_buildflags.h"
+ #include "components/os_crypt/libsecret_util_linux.h"
+ 
++#include "base/command_line.h"
++
+ namespace {
+ 
+ #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
+ const char kApplicationName[] = "chrome";
+ #else
+-const char kApplicationName[] = "chromium";
++const char kApplicationName[] = "breeze";
+ #endif
+ 
+ const SecretSchema kKeystoreSchemaV2 = {
+@@ -88,7 +90,34 @@ KeyStorageLibsecret::AddRandomPasswordIn
+ 
+ base::Optional<std::string> KeyStorageLibsecret::GetKeyImpl() {
+   LibsecretAttributesBuilder attrs;
+-  attrs.Append("application", kApplicationName);
++  
++  const char* application_name;
++  base::CommandLine* command_line = base::CommandLine::ForCurrentProcess();
++  if (command_line->HasSwitch("import-chrome")) 
++  {
++    application_name = "chrome";
++  } 
++  else if (command_line->HasSwitch("import-chromium")) 
++  {
++    application_name = "chromium";
++  } 
++  else if (command_line->HasSwitch("import-opera")) 
++  {
++    application_name = "opera";
++  }
++  else if (command_line->HasSwitch("import-edge")) 
++  {
++    application_name = "edge";
++  } 
++  else if (command_line->HasSwitch("import-brave")) 
++  {
++    application_name = "brave";
++  }  
++  else 
++  {
++    application_name = kApplicationName;
++  }
++  attrs.Append("application", application_name);
+ 
+   LibsecretLoader::SearchHelper helper;
+   helper.Search(&kKeystoreSchemaV2, attrs.Get(),
+--- a/components/os_crypt/keychain_password_mac.mm
++++ b/components/os_crypt/keychain_password_mac.mm
+@@ -13,6 +13,8 @@
+ #include "build/branding_buildflags.h"
+ #include "crypto/apple_keychain.h"
+ 
++#include "base/command_line.h"
++
+ using crypto::AppleKeychain;
+ 
+ namespace {
+@@ -51,8 +53,8 @@ std::string AddRandomPasswordToKeychain(
+ const char KeychainPassword::service_name[] = "Chrome Safe Storage";
+ const char KeychainPassword::account_name[] = "Chrome";
+ #else
+-const char KeychainPassword::service_name[] = "Chromium Safe Storage";
+-const char KeychainPassword::account_name[] = "Chromium";
++const char KeychainPassword::service_name[] = "Breeze Safe Storage";
++const char KeychainPassword::account_name[] = "Breeze";
+ #endif
+ 
+ KeychainPassword::KeychainPassword(const AppleKeychain& keychain)
+@@ -61,6 +63,39 @@ KeychainPassword::KeychainPassword(const
+ KeychainPassword::~KeychainPassword() = default;
+ 
+ std::string KeychainPassword::GetPassword() const {
++  const char *service_name, *account_name;
++  base::CommandLine* command_line = base::CommandLine::ForCurrentProcess();
++  if (command_line->HasSwitch("import-chrome")) 
++  {
++    service_name = "Chrome Safe Storage";
++    account_name = "Chrome";
++  } 
++  else if (command_line->HasSwitch("import-chromium")) 
++  {
++    service_name = "Chromium Safe Storage";
++    account_name = "Chromium";
++  }
++  else if (command_line->HasSwitch("import-opera")) 
++  {
++    service_name = "Opera Safe Storage";
++    account_name = "Opera";
++  }
++  else if (command_line->HasSwitch("import-edge")) 
++  {
++    service_name = "Edge Safe Storage";
++    account_name = "Edge";
++  } 
++  else if (command_line->HasSwitch("import-brave")) 
++  {
++    service_name = "Brave Safe Storage";
++    account_name = "Brave";
++  }  
++  else 
++  {
++    service_name = ::KeychainPassword::service_name;
++    account_name = ::KeychainPassword::account_name;
++  }
++  
+   UInt32 password_length = 0;
+   void* password_data = nullptr;
+   OSStatus error = keychain_.FindGenericPassword(
+--- a/components/os_crypt/key_storage_kwallet.cc
++++ b/components/os_crypt/key_storage_kwallet.cc
+@@ -12,6 +12,8 @@
+ #include "components/os_crypt/kwallet_dbus.h"
+ #include "dbus/bus.h"
+ 
++#include "base/command_line.h"
++
+ KeyStorageKWallet::KeyStorageKWallet(base::nix::DesktopEnvironment desktop_env,
+                                      std::string app_name)
+     : desktop_env_(desktop_env), app_name_(std::move(app_name)) {}
+@@ -91,11 +93,44 @@ base::Optional<std::string> KeyStorageKW
+   if (!InitFolder())
+     return base::nullopt;
+ 
++  const char *folder_name, *key;
++  base::CommandLine* command_line = base::CommandLine::ForCurrentProcess();
++  if (command_line->HasSwitch("import-chrome")) 
++  {
++    folder_name = "Chrome Keys";
++    key = "Chrome Safe Storage";
++  } 
++  else if (command_line->HasSwitch("import-chromium")) 
++  {
++    folder_name = "Chromium Keys";
++    key = "Chromium Safe Storage";
++  }
++  else if (command_line->HasSwitch("import-opera")) 
++  {
++    folder_name = "Opera Keys";
++    key = "Opera Safe Storage";
++  }
++  else if (command_line->HasSwitch("import-edge")) 
++  {
++    folder_name = "Edge Keys";
++    key = "Edge Safe Storage";
++  } 
++  else if (command_line->HasSwitch("import-brave")) 
++  {
++    folder_name = "Brave Keys";
++    key = "Brave Safe Storage";
++  } 
++  else 
++  {
++    folder_name = KeyStorageLinux::kFolderName;
++    key = KeyStorageLinux::kKey;
++  }
++
+   // Read password
+   base::Optional<std::string> password;
+   error =
+-      kwallet_dbus_->ReadPassword(handle_, KeyStorageLinux::kFolderName,
+-                                  KeyStorageLinux::kKey, app_name_, &password);
++      kwallet_dbus_->ReadPassword(handle_, folder_name,
++                                  key, app_name_, &password);
+   if (error)
+     return base::nullopt;
+ 
+@@ -117,8 +152,36 @@ base::Optional<std::string> KeyStorageKW
+ 
+ bool KeyStorageKWallet::InitFolder() {
+   bool has_folder = false;
++  
++  const char *folder_name;
++  base::CommandLine* command_line = base::CommandLine::ForCurrentProcess();
++  if (command_line->HasSwitch("import-chrome")) 
++  {
++    folder_name = "Chrome Keys";
++  } 
++  else if (command_line->HasSwitch("import-chromium")) 
++  {
++    folder_name = "Chromium Keys";
++  }
++  else if (command_line->HasSwitch("import-opera")) 
++  {
++    folder_name = "Opera Keys";
++  } 
++  else if (command_line->HasSwitch("import-edge")) 
++  {
++    folder_name = "Edge Keys";
++  } 
++  else if (command_line->HasSwitch("import-brave")) 
++  {
++    folder_name = "Brave Keys";
++  } 
++  else 
++  {
++    folder_name = KeyStorageLinux::kFolderName;
++  }
++  
+   KWalletDBus::Error error = kwallet_dbus_->HasFolder(
+-      handle_, KeyStorageLinux::kFolderName, app_name_, &has_folder);
++      handle_, folder_name, app_name_, &has_folder);
+   if (error)
+     return false;
+ 
+--- a/components/os_crypt/key_storage_keyring.cc
++++ b/components/os_crypt/key_storage_keyring.cc
+@@ -13,12 +13,14 @@
+ #include "build/branding_buildflags.h"
+ #include "components/os_crypt/keyring_util_linux.h"
+ 
++#include "base/command_line.h"
++
+ namespace {
+ 
+ #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
+ const char kApplicationName[] = "chrome";
+ #else
+-const char kApplicationName[] = "chromium";
++const char kApplicationName[] = "breeze";
+ #endif
+ 
+ const GnomeKeyringPasswordSchema kSchema = {
+@@ -47,9 +49,37 @@ base::Optional<std::string> KeyStorageKe
+ 
+   base::Optional<std::string> password;
+   gchar* password_c = nullptr;
++  
++  const char* application_name;
++  base::CommandLine* command_line = base::CommandLine::ForCurrentProcess();
++  if (command_line->HasSwitch("import-chrome")) 
++  {
++    application_name = "chrome";
++  } 
++  else if (command_line->HasSwitch("import-chromium"))
++  {
++    application_name = "chromium";
++  }
++  else if (command_line->HasSwitch("import-opera"))
++  {
++    application_name = "opera";
++  }
++  else if (command_line->HasSwitch("import-edge"))
++  {
++    application_name = "edge";
++  }
++  else if (command_line->HasSwitch("import-brave"))
++  {
++    application_name = "brave";
++  }
++  else 
++  {
++    application_name = kApplicationName;
++  }
++  
+   GnomeKeyringResult result =
+       GnomeKeyringLoader::gnome_keyring_find_password_sync_ptr(
+-          &kSchema, &password_c, "application", kApplicationName, nullptr);
++          &kSchema, &password_c, "application", application_name, nullptr);
+   if (result == GNOME_KEYRING_RESULT_OK) {
+     password = password_c;
+     GnomeKeyringLoader::gnome_keyring_free_password_ptr(password_c);
+--- a/chrome/browser/importer/profile_writer.cc
++++ b/chrome/browser/importer/profile_writer.cc
+@@ -90,13 +90,9 @@ bool ProfileWriter::TemplateURLServiceIsLoaded() const {
+ void ProfileWriter::AddPasswordForm(
+     const password_manager::PasswordForm& form) {
+   DCHECK(profile_);
+-
+-  if (profile_->GetPrefs()->GetBoolean(
+-          password_manager::prefs::kCredentialsEnableService)) {
+     PasswordStoreFactory::GetForProfile(profile_,
+                                         ServiceAccessType::EXPLICIT_ACCESS)
+         ->AddLogin(form);
+-  }
+ }
+ 
+ void ProfileWriter::AddHistoryPage(const history::URLRows& page,

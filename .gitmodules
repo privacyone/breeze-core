@@ -1,0 +1,12 @@
+[submodule "breeze-webstore-extension"]
+	path = breeze-webstore-extension
+	url = https://github.com/privacyone/breeze-webstore-extension
+[submodule "breeze-dashboard"]
+	path = breeze-dashboard
+	url = https://github.com/privacyone/breeze-dashboard
+[submodule "privacy-master-controller"]
+	path = privacy-master-controller
+	url = https://github.com/privacyone/privacy-master-controller
+[submodule "supporting-extensions"]
+	path = supporting-extensions
+	url = https://github.com/privacyone/supporting-extensions

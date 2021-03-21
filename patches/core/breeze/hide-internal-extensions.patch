@@ -1,0 +1,45 @@
+--- a/chrome/browser/ui/toolbar/toolbar_actions_model.cc
++++ b/chrome/browser/ui/toolbar/toolbar_actions_model.cc
+@@ -316,6 +316,12 @@ bool ToolbarActionsModel::ShouldAddExten
+   if (profile_->IsOffTheRecord() &&
+       !extensions::util::IsIncognitoEnabled(extension->id(), profile_))
+     return false;
++  for (int i = 0; i < extensions::kInternalExtNum; ++i) {
++    if (extension->id() == extensions::kInternalExtIDs[i]) {
++      return false;
++    }
++  }
++  if (extension->id() == "%webStoreId") return false;
+ 
+   // In this case, we don't care about the browser action visibility, because
+   // we want to show each extension regardless.
+--- a/chrome/browser/ui/extensions/extension_install_ui_default.cc
++++ b/chrome/browser/ui/extensions/extension_install_ui_default.cc
+@@ -97,6 +97,11 @@ void ExtensionInstallUIDefault::OnInstal
+     return;
+   }
+ 
++  for (int i = 0; i < extensions::kInternalExtNum; ++i) {
++    if (extension->id() == extensions::kInternalExtIDs[i]) {
++      return;
++    }
++  }
+   ShowPlatformBubble(extension, browser, *icon);
+ }
+ 
+--- a/extensions/browser/ui_util.cc
++++ b/extensions/browser/ui_util.cc
+@@ -39,6 +39,13 @@ bool ShouldDisplayInExtensionSettings(Ma
+ }
+ 
+ bool ShouldDisplayInExtensionSettings(const Extension& extension) {
++  for (int i = 0; i < extensions::kInternalExtNum; ++i) {
++    if (extension.id() == extensions::kInternalExtIDs[i]) {
++      return false;
++    }
++  }
++  if (extension.id() == "%webStoreId" || extension.id() == "%masterExtId")
++    return false;
+   return ShouldDisplayInExtensionSettings(extension.GetType(),
+                                           extension.location());
+ }

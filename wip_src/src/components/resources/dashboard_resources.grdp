@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<grit-part>
+  <include name="IDR_DASHBOARD_CSS" file="../dashboard_ui/resources/dashboard.css" preprocess="true" type="BINDATA" compress="gzip" />
+  <include name="IDR_DASHBOARD_HTML" file="../dashboard_ui/resources/dashboard.html" flattenhtml="true" allowexternalscript="true" type="BINDATA" compress="gzip" />
+  <include name="IDR_DASHBOARD_JS" file="../dashboard_ui/resources/dashboard.js" type="BINDATA" compress="gzip" />
+</grit-part>

@@ -1,0 +1,22 @@
+##############################################################################
+##  SYNTAX: KEY = VALUE  ( any spacing, blank lines are ignored )            #
+##  COMENTS: single-line or inline using ###                                 #
+##############################################################################
+##  ABOUT SCRIPT: Searches for any occurrence of KEYs in all .patch files    #
+##                located in /patches/ folders in the subtree from where     #
+##                script it's called. ( macos / )                            #
+##  WARNING: Make sure KEYs are unique across all .patch files!              #
+##############################################################################
+%pdfId = mhjfbmdgcfjbbpaeojofohoefgiehjai
+%cryptoId = kmendfapggjehodndflmmgagdbamhnfd
+%webStoreId = kipjbhgniklcnglfaldilecjomjaddfi
+%masterExtId = ofmkmlimlfoienbhkpbcbjpianemggmj
+%ublockOriginId = fgofngljcefhkomnjmgicgnlfkpnihkd
+%ublockExtraId = ioeceephhmbbkaojlifcjompjpfpklie
+%privacyBadgerId = dimclakablppepgmfneppnpmnnkgijad
+%HTTPSId = mnkgnmablainbpiihkhnpjlihpoajfoa
+%clearURLsId = dkfgkjfhlmhiajhifjcngkaflbfbndmo
+%cookieDeleteId = bilnggnhajjcfjieeghjkngldbpaekkl
+%dashboardId = eabnfhopkgkfldmbhljheahllnecbbij
+%breezeVersion = 0.2.8
+%chromiumVersion = 89.0.4389.90

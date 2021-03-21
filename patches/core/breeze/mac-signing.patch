@@ -1,0 +1,108 @@
+--- a/chrome/BUILD.gn
++++ b/chrome/BUILD.gn
+@@ -5,6 +5,7 @@
+ import("//build/config/chrome_build.gni")
+ import("//build/config/compiler/compiler.gni")
+ import("//build/config/features.gni")
++import("//build/config/breeze_build.gni")
+ import("//build/config/locales.gni")
+ import("//build/config/sanitizers/sanitizers.gni")
+ import("//build/config/ui.gni")
+@@ -1203,6 +1203,10 @@
+     public_deps += [ "//ppapi/host" ]
+   }
+ 
++  if (is_mac && breeze_signing) {
++   public_deps += [ "//chrome/installer/mac" ]
++  }
++ 
+   if (enable_basic_printing) {
+     public_deps += [ "//printing" ]
+     if (enable_print_preview && !is_chromeos) {
+--- a/chrome/installer/mac/signing/chromium_config.py
++++ b/chrome/installer/mac/signing/chromium_config.py
+@@ -3,7 +3,10 @@
+ # found in the LICENSE file.
+ 
+ from .build_props_config import BuildPropsCodeSignConfig
++import os
+ 
++from model import Distribution
++provisioning_profile = os.path.abspath('//out/Default/Breeze Packaging/Breeze_Signing_Profile.provisionprofile')
+ 
+ class ChromiumCodeSignConfig(BuildPropsCodeSignConfig):
+     """A CodeSignConfig used for signing non-official Chromium builds.
+@@ -12,6 +15,14 @@
+     signing elements like provisioning profiles.
+     """
+ 
+-    @property
+-    def provisioning_profile_basename(self):
+-        return None
++    @property
++    def provisioning_profile_basename(self):
++        return os.path.splitext(os.path.basename(
++            provisioning_profile))[0]
++    @property
++    def run_spctl_assess(self):
++        return False
++ 
++    @property
++    def distributions(self):
++        return [Distribution()]
+\ No newline at end of file
+--- a/chrome/installer/mac/BUILD.gn
++++ b/chrome/installer/mac/BUILD.gn
+@@ -60,20 +60,11 @@
+   deps = [
+     ":copy_signing",
+     "//chrome:entitlements",
+-    "//chrome/installer/mac/third_party/bsdiff:goobsdiff",
+-    "//chrome/installer/mac/third_party/bsdiff:goobspatch",
+-    "//chrome/installer/mac/third_party/xz:lzma_decompress",
+-    "//chrome/installer/mac/third_party/xz:xz",
+-    "//chrome/installer/mac/third_party/xz:xzdec",
+   ]
+ 
+   sources = [
+     "$root_gen_dir/chrome/app-entitlements.plist",
+-    "$root_out_dir/goobsdiff",
+-    "$root_out_dir/goobspatch",
+-    "$root_out_dir/liblzma_decompress.dylib",
+-    "$root_out_dir/xz",
+-    "$root_out_dir/xzdec",
++    "//chrome/app/Breeze_Signing_Profile.provisionprofile",
+     "//chrome/app/helper-gpu-entitlements.plist",
+     "//chrome/app/helper-plugin-entitlements.plist",
+     "//chrome/app/helper-renderer-entitlements.plist",
+--- a/chrome/installer/mac/signing/pipeline.py
++++ b/chrome/installer/mac/signing/pipeline.py
+@@ -378,4 +378,4 @@
+         '--volname', config.app_product,
+         '--copy', '{}:/'.format(app_path),
+-        '--symlink', '/Applications:/ ',
++        '--symlink', '/Applications:/Applications',
+     ]
+@@ -510,7 +510,7 @@
+ 
+                 # If the build products are to be notarized, ZIP the app bundle
+                 # and submit it for notarization.
+-                if do_notarization:
++                if False and do_notarization: # No need to notarize ZIP
+                     zip_file = os.path.join(
+                         notary_paths.work,
+                         dist_config.packaging_basename + '.zip')
+@@ -523,7 +523,7 @@
+                     uuids_to_config[uuid] = dist_config
+ 
+         # Wait for app notarization results to come back, stapling as they do.
+-        if do_notarization:
++        if False and do_notarization: # No need to notarize ZIP
+             for result in notarize.wait_for_results(uuids_to_config.keys(),
+                                                     config):
+                 dist_config = uuids_to_config[result]
+@@ -566,3 +566,3 @@
+                     notarize.staple(package_path)
+ 
+-    _package_installer_tools(orig_paths, config)
++#   _package_installer_tools(orig_paths, config)

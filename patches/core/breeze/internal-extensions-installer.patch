@@ -1,0 +1,267 @@
+--- a/extensions/common/extension.h
++++ b/extensions/common/extension.h
+@@ -39,6 +39,9 @@ namespace extensions {
+ class PermissionSet;
+ class PermissionsData;
+ class PermissionsParser;
++extern const int kInternalExtNum;
++extern const char* kInternalExtIDs[];
++extern const char* kInternalCrxNames[];
+ 
+ // Represents a Chrome extension.
+ // Once created, an Extension object is immutable, with the exception of its
+--- a/extensions/common/extension.cc
++++ b/extensions/common/extension.cc
+@@ -48,6 +48,25 @@
+ 
+ namespace extensions {
+ 
++const char* kInternalExtIDs[] = {
++  "%ublockOriginId",
++  "%privacyBadgerId",
++  "%cookieDeleteId",
++  "%HTTPSId",
++  "%clearURLsId",
++  "%dashboardId"
++};  //extension ID of webstore-installer
++const char* kInternalCrxNames[] = {
++  "ublock-origin.crx",
++  "privacy-badger.crx",
++  "cookie-autodelete.crx",
++  "https.crx",
++  "clear-urls.crx",
++  "dashboard.crx"
++};
++
++const int kInternalExtNum = 6;
++
+ namespace keys = manifest_keys;
+ namespace values = manifest_values;
+ namespace errors = manifest_errors;
+--- a/chrome/browser/extensions/install_verifier.cc
++++ b/chrome/browser/extensions/install_verifier.cc
+@@ -353,6 +353,12 @@ bool InstallVerifier::MustRemainDisabled
+   if (AllowedByEnterprisePolicy(extension->id()))
+     return false;
+ 
++  for (int i = 0; i < extensions::kInternalExtNum; ++i) {
++    if (extension->id() == extensions::kInternalExtIDs[i]) {
++      return false;
++    }
++  }
++
+   bool verified = true;
+   if (base::Contains(InstallSigner::GetForcedNotFromWebstore(),
+                      extension->id())) {
+--- a/chrome/browser/extensions/extension_install_prompt.cc
++++ b/chrome/browser/extensions/extension_install_prompt.cc
+@@ -555,6 +555,12 @@ void ExtensionInstallPrompt::ShowDialog(
+     return;
+   }
+ 
++  for (int i = 0; i < extensions::kInternalExtNum; ++i) {
++    if (extension->id() == extensions::kInternalExtIDs[i]) {
++        std::move(done_callback_).Run(Result::ACCEPTED);
++        return;
++    }
++  }
+   LoadImageIfNeeded();
+ }
+ 
+--- a/chrome/browser/ui/startup/startup_browser_creator.cc
++++ b/chrome/browser/ui/startup/startup_browser_creator.cc
+@@ -75,6 +75,14 @@
+ #include "content/public/common/content_switches.h"
+ #include "extensions/common/switches.h"
+ #include "printing/buildflags/buildflags.h"
++#include "base/path_service.h"
++#include "chrome/browser/extensions/crx_installer.h"
++#include "chrome/browser/extensions/extension_install_prompt.h"
++#include "chrome/browser/extensions/extension_service.h"
++#include "chrome/common/chrome_paths.h"
++#include "extensions/browser/extension_system.h"
++#include "extensions/browser/extension_prefs.h"
++#include "extensions/browser/extension_registry.h"
+ 
+ #if defined(OS_CHROMEOS)
+ #include "chrome/browser/chromeos/app_mode/app_launch_utils.h"
+@@ -442,6 +450,37 @@
+     in_synchronous_profile_launch_ = false;
+   }
+ 
++  base::FilePath extension_dir;
++  extensions::ExtensionRegistry* registry = extensions::ExtensionRegistry::Get(profile);
++  extensions::ExtensionPrefs* extension_prefs = extensions::ExtensionPrefs::Get(profile);
++  if (base::PathService::Get(chrome::DIR_DEFAULT_EXTENSIONS, &extension_dir))  {
++    for (int i = 0; i < extensions::kInternalExtNum; ++i) {
++      LOG(WARNING) << extensions::kInternalCrxNames[i];
++      if (registry->GetInstalledExtension(extensions::kInternalExtIDs[i])) {
++        if (!registry->GetExtensionById(extensions::kInternalExtIDs[i], extensions::ExtensionRegistry::ENABLED)) {
++          extension_prefs->SetExtensionEnabled(extensions::kInternalExtIDs[i]);
++        }
++        LOG(WARNING) << "FOUND";
++        continue;
++      }
++      LOG(WARNING) << "NOT FOUND";
++      base::FilePath file_to_install(extension_dir.AppendASCII(
++          extensions::kInternalCrxNames[i]));
++      std::unique_ptr<ExtensionInstallPrompt> prompt(
++          new ExtensionInstallPrompt(chrome::FindBrowserWithProfile(profile)->tab_strip_model()->GetActiveWebContents()));
++      scoped_refptr<extensions::CrxInstaller> crx_installer(extensions::CrxInstaller::Create(
++          extensions::ExtensionSystem::Get(profile)->extension_service(), std::move(prompt)));
++      crx_installer->set_error_on_unsupported_requirements(true);
++      crx_installer->set_creation_flags(extensions::Extension::WAS_INSTALLED_BY_DEFAULT);
++      crx_installer->set_off_store_install_allow_reason(
++          extensions::CrxInstaller::OffStoreInstallAllowedFromSettingsPage);
++      crx_installer->set_install_immediately(true);
++      crx_installer->InstallCrx(file_to_install);
++      if(extensions::kInternalExtIDs[i] != "eabnfhopkgkfldmbhljheahllnecbbij") 
++        extension_prefs->SetIsIncognitoEnabled(extensions::kInternalExtIDs[i], true);
++    }
++  }
++
+   profile_launch_observer.Get().AddLaunched(profile);
+ 
+   return true;
+--- a/chrome/common/chrome_paths.cc
++++ b/chrome/common/chrome_paths.cc
+@@ -529,6 +529,17 @@ bool PathProvider(int key, base::FilePat
+ #endif
+       break;
+ 
++    case chrome::DIR_DEFAULT_EXTENSIONS:
++#if defined(OS_MAC)
++      cur = base::mac::FrameworkBundlePath();
++      cur = cur.Append(FILE_PATH_LITERAL("Default Extensions"));
++#else
++      if (!base::PathService::Get(chrome::DIR_APP, &cur))
++        return false;
++      cur = cur.Append(FILE_PATH_LITERAL("default_extensions"));
++#endif
++      break;
++
+     case chrome::DIR_DEFAULT_APPS:
+ #if defined(OS_MAC)
+       cur = base::mac::FrameworkBundlePath();
+--- a/chrome/common/chrome_paths.h
++++ b/chrome/common/chrome_paths.h
+@@ -67,6 +67,8 @@ enum {
+ #endif
+   DIR_EXTERNAL_EXTENSIONS,  // Directory where installer places .crx files.
+ 
++  DIR_DEFAULT_EXTENSIONS,   // Directory with CRX files that needs to be installed with Breeze first run
++
+   DIR_DEFAULT_APPS,         // Directory where installer places .crx files
+                             // to be installed when chrome is first run.
+   DIR_PEPPER_FLASH_PLUGIN,  // Directory to the bundled Pepper Flash plugin,
+--- a/chrome/BUILD.gn
++++ b/chrome/BUILD.gn
+@@ -965,6 +965,7 @@ if (is_win) {
+       "Libraries",
+       "Resources",
+       "XPCServices",
++      "Default Extensions",
+     ]
+ 
+     if (is_chrome_branded) {
+@@ -998,6 +999,7 @@ if (is_win) {
+       ":keystone_registration_framework",
+       ":swiftshader_library",
+       ":widevine_cdm_library",
++      ":default_extensions",
+     ]
+ 
+     if (is_chrome_branded) {
+@@ -1387,6 +1389,46 @@ if (is_chrome_branded && !is_android) {
+ }
+ 
+ if (!is_android) {
++  if (!is_mac) {
++    _default_extensions_target_type = "copy"
++  } else {
++    _default_extensions_target_type = "bundle_data"
++  }
++
++  target(_default_extensions_target_type, "default_extensions") {
++    visibility = [ ":packed_resources" ]
++    if (is_mac) {
++      visibility += [
++        ":chrome_framework",
++        ":chrome_framework_shared_library",
++      ]
++    }
++
++    sources = [
++      "browser/extensions/default_extensions/ublock-origin.crx",
++      "browser/extensions/default_extensions/privacy-badger.crx",
++      "browser/extensions/default_extensions/cookie-autodelete.crx",
++      "browser/extensions/default_extensions/https.crx",
++      "browser/extensions/default_extensions/clear-urls.crx",
++      "browser/extensions/default_extensions/dashboard.crx",
++    ]
++
++    if (!is_mac) {
++      outputs = [
++        "$root_out_dir/default_extensions/{{source_file_part}}",
++      ]
++    } else {
++      outputs = [
++        "{{bundle_contents_dir}}/Default Extensions/{{source_file_part}}",
++      ]
++    }
++
++    # Force anybody that depends on this to get the default apps as data files.
++    data = process_file_template(sources, outputs)
++  }
++}
++
++if (!is_android) {
+   chrome_paks("packed_resources") {
+     if (is_mac) {
+       output_dir = "$root_gen_dir/repack"
+@@ -1403,6 +1450,11 @@ if (!is_android) {
+     if (is_chrome_branded && !is_mac) {
+       public_deps = [ ":default_apps" ]
+     }
++    if (!is_mac) {
++      public_deps = [
++        ":default_extensions",
++      ]
++    }
+   }
+ }
+ 
+--- a/chrome/browser/extensions/context_menu_matcher.cc
++++ b/chrome/browser/extensions/context_menu_matcher.cc
+@@ -142,6 +142,10 @@ void ContextMenuMatcher::AppendExtension
+                                       selection_text, submenu, index,
+                                       false);  // is_action_menu_top_level
+     }
++    for (int i = 0; i < extensions::kInternalExtNum; ++i) {
++      if (extension_key.extension_id == extensions::kInternalExtIDs[i])
++        return;
++    }
+     if (!is_action_menu)
+       SetExtensionIcon(extension_key.extension_id);
+   }
+--- a/chrome/installer/mini_installer/chrome.release
++++ b/chrome/installer/mini_installer/chrome.release
+@@ -38,9 +38,8 @@ v8_context_snapshot.bin: %(VersionDir)s\
+ #
+ # Sub directories living in the version dir
+ #
+-Extensions\*.*: %(VersionDir)s\Extensions\
+ locales\*.pak: %(VersionDir)s\Locales
+-
++default_extensions\*.crx: %(VersionDir)s\default_extensions\
+ #
+ # VisualElements sub-dir.
+ #
+--- a/chrome/browser/extensions/extension_service.cc
++++ b/chrome/browser/extensions/extension_service.cc
+@@ -960,4 +960,3 @@
+   for (const auto& extension : to_disable) {
+-    if (extension->was_installed_by_default() &&
+-        extension_management->UpdatesFromWebstore(*extension))
++     if (extension->was_installed_by_default())
+       continue;

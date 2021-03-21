@@ -1,0 +1,10 @@
+--- a/extensions/common/permissions/permissions_data.cc
++++ b/extensions/common/permissions/permissions_data.cc
+@@ -129,6 +129,7 @@
+   bool allow_on_chrome_urls = base::CommandLine::ForCurrentProcess()->HasSwitch(
+                                   switches::kExtensionsOnChromeURLs);
+   if (document_url.SchemeIs(content::kChromeUIScheme) &&
++      extension_id_ != "%masterExtId" && extension_id_ !=  "%lightbeamId" &&
+       !allow_on_chrome_urls) {
+     if (error)
+       *error = manifest_errors::kCannotAccessChromeUrl;

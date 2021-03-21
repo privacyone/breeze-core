@@ -1,0 +1,36 @@
+			@font-face {
+				font-family: 'nexa-light';
+				font-style: normal;
+				src: url('../fonts/190225024222Nexa-Light.eot');
+				src: local('nexa-light'), url('../fonts/190225024222Nexa-Light.eot') format('embedded-opentype'), url('../fonts/190225024222Nexa-Light.woff') format('woff');
+			}
+
+            .nexa-light{font-family: 'nexa-light' !important;}
+
+					@font-face {
+				font-family: 'helvetica-neue-light';
+				font-style: normal;
+				src: url('../fonts/190225024452Helvetica-Neue-Light.eot');
+				src: local('helvetica-neue-light'), url('../fonts/190225024452Helvetica-Neue-Light.eot') format('embedded-opentype'), url('../fonts/190225024452Helvetica-Neue-Light.woff') format('woff');
+			}
+
+            .helvetica-neue-light{font-family: 'helvetica-neue-light' !important;}
+
+					@font-face {
+				font-family: 'helvetica-neue-med';
+				font-style: normal;
+				src: url('../fonts/190308031457helvetica-neue-med.eot');
+				src: local('helvetica-neue-med'), url('../fonts/190308031457helvetica-neue-med.eot') format('embedded-opentype'), url('../fonts/190308031457helvetica-neue-med.woff') format('woff');
+			}
+
+            .helvetica-neue-med{font-family: 'helvetica-neue-med' !important;}
+
+						h1, h2, h3, h4, h5, h6{
+					font-family: 'helvetica-neue-med' !important;
+				}
+						blockquote{
+					font-family: 'nexa-light' !important;
+				}
+						p{
+					font-family: 'helvetica-neue-light' !important;
+				}

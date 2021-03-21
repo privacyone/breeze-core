@@ -1,0 +1,259 @@
+--- a/chrome/browser/resources/settings/privacy_page/cookies_page.html
++++ b/chrome/browser/resources/settings/privacy_page/cookies_page.html
+@@ -33,13 +33,6 @@
+         padding-bottom: 12px;
+       }
+     </style>
+-    <picture>
+-      <source
+-          srcset="breeze://settings/images/cookies_banner_dark.svg"
+-          media="(prefers-color-scheme: dark">
+-      <img id="banner" alt=""
+-          src="breeze://settings/images/cookies_banner.svg">
+-    </picture>
+     <div id="generalControls">
+       <h2>$i18n{cookiePageGeneralControls}</h2>
+       <settings-radio-group id="primarySettingGroup"
+@@ -124,14 +124,5 @@
+     <settings-do-not-track-toggle id="doNotTrack"
+         prefs="{{prefs}}">
+     </settings-do-not-track-toggle>
+-    <settings-toggle-button id="networkPrediction"
+-        class="hr"
+-        hidden="[[!pageVisibility.networkPrediction]]"
+-        label="$i18n{networkPredictionEnabled}"
+-        sub-label="$i18n{networkPredictionEnabledDescCookiesPage}"
+-        pref="{{prefs.net.network_prediction_options}}"
+-        numeric-unchecked-value="[[networkPredictionUncheckedValue_]]"
+-        on-settings-boolean-control-change="onNetworkPredictionChange_">
+-     </settings-toggle-button>
+     <cr-link-row id="site-data-trigger" class="hr"
+         on-click="onSiteDataClick_" label="$i18n{siteSettingsCookieLink}">
+--- a/chrome/browser/resources/settings/privacy_page/privacy_page.html
++++ b/chrome/browser/resources/settings/privacy_page/privacy_page.html
+@@ -8,26 +8,26 @@
+     <settings-animated-pages id="pages" section="privacy"
+         focus-config="[[focusConfig_]]">
+       <div route-path="default">
+-        <cr-link-row id="clearBrowsingData"
+-            start-icon="cr:delete"
+-            label="$i18n{clearBrowsingData}"
+-            sub-label="$i18n{clearBrowsingDataDescription}"
+-            on-click="onClearBrowsingDataTap_"></cr-link-row>
+-        <cr-link-row id="cookiesLinkRow" start-icon="settings:cookie"
+-            class="hr" label="$i18n{cookiePageTitle}"
+-            sub-label="[[cookieSettingDescription_]]"
++        <cr-link-row id="cookiesLinkRow"
++            label="$i18n{cookiePageTitle}"
++            sub-label=""
+             on-click="onCookiesClick_"
+             role-description="$i18n{subpageArrowRoleDescription}"></cr-link-row>
+-        <cr-link-row id="securityLinkRow" start-icon="cr:security"
++        <cr-link-row id="securityLinkRow"
+             class="hr" label="$i18n{securityPageTitle}"
+-            sub-label="$i18n{securityPageDescription}"
++            sub-label=""
+             on-click="onSecurityPageClick_"
+             role-description="$i18n{subpageArrowRoleDescription}"></cr-link-row>
+-        <cr-link-row id="permissionsLinkRow" start-icon="settings:permissions"
++        <cr-link-row id="permissionsLinkRow"
+             class="hr" label="$i18n{siteSettings}"
+-            sub-label="$i18n{permissionsPageDescription}"
++            sub-label=""
+             on-click="onPermissionsPageClick_"
+             role-description="$i18n{subpageArrowRoleDescription}"></cr-link-row>
++        <cr-link-row data-route="SITE_SETTINGS_ALL" id="allSites"
++            class="hr"
++            sub-label=""
++            label="$i18n{siteSettingsAllSitesDescription}"
++            on-click="onSiteSettingsAllClick_"></cr-link-row>
+         <cr-link-row id="privacySandboxLinkRow"
+             start-icon="settings20:experiment"
+             class="hr"
+@@ -52,7 +52,7 @@
+             id="site-settings"
+             page-title="$i18n{siteSettings}"
+             learn-more-url="$i18n{exceptionsLearnMoreURL}">
+-          <settings-site-settings-page focus-config="[[focusConfig_]]">
++          <settings-site-settings-page>
+           </settings-site-settings-page>
+         </settings-subpage>
+       </template>
+@@ -68,7 +68,7 @@
+         </settings-subpage>
+       </template>
+ 
+-      <template is="dom-if" route-path="/content/all" no-search>
++      <template is="dom-if" route-path="/all" no-search>
+         <settings-subpage page-title="$i18n{siteSettingsAllSites}"
+             search-label="$i18n{siteSettingsAllSitesSearch}"
+             search-term="{{searchFilter_}}"
+@@ -476,7 +476,7 @@
+           </chooser-exception-list>
+         </settings-subpage>
+       </template>
+-      <template is="dom-if" route-path="/content/siteDetails" no-search>
++      <template is="dom-if" route-path="/all/siteDetails" no-search>
+         <settings-subpage page-title="[[pageTitle]]">
+           <site-details
+             page-title="{{pageTitle}}"
+--- a/chrome/browser/resources/settings/privacy_page/privacy_page.js
++++ b/chrome/browser/resources/settings/privacy_page/privacy_page.js
+@@ -337,6 +337,11 @@ Polymer({
+                    this.i18n('siteSettingsBlocked');
+   },
+ 
++  /** @private */
++  onSiteSettingsAllClick_() {
++    Router.getInstance().navigateTo(routes.SITE_SETTINGS_ALL);
++  },
++
+   /** @private */
+   tryShowHatsSurvey_() {
+     HatsBrowserProxyImpl.getInstance().tryShowSurvey();
+--- a/chrome/browser/resources/settings/privacy_page/security_page.html
++++ b/chrome/browser/resources/settings/privacy_page/security_page.html
+@@ -52,13 +52,6 @@
+         padding-bottom: 12px;
+       }
+     </style>
+-    <picture>
+-      <source
+-          srcset="breeze://settings/images/safe_browsing_banner_dark.svg"
+-          media="(prefers-color-scheme: dark">
+-      <img id="banner" alt=""
+-          src="breeze://settings/images/safe_browsing_banner.svg">
+-    </picture>
+     <div class="cr-row first">
+       <h2>$i18n{advancedPageTitle}</h2>
+     </div>
+--- a/chrome/browser/resources/settings/route.js
++++ b/chrome/browser/resources/settings/route.js
+@@ -26,9 +26,9 @@ function addPrivacyChildRoutes(r) {
+     r.SECURITY_KEYS = r.SECURITY.createChild('/securityKeys');
+   }
+ 
+-  r.SITE_SETTINGS_ALL = r.SITE_SETTINGS.createChild('all');
++  r.SITE_SETTINGS_ALL = r.PRIVACY.createChild('/all');
+   r.SITE_SETTINGS_SITE_DETAILS =
+-      r.SITE_SETTINGS_ALL.createChild('/content/siteDetails');
++      r.SITE_SETTINGS_ALL.createChild('/all/siteDetails');
+ 
+   r.SITE_SETTINGS_HANDLERS = r.SITE_SETTINGS.createChild('/handlers');
+ 
+--- a/chrome/browser/resources/settings/site_settings_page/site_settings_page.html
++++ b/chrome/browser/resources/settings/site_settings_page/site_settings_page.html
+@@ -7,13 +7,6 @@
+         width: 100%;
+       }
+     </style>
+-    <picture>
+-      <source
+-          srcset="breeze://settings/images/permissions_banner_dark.svg"
+-          media="(prefers-color-scheme: dark">
+-      <img id="banner" alt=""
+-          src="breeze://settings/images/permissions_banner.svg">
+-    </picture>
+     <div class="cr-row first">
+       <h2>$i18n{siteSettingsRecentPermissionsSectionLabel}</h2>
+     </div>
+@@ -22,11 +15,6 @@
+         focus-config="[[focusConfig]]">
+     </settings-recent-site-permissions>
+ 
+-    <cr-link-row data-route="SITE_SETTINGS_ALL" id="allSites"
+-        class$="[[getClassForSiteSettingsAllLink_(noRecentSitePermissions_)]]"
+-        label="$i18n{siteSettingsAllSitesDescription}"
+-        on-click="onSiteSettingsAllClick_"
+-        role-description="$i18n{subpageArrowRoleDescription}"></cr-link-row>
+     <div class="cr-row first line-only">
+       <h2>$i18n{siteSettingsPermissions}</h2>
+     </div>
+--- a/chrome/browser/resources/settings/site_settings_page/site_settings_page.js
++++ b/chrome/browser/resources/settings/site_settings_page/site_settings_page.js
+@@ -397,12 +397,6 @@ Polymer({
+       }
+     },
+ 
+-    /** @type {!Map<string, (string|Function)>} */
+-    focusConfig: {
+-      type: Object,
+-      observer: 'focusConfigChanged_',
+-    },
+-
+     /** @private */
+     permissionsExpanded_: Boolean,
+ 
+@@ -413,25 +407,6 @@ Polymer({
+     noRecentSitePermissions_: Boolean,
+   },
+ 
+-  /**
+-   * @param {!Map<string, string>} newConfig
+-   * @param {?Map<string, string>} oldConfig
+-   * @private
+-   */
+-  focusConfigChanged_(newConfig, oldConfig) {
+-    // focusConfig is set only once on the parent, so this observer should
+-    // only fire once.
+-    assert(!oldConfig);
+-    this.focusConfig.set(routes.SITE_SETTINGS_ALL.path, () => {
+-      focusWithoutInk(assert(this.$$('#allSites')));
+-    });
+-  },
+-
+-  /** @private */
+-  onSiteSettingsAllClick_() {
+-    Router.getInstance().navigateTo(routes.SITE_SETTINGS_ALL);
+-  },
+-
+   /**
+    * @return {string} Class for the all site settings link
+    * @private
+--- a/chrome/common/webui_url_constants.cc
++++ b/chrome/common/webui_url_constants.cc
+@@ -149,7 +149,7 @@ const char kChromeUISigninErrorURL[] = "breeze://signin-error/";
+ const char kChromeUISigninReauthHost[] = "signin-reauth";
+ const char kChromeUISigninReauthURL[] = "breeze://signin-reauth/";
+ const char kChromeUISiteDetailsPrefixURL[] =
+-    "breeze://settings/content/siteDetails?site=";
++    "breeze://settings/all/siteDetails?site=";
+ const char kChromeUISiteEngagementHost[] = "site-engagement";
+ const char kChromeUISuggestionsHost[] = "suggestions";
+ const char kChromeUISuggestionsURL[] = "breeze://suggestions/";
+--- a/chrome/app/settings_strings.grdp
++++ b/chrome/app/settings_strings.grdp
+@@ -1363,7 +1363,7 @@
+     Content settings
+   </message>
+   <message name="IDS_SETTINGS_SITE_SETTINGS" desc="Text of the button that takes a user to the enhanced settings page thats allows users to modify site settings. Also the title of that settings page.">
+-    Site Settings
++    Global Settings
+   </message>
+   <message name="IDS_SETTINGS_SITE_SETTINGS_DESCRIPTION" desc="Secondary, continued explanation of what content settings in Chrome do">
+     Control what information websites can use and what content they can show you
+@@ -1525,7 +1525,7 @@
+     All sites
+   </message>
+   <message name="IDS_SETTINGS_SITE_SETTINGS_ALL_SITES_DESCRIPTION" desc="Label for the button linking to the All Sites page.">
+-    View permissions and data stored across sites
++    Site Settings
+   </message>
+   <message name="IDS_SETTINGS_SITE_SETTINGS_ALL_SITES_SEARCH" desc="Placeholder text for the search text box that allows the user to filter the All Sites list with their search query.">
+     Search
+--- a/chrome/browser/resources/settings/search_page/search_page.html
++++ b/chrome/browser/resources/settings/search_page/search_page.html
+@@ -49,6 +49,13 @@
+         label="$i18n{searchEnginesManage}"
+         on-click="onManageSearchEnginesTap_"
+         role-description="$i18n{subpageArrowRoleDescription}"></cr-link-row>
++    <!-- Search suggest -->
++    <settings-toggle-button class="hr"
++        hidden="[[!pageVisibility.searchPrediction]]"
++        pref="{{prefs.search.suggest_enabled}}"
++        label="$i18n{searchSuggestPref}"
++        sub-label="$i18n{searchSuggestPrefDesc}">
++    </settings-toggle-button>
+   </div>
+   <template is="dom-if" route-path="/searchEngines">
+     <settings-subpage

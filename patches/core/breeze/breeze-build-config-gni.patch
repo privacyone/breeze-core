@@ -1,0 +1,20 @@
+--- /dev/null
++++ b/build/config/breeze_build.gni
+@@ -0,0 +1,16 @@
++# Copyright 2015 The Chromium Authors. All rights reserved.
++# Use of this source code is governed by a BSD-style license that can be
++# found in the LICENSE file.
++
++declare_args() {
++  breeze_signing = false
++  breeze_installer_exe = "mini_installer.exe"
++  breeze_stub_installer_exe = "stub.exe"
++  breeze_silent_stub_installer_exe = "silent_stub.exe"
++  breeze_untagged_stub_installer_exe = "untagged_stub.exe"
++  breeze_standalone_installer_exe = "standalone.exe"
++  breeze_silent_installer_exe = "silent.exe"
++  breeze_untagged_installer_exe = "untagged.exe"
++  breeze_app_guid = "{BAD153F4-2C4B-4944-8016-85FFB2BAE7F3}"
++  tag_ap =""
++}
+\ No newline at end of file

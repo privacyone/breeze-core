@@ -1,0 +1,74 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'breeze://resources/cr_elements/cr_button/cr_button.m.js';
+import 'breeze://resources/polymer/v3_0/paper-styles/color.js';
+import './shared/action_link_style_css.js';
+import './shared/animations_css.js';
+import './shared/onboarding_background.js';
+import './shared/splash_pages_shared_css.js';
+import '../strings.m.js';
+
+import {html, Polymer} from 'breeze://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+
+//import {navigateTo, navigateToNextStep, NavigationBehavior, Routes} from './navigation_behavior.js';
+import {SigninViewProxy, SigninViewProxyImpl} from './signin_view_proxy.js';
+import {WelcomeBrowserProxy, WelcomeBrowserProxyImpl} from './welcome_browser_proxy.js';
+
+Polymer({
+  is: 'signin-view',
+
+  _template: html`{__html_template__}`,
+
+  /** @private {boolean} */
+  finalized_: false,
+
+  /** @private {?WelcomeBrowserProxy} */
+  welcomeBrowserProxy_: null,
+
+  /** @private {?SigninViewProxy} */
+  signinViewProxy_: null,
+
+  /** @override */
+  ready() {
+    this.welcomeBrowserProxy_ = WelcomeBrowserProxyImpl.getInstance();
+    this.signinViewProxy_ = SigninViewProxyImpl.getInstance();
+  },
+
+  onRouteEnter() {
+    this.finalized_ = false;
+    this.signinViewProxy_.recordPageShown();
+  },
+
+  onRouteExit() {
+    if (this.finalized_) {
+      return;
+    }
+    this.finalized_ = true;
+    this.signinViewProxy_.recordNavigatedAwayThroughBrowserHistory();
+  },
+
+  onRouteUnload() {
+    // URL is expected to change when signing in or skipping.
+    if (this.finalized_) {
+      return;
+    }
+    this.finalized_ = true;
+    this.signinViewProxy_.recordNavigatedAway();
+  },
+
+  /** private */
+  onSignInClick_() {
+    this.finalized_ = true;
+    this.signinViewProxy_.recordSignIn();
+    this.welcomeBrowserProxy_.handleActivateSignIn(null);
+  },
+
+  /** @private */
+  onNoThanksClick_() {
+    this.finalized_ = true;
+    this.signinViewProxy_.recordSkip();
+    this.welcomeBrowserProxy_.handleUserDecline();
+  }
+});

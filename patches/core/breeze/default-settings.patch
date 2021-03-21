@@ -1,0 +1,22 @@
+--- a/chrome/browser/download/download_prefs.cc
++++ b/chrome/browser/download/download_prefs.cc
+@@ -239,7 +239,7 @@
+     user_prefs::PrefRegistrySyncable* registry) {
+   registry->RegisterBooleanPref(
+       prefs::kPromptForDownload,
+-      true,
++      false,
+       user_prefs::PrefRegistrySyncable::SYNCABLE_PREF);
+   registry->RegisterStringPref(prefs::kDownloadExtensionsToOpen, std::string());
+   registry->RegisterBooleanPref(prefs::kDownloadDirUpgraded, false);
+--- a/components/search_engines/template_url_prepopulate_data.cc
++++ b/components/search_engines/template_url_prepopulate_data.cc
+@@ -1324,7 +1324,7 @@
+   if (default_search_provider_index) {
+     const auto itr = std::find_if(
+         t_urls.begin(), t_urls.end(),
+-        [](const auto& t_url) { return t_url->prepopulate_id == google.id; });
++        [](const auto& t_url) { return t_url->prepopulate_id == duckduckgo.id; });
+     *default_search_provider_index =
+         itr == t_urls.end() ? 0 : std::distance(t_urls.begin(), itr);
+   }

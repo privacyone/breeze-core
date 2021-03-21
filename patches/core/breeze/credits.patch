@@ -1,0 +1,81 @@
+--- a/tools/licenses.py
++++ b/tools/licenses.py
+@@ -33,6 +33,9 @@
+ 
+ # TODO(agrieve): Move build_utils.WriteDepFile into a non-android directory.
+ _REPOSITORY_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
++_BREEZE_CORE_ROOT = os.path.join(os.path.dirname(os.path.dirname(_REPOSITORY_ROOT)), 'core')
++_BREEZE_INT_EXTS = os.path.join( _BREEZE_CORE_ROOT, 'supporting-extensions/src')
++_BREEZE_CREDITS = os.path.join( _BREEZE_CORE_ROOT, 'credits')
+ sys.path.insert(0, os.path.join(_REPOSITORY_ROOT, 'build/android/gyp'))
+ from util import build_utils
+ 
+@@ -295,6 +298,53 @@
+     },
+ }
+ 
++BREEZE_DEPS = [
++    {
++      "License File": os.path.join(_BREEZE_CREDITS, 'ungoogled-chromium', 'LICENSE'),
++      "Name": "Ungoogled Chromium",
++      "URL": "https://github.com/Eloston/ungoogled-chromium",
++    },
++    {
++      "License File": os.path.join(_BREEZE_CREDITS, 'brave', 'LICENSE'),
++      "Name": "Brave",
++      "URL": "https://github.com/brave/",
++    },
++    {
++      "License File": os.path.join(_REPOSITORY_ROOT, 'third_party', 'Sparkle', 'LICENSE'),
++      "Name": "Sparkle",
++      "URL": "https://github.com/sparkle-project/Sparkle",
++    },
++    {
++      "License File": os.path.join(_BREEZE_INT_EXTS, 'privacy-badger', 'LICENSE'),
++      "Name": "Privacy Badger",
++      "URL": "https://github.com/EFForg/privacybadger",
++    },
++    {
++      "License File": os.path.join(_BREEZE_INT_EXTS, 'ublock-origin', 'LICENSE.txt'),
++      "Name": "uBlock Origin",
++      "URL": "https://github.com/gorhill/uBlock",
++    },
++    {
++      "License File": os.path.join(_BREEZE_INT_EXTS, 'cookie-autodelete', 'LICENSE'),
++      "Name": "Cookie AutoDelete",
++      "URL": "https://github.com/Cookie-AutoDelete/Cookie-AutoDelete",
++    },
++    {
++      "License File": os.path.join(_BREEZE_INT_EXTS, 'https', 'LICENSE.txt'),
++      "Name": "HTTPS Everywhere",
++      "URL": "https://github.com/EFForg/https-everywhere",
++    },
++    {
++      "License File": os.path.join(_BREEZE_INT_EXTS, 'clear-urls', 'LICENSE'),
++      "Name": "ClearURLs",
++      "URL": "https://gitlab.com/KevinRoebert/ClearUrls",
++    },
++    {
++      "License File": os.path.join(_BREEZE_CORE_ROOT, 'breeze-webstore-extension', 'LICENSE'),
++      "Name": "chrome-webstore-extension",
++      "URL": "https://github.com/operasoftware/chrome-webstore-extension",
++    }
++]
+ # Special value for 'License File' field used to indicate that the license file
+ # should not be used in about:credits.
+ NOT_SHIPPED = "NOT_SHIPPED"
+@@ -682,6 +736,14 @@
+         continue
+     entries.append(MetadataToTemplateEntry(metadata, entry_template))
+ 
++  # Adding breeze third party credits
++  for metadata in BREEZE_DEPS:
++    if os.path.exists(metadata["License File"]):
++      entries.append(MetadataToTemplateEntry(metadata, entry_template))
++    else:
++      print("WARNING: License file: " + metadata["License File"] + " NOT FOUND")
++
++
+   entries.sort(key=lambda entry: (entry['name'].lower(), entry['content']))
+   for entry_id, entry in enumerate(entries):
+     entry['content'] = entry['content'].replace('{{id}}', str(entry_id))

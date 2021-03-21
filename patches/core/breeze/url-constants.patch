@@ -1,0 +1,28 @@
+--- a/chrome/common/webui_url_constants.h
++++ b/chrome/common/webui_url_constants.h
+@@ -87,6 +87,11 @@ extern const char kChromeUIGCMInternalsHost[];
+ extern const char kChromeUIHangUIHost[];
+ extern const char kChromeUIHelpHost[];
+ extern const char kChromeUIHelpURL[];
++extern const char kBreezeUIFeedBackURL[];
++extern const char kBreezeContributersURL[];
++extern const char kBreezeOurMissionURL[];
++extern const char kBreezeOurTeamURL[];
++extern const char kUngoogledChromiumURL[];
+ extern const char kChromeUIHistoryHost[];
+ extern const char kChromeUIHistorySyncedTabs[];
+ extern const char kChromeUIHistoryURL[];
+--- a/chrome/common/webui_url_constants.cc
++++ b/chrome/common/webui_url_constants.cc
+@@ -83,6 +83,11 @@ const char kChromeUIGCMInternalsHost[] = "gcm-internals";
+ const char kChromeUIHangUIHost[] = "uithreadhang";
+ const char kChromeUIHelpHost[] = "help";
+ const char kChromeUIHelpURL[] = "breeze://help/";
++const char kBreezeUIFeedBackURL[] = "https://www.breezebrowser.io/breeze/utility/in-app/send-feedback/";
++const char kBreezeContributersURL[] = "https://public-git.privacyone.io/contributers";
++const char kBreezeOurMissionURL[] = "https://www.privacyone.io/privacy-one/company/mission/";
++const char kBreezeOurTeamURL[] = "https://www.privacyone.io/privacy-one/company/our-team/";
++const char kUngoogledChromiumURL[] = "https://github.com/Eloston/ungoogled-chromium";
+ const char kChromeUIHistoryHost[] = "history";
+ const char kChromeUIHistorySyncedTabs[] = "/syncedTabs";
+ const char kChromeUIHistoryURL[] = "breeze://history/";

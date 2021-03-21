@@ -1,0 +1,22 @@
+--- a/chrome/browser/profiles/guest_mode_policy_handler.cc
++++ b/chrome/browser/profiles/guest_mode_policy_handler.cc
+@@ -26,5 +26,5 @@
+   if (guest_mode_value &&
+       guest_mode_value->GetAsBoolean(&is_guest_mode_enabled)) {
+-    prefs->SetBoolean(prefs::kBrowserGuestModeEnabled, is_guest_mode_enabled);
++    prefs->SetBoolean(prefs::kBrowserGuestModeEnabled, false);
+     return;
+   }
+--- a/chrome/browser/profiles/profiles_state.cc
++++ b/chrome/browser/profiles/profiles_state.cc
+@@ -70,8 +70,8 @@
+   registry->RegisterIntegerPref(prefs::kProfilesNumCreated, 1);
+-  registry->RegisterIntegerPref(prefs::kGuestProfilesNumCreated, 1);
++  registry->RegisterIntegerPref(prefs::kGuestProfilesNumCreated, 0);
+   registry->RegisterListPref(prefs::kProfilesLastActive);
+   registry->RegisterListPref(prefs::kProfilesDeleted);
+ 
+   // Preferences about the user manager.
+-  registry->RegisterBooleanPref(prefs::kBrowserGuestModeEnabled, true);
++  registry->RegisterBooleanPref(prefs::kBrowserGuestModeEnabled, false);
+   registry->RegisterBooleanPref(prefs::kBrowserGuestModeEnforced, false);

@@ -1,0 +1,87 @@
+--- a/chrome/app/chrome_command_ids.h
++++ b/chrome/app/chrome_command_ids.h
+@@ -211,6 +211,7 @@
+ #define IDC_CARET_BROWSING_TOGGLE      40260
+ #define IDC_TOGGLE_COMMANDER     40261
+ #define IDC_SHOW_KALEIDOSCOPE          40262
++#define IDC_SEND_FEEDBACK              40263
+ 
+ // Spell-check
+ // Insert any additional suggestions before _LAST; these have to be consecutive.
+--- a/chrome/browser/ui/toolbar/app_menu_model.cc
++++ b/chrome/browser/ui/toolbar/app_menu_model.cc
+@@ -609,6 +609,8 @@ void AppMenuModel::LogMenuMetrics(int command_id) {
+         UMA_HISTOGRAM_MEDIUM_TIMES("WrenchMenu.TimeToAction.About", delta);
+       LogMenuAction(MENU_ACTION_ABOUT);
+       break;
++    case IDC_SEND_FEEDBACK:
++      break;
+ 
+     // Help menu.
+     case IDC_HELP_PAGE_VIA_MENU:
+@@ -867,6 +869,8 @@ void AppMenuModel::Build() {
+ #endif
+ #endif
+ 
++  AddItem(IDC_SEND_FEEDBACK, l10n_util::GetStringUTF16(IDS_SEND_FEEDBACK));
++
+   if (browser_defaults::kShowExitMenuItem) {
+     AddSeparator(ui::NORMAL_SEPARATOR);
+     AddItemWithStringId(IDC_EXIT, IDS_EXIT);
+--- a/chrome/browser/ui/browser_command_controller.cc
++++ b/chrome/browser/ui/browser_command_controller.cc
+@@ -709,6 +709,9 @@ bool BrowserCommandController::ExecuteCommandWithDisposition(
+     case IDC_ABOUT:
+       ShowAboutChrome(browser_);
+       break;
++    case IDC_SEND_FEEDBACK:
++      ShowSendFeedback(browser_);
++      break;
+     case IDC_UPGRADE_DIALOG:
+       OpenUpdateChromeDialog(browser_);
+       break;
+@@ -1299,6 +1302,7 @@ void BrowserCommandController::UpdateCommandsForFullscreenMode() {
+   command_updater_.UpdateCommandEnabled(IDC_EDIT_SEARCH_ENGINES, show_main_ui);
+   command_updater_.UpdateCommandEnabled(IDC_VIEW_PASSWORDS, show_main_ui);
+   command_updater_.UpdateCommandEnabled(IDC_ABOUT, show_main_ui);
++  command_updater_.UpdateCommandEnabled(IDC_SEND_FEEDBACK, show_main_ui);
+   command_updater_.UpdateCommandEnabled(IDC_QRCODE_GENERATOR, show_main_ui);
+   command_updater_.UpdateCommandEnabled(IDC_SHOW_APP_MENU, show_main_ui);
+   command_updater_.UpdateCommandEnabled(IDC_SEND_TAB_TO_SELF, show_main_ui);
+--- a/chrome/browser/ui/chrome_pages.cc
++++ b/chrome/browser/ui/chrome_pages.cc
+@@ -477,6 +477,11 @@ void ShowAboutChrome(Browser* browser) {
+   ShowSingletonTabIgnorePathOverwriteNTP(browser, GURL(kChromeUIHelpURL));
+ }
+ 
++void ShowSendFeedback(Browser* browser) {
++  //base::RecordAction(UserMetricsAction("SendFeedback"));
++  ShowSingletonTabIgnorePathOverwriteNTP(browser, GURL(kBreezeUIFeedBackURL));
++}
++
+ void ShowSearchEngineSettings(Browser* browser) {
+   base::RecordAction(UserMetricsAction("EditSearchEngines"));
+   ShowSettingsSubPage(browser, kSearchEnginesSubPage);
+--- a/chrome/browser/ui/chrome_pages.h
++++ b/chrome/browser/ui/chrome_pages.h
+@@ -135,6 +135,7 @@ void ShowPasswordManager(Browser* browser);
+ void ShowPasswordCheck(Browser* browser);
+ void ShowImportDialog(Browser* browser);
+ void ShowAboutChrome(Browser* browser);
++void ShowSendFeedback(Browser* browser);
+ void ShowSearchEngineSettings(Browser* browser);
+ 
+ #if defined(OS_CHROMEOS)
+--- a/chrome/app/chromium_strings.grd
++++ b/chrome/app/chromium_strings.grd
+@@ -599,6 +599,10 @@ Breeze is unable to recover your settings.
+         &amp;Open in Breeze
+       </message>
+ 
++      <message name="IDS_SEND_FEEDBACK" desc="The text label of Send Feedback in Chrome menu">
++        Send &amp;Feedback
++      </message>
++
+       <if expr="use_titlecase and not chromeos">
+         <message name="IDS_ABOUT" desc="In Title Case: The text label of the About Chrome menu item">
+           About &amp;Breeze

@@ -1,0 +1,91 @@
+--- a/chrome/common/chrome_constants.cc
++++ b/chrome/common/chrome_constants.cc
+@@ -11,11 +11,11 @@
+ #define FPL FILE_PATH_LITERAL
+ 
+ #if defined(OS_MAC)
+-#define CHROMIUM_PRODUCT_STRING "Chromium"
++#define CHROMIUM_PRODUCT_STRING "Breeze"
+ #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
+ #define PRODUCT_STRING "Google Chrome"
+ #elif BUILDFLAG(CHROMIUM_BRANDING)
+-#define PRODUCT_STRING "Chromium"
++#define PRODUCT_STRING "Breeze"
+ #else
+ #error Unknown branding
+ #endif
+--- a/media/audio/pulse/pulse_util.cc
++++ b/media/audio/pulse/pulse_util.cc
+@@ -37,8 +37,8 @@
+ constexpr char kBrowserDisplayName[] = "google-chrome";
+ #define PRODUCT_STRING "Google Chrome"
+ #else
+-constexpr char kBrowserDisplayName[] = "chromium-browser";
+-#define PRODUCT_STRING "Chromium"
++constexpr char kBrowserDisplayName[] = "breeze-browser";
++#define PRODUCT_STRING "Breeze"
+ #endif
+ 
+ #if defined(DLOPEN_PULSEAUDIO)
+--- a/chrome/test/chromedriver/chrome/chrome_finder.cc
++++ b/chrome/test/chromedriver/chrome/chrome_finder.cc
+@@ -134,16 +134,17 @@
+-bool FindChrome(base::FilePath* browser_exe) {
+-  base::FilePath browser_exes_array[] = {
+-#if defined(OS_WIN) || defined(OS_MAC)
+-    base::FilePath(chrome::kBrowserProcessExecutablePath),
+-    base::FilePath(chrome::kBrowserProcessExecutablePathChromium)
+-#elif defined(OS_LINUX) || defined(OS_CHROMEOS)
+-    base::FilePath("google-chrome"),
+-    base::FilePath(chrome::kBrowserProcessExecutablePath),
+-    base::FilePath(chrome::kBrowserProcessExecutablePathChromium),
+-    base::FilePath("chromium"),
+-    base::FilePath("chromium-browser")
+-#else
+-    // it will compile but won't work on other OSes
+-    base::FilePath()
+-#endif
+-  };
++bool FindChrome(base::FilePath* browser_exe) {
++  base::FilePath browser_exes_array[] = {
++#if defined(OS_WIN)
++      base::FilePath(L"breeze.exe")
++#elif defined(OS_MAC)
++      base::FilePath("Google Chrome.app/Contents/MacOS/Breeze"),
++      base::FilePath("Breeze.app/Contents/MacOS/Breeze")
++#elif defined(OS_LINUX)
++      base::FilePath("google-chrome"),
++      base::FilePath("chrome"),
++      base::FilePath("chromium"),
++      base::FilePath("chromium-browser")
++#else
++      // it will compile but won't work on other OSes
++      base::FilePath()
++#endif
++  };
+--- a/chrome/app/theme/chromium/BRANDING
++++ b/chrome/app/theme/chromium/BRANDING
+@@ -1,10 +1,10 @@
+-COMPANY_FULLNAME=The Chromium Authors
+-COMPANY_SHORTNAME=The Chromium Authors
++COMPANY_FULLNAME=Privacy One LLC
++COMPANY_SHORTNAME=Privacy One
+-PRODUCT_FULLNAME=Chromium
+-PRODUCT_SHORTNAME=Chromium
++PRODUCT_FULLNAME=Breeze
++PRODUCT_SHORTNAME=Breeze
+-PRODUCT_INSTALLER_FULLNAME=Chromium Installer
+-PRODUCT_INSTALLER_SHORTNAME=Chromium Installer
+-COPYRIGHT=Copyright 2020 The Chromium Authors. All rights reserved.
++PRODUCT_INSTALLER_FULLNAME=Breeze Installer
++PRODUCT_INSTALLER_SHORTNAME=Breeze Installer
++COPYRIGHT=Copyright 2020 Privacy One LLC. All rights reserved.
+ MAC_BUNDLE_ID=org.chromium.Chromium
+ MAC_CREATOR_CODE=Cr24
+-MAC_TEAM_ID=
++MAC_TEAM_ID=G64LM97BC6
+--- a/chrome/common/chrome_paths_mac.mm
++++ b/chrome/common/chrome_paths_mac.mm
+@@ -63,1 +63,1 @@
+-       product_dir_name = "Chromium";
++       product_dir_name = "/Privacy One/Breeze";

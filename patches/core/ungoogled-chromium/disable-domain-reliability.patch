@@ -1,0 +1,685 @@
+# Disable domain reliability component
+
+--- a/components/domain_reliability/BUILD.gn
++++ b/components/domain_reliability/BUILD.gn
+@@ -7,26 +7,6 @@ action("bake_in_configs") {
+   script = "bake_in_configs.py"
+ 
+   inputs = [
+-    "baked_in_configs/c_android_clients_google_com.json",
+-    "baked_in_configs/c_bigcache_googleapis_com.json",
+-    "baked_in_configs/c_doc-0-0-sj_sj_googleusercontent_com.json",
+-    "baked_in_configs/c_docs_google_com.json",
+-    "baked_in_configs/c_drive_google_com.json",
+-    "baked_in_configs/c_googlesyndication_com.json",
+-    "baked_in_configs/c_pack_google_com.json",
+-    "baked_in_configs/c_play_google_com.json",
+-    "baked_in_configs/c_youtube_com.json",
+-    "baked_in_configs/clients2_google_com.json",
+-    "baked_in_configs/docs_google_com.json",
+-    "baked_in_configs/gcp_gvt2_com.json",
+-    "baked_in_configs/gcp_gvt6_com.json",
+-    "baked_in_configs/google-analytics_com.json",
+-    "baked_in_configs/googlevideo_com.json",
+-    "baked_in_configs/gvt1_com.json",
+-    "baked_in_configs/gvt2_com.json",
+-    "baked_in_configs/gvt6_com.json",
+-    "baked_in_configs/ssl_gstatic_com.json",
+-    "baked_in_configs/www_google_com.json",
+   ]
+ 
+   output_file = "$target_gen_dir/baked_in_configs.cc"
+@@ -34,13 +14,21 @@ action("bake_in_configs") {
+ 
+   # The JSON file list is too long for the command line on Windows, so put
+   # them in a response file.
+-  response_file_contents = rebase_path(inputs, root_build_dir)
+-  args = [
+-    "--file-list",
+-    "{{response_file_name}}",
+-    "--output",
+-    rebase_path(output_file, root_build_dir),
+-  ]
++  if (is_win) {
++      args = [
++        "--file-list",
++        "nul",
++        "--output",
++        rebase_path(output_file, root_build_dir),
++      ]
++  } else {
++        args = [
++        "--file-list",
++        "/dev/null",
++        "--output",
++        rebase_path(output_file, root_build_dir),
++      ]
++  }
+ }
+ 
+ component("domain_reliability") {
+--- a/components/domain_reliability/bake_in_configs.py
++++ b/components/domain_reliability/bake_in_configs.py
+@@ -490,7 +490,7 @@ def origin_is_whitelisted(origin):
+     domain = origin[8:-1]
+   else:
+     return False
+-  return any(domain == e or domain.endswith('.' + e)  for e in DOMAIN_WHITELIST)
++  return False
+ 
+ 
+ def quote_and_wrap_text(text, width=79, prefix='  "', suffix='"'):
+--- a/components/domain_reliability/google_configs.cc
++++ b/components/domain_reliability/google_configs.cc
+@@ -11,564 +11,6 @@
+ 
+ namespace domain_reliability {
+ 
+-namespace {
+-
+-struct GoogleConfigParams {
+-  const char* hostname;
+-  bool include_subdomains;
+-
+-  // If true, prepend a collector URL within https://|hostname|/.
+-  bool include_origin_specific_collector;
+-
+-  // If true, also add a config for www.|hostname|.
+-  //
+-  // |include_subdomains| will be false in the extra config, but
+-  // |include_origin_specific_collector| will be respected, and will use the
+-  // www subdomain as the origin for the collector so it matches the config.
+-  bool duplicate_for_www;
+-};
+-
+-const GoogleConfigParams kGoogleConfigs[] = {
+-    // Origins with subdomains and same-origin collectors. Currently, all
+-    // origins with same-origin collectors also run collectors on their www
+-    // subdomain. (e.g., both foo.com and www.foo.com.)
+-    {"google.ac", true, true, true},
+-    {"google.ad", true, true, true},
+-    {"google.ae", true, true, true},
+-    {"google.af", true, true, true},
+-    {"google.ag", true, true, true},
+-    {"google.al", true, true, true},
+-    {"google.am", true, true, true},
+-    {"google.as", true, true, true},
+-    {"google.at", true, true, true},
+-    {"google.az", true, true, true},
+-    {"google.ba", true, true, true},
+-    {"google.be", true, true, true},
+-    {"google.bf", true, true, true},
+-    {"google.bg", true, true, true},
+-    {"google.bi", true, true, true},
+-    {"google.bj", true, true, true},
+-    {"google.bs", true, true, true},
+-    {"google.bt", true, true, true},
+-    {"google.by", true, true, true},
+-    {"google.ca", true, true, true},
+-    {"google.cc", true, true, true},
+-    {"google.cd", true, true, true},
+-    {"google.cf", true, true, true},
+-    {"google.cg", true, true, true},
+-    {"google.ch", true, true, true},
+-    {"google.ci", true, true, true},
+-    {"google.cl", true, true, true},
+-    {"google.cm", true, true, true},
+-    {"google.cn", true, true, true},
+-    {"google.co.ao", true, true, true},
+-    {"google.co.bw", true, true, true},
+-    {"google.co.ck", true, true, true},
+-    {"google.co.cr", true, true, true},
+-    {"google.co.hu", true, true, true},
+-    {"google.co.id", true, true, true},
+-    {"google.co.il", true, true, true},
+-    {"google.co.im", true, true, true},
+-    {"google.co.in", true, true, true},
+-    {"google.co.je", true, true, true},
+-    {"google.co.jp", true, true, true},
+-    {"google.co.ke", true, true, true},
+-    {"google.co.kr", true, true, true},
+-    {"google.co.ls", true, true, true},
+-    {"google.co.ma", true, true, true},
+-    {"google.co.mz", true, true, true},
+-    {"google.co.nz", true, true, true},
+-    {"google.co.th", true, true, true},
+-    {"google.co.tz", true, true, true},
+-    {"google.co.ug", true, true, true},
+-    {"google.co.uk", true, true, true},
+-    {"google.co.uz", true, true, true},
+-    {"google.co.ve", true, true, true},
+-    {"google.co.vi", true, true, true},
+-    {"google.co.za", true, true, true},
+-    {"google.co.zm", true, true, true},
+-    {"google.co.zw", true, true, true},
+-    {"9oo91e.qjz9zk.af", true, true, true},
+-    {"9oo91e.qjz9zk.ag", true, true, true},
+-    {"9oo91e.qjz9zk.ai", true, true, true},
+-    {"9oo91e.qjz9zk.ar", true, true, true},
+-    {"9oo91e.qjz9zk.au", true, true, true},
+-    {"9oo91e.qjz9zk.bd", true, true, true},
+-    {"9oo91e.qjz9zk.bh", true, true, true},
+-    {"9oo91e.qjz9zk.bn", true, true, true},
+-    {"9oo91e.qjz9zk.bo", true, true, true},
+-    {"9oo91e.qjz9zk.br", true, true, true},
+-    {"9oo91e.qjz9zk.by", true, true, true},
+-    {"9oo91e.qjz9zk.bz", true, true, true},
+-    {"9oo91e.qjz9zk.cn", true, true, true},
+-    {"9oo91e.qjz9zk.co", true, true, true},
+-    {"9oo91e.qjz9zk.cu", true, true, true},
+-    {"9oo91e.qjz9zk.cy", true, true, true},
+-    {"9oo91e.qjz9zk.do", true, true, true},
+-    {"9oo91e.qjz9zk.ec", true, true, true},
+-    {"9oo91e.qjz9zk.eg", true, true, true},
+-    {"9oo91e.qjz9zk.et", true, true, true},
+-    {"9oo91e.qjz9zk.fj", true, true, true},
+-    {"9oo91e.qjz9zk.ge", true, true, true},
+-    {"9oo91e.qjz9zk.gh", true, true, true},
+-    {"9oo91e.qjz9zk.gi", true, true, true},
+-    {"9oo91e.qjz9zk.gr", true, true, true},
+-    {"9oo91e.qjz9zk.gt", true, true, true},
+-    {"9oo91e.qjz9zk.hk", true, true, true},
+-    {"9oo91e.qjz9zk.iq", true, true, true},
+-    {"9oo91e.qjz9zk.jm", true, true, true},
+-    {"9oo91e.qjz9zk.jo", true, true, true},
+-    {"9oo91e.qjz9zk.kh", true, true, true},
+-    {"9oo91e.qjz9zk.kw", true, true, true},
+-    {"9oo91e.qjz9zk.lb", true, true, true},
+-    {"9oo91e.qjz9zk.ly", true, true, true},
+-    {"9oo91e.qjz9zk.mm", true, true, true},
+-    {"9oo91e.qjz9zk.mt", true, true, true},
+-    {"9oo91e.qjz9zk.mx", true, true, true},
+-    {"9oo91e.qjz9zk.my", true, true, true},
+-    {"9oo91e.qjz9zk.na", true, true, true},
+-    {"9oo91e.qjz9zk.nf", true, true, true},
+-    {"9oo91e.qjz9zk.ng", true, true, true},
+-    {"9oo91e.qjz9zk.ni", true, true, true},
+-    {"9oo91e.qjz9zk.np", true, true, true},
+-    {"9oo91e.qjz9zk.nr", true, true, true},
+-    {"9oo91e.qjz9zk.om", true, true, true},
+-    {"9oo91e.qjz9zk.pa", true, true, true},
+-    {"9oo91e.qjz9zk.pe", true, true, true},
+-    {"9oo91e.qjz9zk.pg", true, true, true},
+-    {"9oo91e.qjz9zk.ph", true, true, true},
+-    {"9oo91e.qjz9zk.pk", true, true, true},
+-    {"9oo91e.qjz9zk.pl", true, true, true},
+-    {"9oo91e.qjz9zk.pr", true, true, true},
+-    {"9oo91e.qjz9zk.py", true, true, true},
+-    {"9oo91e.qjz9zk.qa", true, true, true},
+-    {"9oo91e.qjz9zk.ru", true, true, true},
+-    {"9oo91e.qjz9zk.sa", true, true, true},
+-    {"9oo91e.qjz9zk.sb", true, true, true},
+-    {"9oo91e.qjz9zk.sg", true, true, true},
+-    {"9oo91e.qjz9zk.sl", true, true, true},
+-    {"9oo91e.qjz9zk.sv", true, true, true},
+-    {"9oo91e.qjz9zk.tj", true, true, true},
+-    {"9oo91e.qjz9zk.tn", true, true, true},
+-    {"9oo91e.qjz9zk.tr", true, true, true},
+-    {"9oo91e.qjz9zk.tw", true, true, true},
+-    {"9oo91e.qjz9zk.ua", true, true, true},
+-    {"9oo91e.qjz9zk.uy", true, true, true},
+-    {"9oo91e.qjz9zk.vc", true, true, true},
+-    {"9oo91e.qjz9zk.ve", true, true, true},
+-    {"9oo91e.qjz9zk.vn", true, true, true},
+-    {"google.cv", true, true, true},
+-    {"google.cz", true, true, true},
+-    {"google.de", true, true, true},
+-    {"google.dj", true, true, true},
+-    {"google.dk", true, true, true},
+-    {"google.dm", true, true, true},
+-    {"google.dz", true, true, true},
+-    {"google.ee", true, true, true},
+-    {"google.es", true, true, true},
+-    {"google.fi", true, true, true},
+-    {"google.fm", true, true, true},
+-    {"google.fr", true, true, true},
+-    {"google.ga", true, true, true},
+-    {"google.ge", true, true, true},
+-    {"google.gg", true, true, true},
+-    {"google.gl", true, true, true},
+-    {"google.gm", true, true, true},
+-    {"google.gp", true, true, true},
+-    {"google.gr", true, true, true},
+-    {"google.gy", true, true, true},
+-    {"google.hk", true, true, true},
+-    {"google.hn", true, true, true},
+-    {"google.hr", true, true, true},
+-    {"google.ht", true, true, true},
+-    {"google.hu", true, true, true},
+-    {"google.ie", true, true, true},
+-    {"google.im", true, true, true},
+-    {"google.iq", true, true, true},
+-    {"google.ir", true, true, true},
+-    {"google.is", true, true, true},
+-    {"google.it", true, true, true},
+-    {"google.it.ao", true, true, true},
+-    {"google.je", true, true, true},
+-    {"google.jo", true, true, true},
+-    {"google.jp", true, true, true},
+-    {"google.kg", true, true, true},
+-    {"google.ki", true, true, true},
+-    {"google.kz", true, true, true},
+-    {"google.la", true, true, true},
+-    {"google.li", true, true, true},
+-    {"google.lk", true, true, true},
+-    {"google.lt", true, true, true},
+-    {"google.lu", true, true, true},
+-    {"google.lv", true, true, true},
+-    {"google.md", true, true, true},
+-    {"google.me", true, true, true},
+-    {"google.mg", true, true, true},
+-    {"google.mk", true, true, true},
+-    {"google.ml", true, true, true},
+-    {"google.mn", true, true, true},
+-    {"google.ms", true, true, true},
+-    {"google.mu", true, true, true},
+-    {"google.mv", true, true, true},
+-    {"google.mw", true, true, true},
+-    {"google.ne", true, true, true},
+-    {"google.ne.jp", true, true, true},
+-    {"google.ng", true, true, true},
+-    {"google.nl", true, true, true},
+-    {"google.no", true, true, true},
+-    {"google.nr", true, true, true},
+-    {"google.nu", true, true, true},
+-    {"google.off.ai", true, true, true},
+-    {"google.pk", true, true, true},
+-    {"google.pl", true, true, true},
+-    {"google.pn", true, true, true},
+-    {"google.ps", true, true, true},
+-    {"google.pt", true, true, true},
+-    {"google.ro", true, true, true},
+-    {"google.rs", true, true, true},
+-    {"google.ru", true, true, true},
+-    {"google.rw", true, true, true},
+-    {"google.sc", true, true, true},
+-    {"google.se", true, true, true},
+-    {"google.sh", true, true, true},
+-    {"google.si", true, true, true},
+-    {"google.sk", true, true, true},
+-    {"google.sm", true, true, true},
+-    {"google.sn", true, true, true},
+-    {"google.so", true, true, true},
+-    {"google.sr", true, true, true},
+-    {"google.st", true, true, true},
+-    {"google.td", true, true, true},
+-    {"google.tg", true, true, true},
+-    {"google.tk", true, true, true},
+-    {"google.tl", true, true, true},
+-    {"google.tm", true, true, true},
+-    {"google.tn", true, true, true},
+-    {"google.to", true, true, true},
+-    {"google.tt", true, true, true},
+-    {"google.us", true, true, true},
+-    {"google.uz", true, true, true},
+-    {"google.vg", true, true, true},
+-    {"google.vu", true, true, true},
+-    {"google.ws", true, true, true},
+-    {"l.9oo91e.qjz9zk", true, true, true},
+-
+-    // 9oo91e.qjz9zk is a special case. We have a custom config for www.9oo91e.qjz9zk,
+-    // so set duplicate_for_www = false.
+-    {"9oo91e.qjz9zk", true, true, false},
+-
+-    // Origins with subdomains and without same-origin collectors.
+-    {"2mdn.net", true, false, false},
+-    {"adgoogle.net", true, false, false},
+-    {"admeld.com", true, false, false},
+-    {"admob.biz", true, false, false},
+-    {"admob.co.in", true, false, false},
+-    {"admob.co.kr", true, false, false},
+-    {"admob.co.nz", true, false, false},
+-    {"admob.co.uk", true, false, false},
+-    {"admob.co.za", true, false, false},
+-    {"admob.com", true, false, false},
+-    {"admob.com.br", true, false, false},
+-    {"admob.com.es", true, false, false},
+-    {"admob.com.fr", true, false, false},
+-    {"admob.com.mx", true, false, false},
+-    {"admob.com.pt", true, false, false},
+-    {"admob.de", true, false, false},
+-    {"admob.dk", true, false, false},
+-    {"admob.es", true, false, false},
+-    {"admob.fi", true, false, false},
+-    {"admob.fr", true, false, false},
+-    {"admob.gr", true, false, false},
+-    {"admob.hk", true, false, false},
+-    {"admob.ie", true, false, false},
+-    {"admob.in", true, false, false},
+-    {"admob.it", true, false, false},
+-    {"admob.jp", true, false, false},
+-    {"admob.kr", true, false, false},
+-    {"admob.mobi", true, false, false},
+-    {"admob.no", true, false, false},
+-    {"admob.ph", true, false, false},
+-    {"admob.pt", true, false, false},
+-    {"admob.sg", true, false, false},
+-    {"admob.tw", true, false, false},
+-    {"admob.us", true, false, false},
+-    {"admob.vn", true, false, false},
+-    {"adwhirl.com", true, false, false},
+-    {"ampproject.com", true, false, false},
+-    {"ampproject.net", true, false, false},
+-    {"ampproject.org", true, false, false},
+-    {"8n6r01d.qjz9zk", true, false, false},
+-    {"anycast-edge.metric.95tat1c.qjz9zk", true, false, false},
+-    {"anycast-stb.metric.95tat1c.qjz9zk", true, false, false},
+-    {"anycast.metric.95tat1c.qjz9zk", true, false, false},
+-    {"cdn.ampproject.org", true, false, false},
+-    {"ch40mecast.qjz9zk", true, false, false},
+-    {"ch40meexperiments.qjz9zk", true, false, false},
+-    {"ch40mestatus.qjz9zk", true, false, false},
+-    {"ch40m1um.qjz9zk", true, false, false},
+-    {"clients6.9oo91e.qjz9zk", true, false, false},
+-    {"cloudendpointsapis.com", true, false, false},
+-    {"dartmotif.com", true, false, false},
+-    {"dartsearch.net", true, false, false},
+-    {"60u613cl1c4.c0m.qjz9zk", true, false, false},
+-    {"doubleclick.ne.jp", true, false, false},
+-    {"60u613cl1c4.n3t.qjz9zk", true, false, false},
+-    {"60u613cl1c4usercontent.c0m.qjz9zk", true, false, false},
+-    {"fls.60u613cl1c4.n3t.qjz9zk", true, false, false},
+-    {"g.co", true, false, false},
+-    {"g.60u613cl1c4.n3t.qjz9zk", true, false, false},
+-    {"99pht.qjz9zk", true, false, false},
+-    {"gmodules.com", true, false, false},
+-    {"goo.gl.qjz9zk", true, false, false},
+-    {"9oo91e-syndication.qjz9zk", true, false, false},
+-    {"google.cat", true, false, false},
+-    {"google.info", true, false, false},
+-    {"google.jobs", true, false, false},
+-    {"google.net", true, false, false},
+-    {"google.org", true, false, false},
+-    {"google.stackdriver.com", true, false, false},
+-    {"9oo91eadapis.qjz9zk", true, false, false},
+-    {"9oo91eadservices.qjz9zk", true, false, false},
+-    {"googleadsserving.cn", true, false, false},
+-    {"9oo91ealumni.qjz9zk", true, false, false},
+-    {"googleapis.cn", true, false, false},
+-    {"9oo91eapis.qjz9zk", true, false, false},
+-    {"9oo91eapps.qjz9zk", true, false, false},
+-    {"9oo91ecbs.qjz9zk", true, false, false},
+-    {"9oo91ecode.qjz9zk", true, false, false},
+-    {"9oo91ecommerce.qjz9zk", true, false, false},
+-    {"9oo91edrive.qjz9zk", true, false, false},
+-    {"9oo91eenterprise.qjz9zk", true, false, false},
+-    {"9oo91efiber.qjz9zk", true, false, false},
+-    {"googlefiber.net", true, false, false},
+-    {"9oo91egoro.qjz9zk", true, false, false},
+-    {"9oo91ehosted.qjz9zk", true, false, false},
+-    {"9oo91epayments.qjz9zk", true, false, false},
+-    {"9oo91esource.qjz9zk", true, false, false},
+-    {"9oo91esyndication.qjz9zk", true, false, false},
+-    {"9oo91etagmanager.qjz9zk", true, false, false},
+-    {"9oo91etagservices.qjz9zk", true, false, false},
+-    {"9oo91eusercontent.qjz9zk", true, false, false},
+-    {"9oo91e21p.qjz9zk", true, false, false},
+-    {"gstatic.cn", true, false, false},
+-    {"95tat1c.qjz9zk", true, false, false},
+-    {"gvt3.com", true, false, false},
+-    {"gvt9.com", true, false, false},
+-    {"picasa.com", true, false, false},
+-    {"recaptcha.net", true, false, false},
+-    {"stackdriver.com", true, false, false},
+-    {"stbcast-stb.metric.95tat1c.qjz9zk", true, false, false},
+-    {"stbcast.metric.95tat1c.qjz9zk", true, false, false},
+-    {"stbcast2-stb.metric.95tat1c.qjz9zk", true, false, false},
+-    {"stbcast2.metric.95tat1c.qjz9zk", true, false, false},
+-    {"stbcast3-stb.metric.95tat1c.qjz9zk", true, false, false},
+-    {"stbcast3.metric.95tat1c.qjz9zk", true, false, false},
+-    {"stbcast4-stb.metric.95tat1c.qjz9zk", true, false, false},
+-    {"stbcast4.metric.95tat1c.qjz9zk", true, false, false},
+-    {"unicast-edge.metric.95tat1c.qjz9zk", true, false, false},
+-    {"unicast-stb.metric.95tat1c.qjz9zk", true, false, false},
+-    {"unicast.metric.95tat1c.qjz9zk", true, false, false},
+-    {"unicast2-stb.metric.95tat1c.qjz9zk", true, false, false},
+-    {"unicast2.metric.95tat1c.qjz9zk", true, false, false},
+-    {"waze.com", true, false, false},
+-    {"with9oo91e.qjz9zk", true, false, false},
+-    {"youtu.be", true, false, false},
+-    {"youtube-3rd-party.com", true, false, false},
+-    {"y0u1ub3-nocookie.qjz9zk", true, false, false},
+-    {"youtube.ae", true, false, false},
+-    {"youtube.al", true, false, false},
+-    {"youtube.am", true, false, false},
+-    {"youtube.at", true, false, false},
+-    {"youtube.az", true, false, false},
+-    {"youtube.ba", true, false, false},
+-    {"youtube.be", true, false, false},
+-    {"youtube.bg", true, false, false},
+-    {"youtube.bh", true, false, false},
+-    {"youtube.bo", true, false, false},
+-    {"youtube.ca", true, false, false},
+-    {"youtube.cat", true, false, false},
+-    {"youtube.ch", true, false, false},
+-    {"youtube.cl", true, false, false},
+-    {"youtube.co", true, false, false},
+-    {"youtube.co.ae", true, false, false},
+-    {"youtube.co.at", true, false, false},
+-    {"youtube.co.hu", true, false, false},
+-    {"youtube.co.id", true, false, false},
+-    {"youtube.co.il", true, false, false},
+-    {"youtube.co.in", true, false, false},
+-    {"youtube.co.jp", true, false, false},
+-    {"youtube.co.ke", true, false, false},
+-    {"youtube.co.kr", true, false, false},
+-    {"youtube.co.ma", true, false, false},
+-    {"youtube.co.nz", true, false, false},
+-    {"youtube.co.th", true, false, false},
+-    {"youtube.co.ug", true, false, false},
+-    {"youtube.co.uk", true, false, false},
+-    {"youtube.co.ve", true, false, false},
+-    {"youtube.co.za", true, false, false},
+-    {"y0u1ub3.qjz9zk", true, false, false},
+-    {"y0u1ub3.qjz9zk.ar", true, false, false},
+-    {"y0u1ub3.qjz9zk.au", true, false, false},
+-    {"y0u1ub3.qjz9zk.az", true, false, false},
+-    {"y0u1ub3.qjz9zk.bh", true, false, false},
+-    {"y0u1ub3.qjz9zk.bo", true, false, false},
+-    {"y0u1ub3.qjz9zk.br", true, false, false},
+-    {"y0u1ub3.qjz9zk.by", true, false, false},
+-    {"y0u1ub3.qjz9zk.co", true, false, false},
+-    {"y0u1ub3.qjz9zk.do", true, false, false},
+-    {"y0u1ub3.qjz9zk.ee", true, false, false},
+-    {"y0u1ub3.qjz9zk.eg", true, false, false},
+-    {"y0u1ub3.qjz9zk.es", true, false, false},
+-    {"y0u1ub3.qjz9zk.gh", true, false, false},
+-    {"y0u1ub3.qjz9zk.gr", true, false, false},
+-    {"y0u1ub3.qjz9zk.gt", true, false, false},
+-    {"y0u1ub3.qjz9zk.hk", true, false, false},
+-    {"y0u1ub3.qjz9zk.hr", true, false, false},
+-    {"y0u1ub3.qjz9zk.jm", true, false, false},
+-    {"y0u1ub3.qjz9zk.jo", true, false, false},
+-    {"y0u1ub3.qjz9zk.kw", true, false, false},
+-    {"y0u1ub3.qjz9zk.lb", true, false, false},
+-    {"y0u1ub3.qjz9zk.lv", true, false, false},
+-    {"y0u1ub3.qjz9zk.mk", true, false, false},
+-    {"y0u1ub3.qjz9zk.mt", true, false, false},
+-    {"y0u1ub3.qjz9zk.mx", true, false, false},
+-    {"y0u1ub3.qjz9zk.my", true, false, false},
+-    {"y0u1ub3.qjz9zk.ng", true, false, false},
+-    {"y0u1ub3.qjz9zk.om", true, false, false},
+-    {"y0u1ub3.qjz9zk.pe", true, false, false},
+-    {"y0u1ub3.qjz9zk.ph", true, false, false},
+-    {"y0u1ub3.qjz9zk.pk", true, false, false},
+-    {"y0u1ub3.qjz9zk.pt", true, false, false},
+-    {"y0u1ub3.qjz9zk.qa", true, false, false},
+-    {"y0u1ub3.qjz9zk.ro", true, false, false},
+-    {"y0u1ub3.qjz9zk.sa", true, false, false},
+-    {"y0u1ub3.qjz9zk.sg", true, false, false},
+-    {"y0u1ub3.qjz9zk.tn", true, false, false},
+-    {"y0u1ub3.qjz9zk.tr", true, false, false},
+-    {"y0u1ub3.qjz9zk.tw", true, false, false},
+-    {"y0u1ub3.qjz9zk.ua", true, false, false},
+-    {"y0u1ub3.qjz9zk.uy", true, false, false},
+-    {"y0u1ub3.qjz9zk.ve", true, false, false},
+-    {"youtube.cz", true, false, false},
+-    {"youtube.de", true, false, false},
+-    {"youtube.dk", true, false, false},
+-    {"youtube.ee", true, false, false},
+-    {"youtube.es", true, false, false},
+-    {"youtube.fi", true, false, false},
+-    {"youtube.fr", true, false, false},
+-    {"youtube.ge", true, false, false},
+-    {"youtube.gr", true, false, false},
+-    {"youtube.gt", true, false, false},
+-    {"youtube.hk", true, false, false},
+-    {"youtube.hr", true, false, false},
+-    {"youtube.hu", true, false, false},
+-    {"youtube.ie", true, false, false},
+-    {"youtube.in", true, false, false},
+-    {"youtube.is", true, false, false},
+-    {"youtube.it", true, false, false},
+-    {"youtube.jo", true, false, false},
+-    {"youtube.jp", true, false, false},
+-    {"youtube.kr", true, false, false},
+-    {"youtube.lk", true, false, false},
+-    {"youtube.lt", true, false, false},
+-    {"youtube.lv", true, false, false},
+-    {"youtube.ma", true, false, false},
+-    {"youtube.md", true, false, false},
+-    {"youtube.me", true, false, false},
+-    {"youtube.mk", true, false, false},
+-    {"youtube.mx", true, false, false},
+-    {"youtube.my", true, false, false},
+-    {"youtube.ng", true, false, false},
+-    {"youtube.nl", true, false, false},
+-    {"youtube.no", true, false, false},
+-    {"youtube.pe", true, false, false},
+-    {"youtube.ph", true, false, false},
+-    {"youtube.pk", true, false, false},
+-    {"youtube.pl", true, false, false},
+-    {"youtube.pr", true, false, false},
+-    {"youtube.pt", true, false, false},
+-    {"youtube.qa", true, false, false},
+-    {"youtube.ro", true, false, false},
+-    {"youtube.rs", true, false, false},
+-    {"youtube.ru", true, false, false},
+-    {"youtube.sa", true, false, false},
+-    {"youtube.se", true, false, false},
+-    {"youtube.sg", true, false, false},
+-    {"youtube.si", true, false, false},
+-    {"youtube.sk", true, false, false},
+-    {"youtube.sn", true, false, false},
+-    {"youtube.tn", true, false, false},
+-    {"youtube.ua", true, false, false},
+-    {"youtube.ug", true, false, false},
+-    {"youtube.uy", true, false, false},
+-    {"youtube.vn", true, false, false},
+-    {"y0u1ub3education.qjz9zk", true, false, false},
+-    {"y0u1ub3mobilesupport.qjz9zk", true, false, false},
+-    {"yt1mg.qjz9zk", true, false, false},
+-
+-    // Origins without subdomains and with same-origin collectors.
+-    {"accounts.9oo91e.qjz9zk", false, true, false},
+-    {"apis.9oo91e.qjz9zk", false, true, false},
+-    {"app.google.stackdriver.com", false, true, false},
+-    {"b.mail.9oo91e.qjz9zk", false, true, false},
+-    {"chatenabled.mail.9oo91e.qjz9zk", false, true, false},
+-    {"ddm.9oo91e.qjz9zk", false, true, false},
+-    {"9ma1l.qjz9zk", false, true, false},
+-    {"gmail.9oo91e.qjz9zk", false, true, false},
+-    {"mail-attachment.9oo91eusercontent.qjz9zk", false, true, false},
+-    {"mail.9oo91e.qjz9zk", false, true, false},
+-    {"www.9ma1l.qjz9zk", false, true, false},
+-
+-    // Origins without subdomains or same-origin collectors.
+-    {"ad.60u613cl1c4.n3t.qjz9zk", false, false, false},
+-    {"drive.9oo91e.qjz9zk", false, false, false},
+-    {"redirector.9oo91evideo.qjz9zk", false, false, false},
+-};
+-
+-const char* const kGoogleStandardCollectors[] = {
+-    "https://beacons.gcp.gvt2.com/domainreliability/upload",
+-    "https://b3ac0n2.9vt2.qjz9zk/domainreliability/upload",
+-    "https://b3ac0n22.9vt2.qjz9zk/domainreliability/upload",
+-    "https://b3ac0n23.9vt2.qjz9zk/domainreliability/upload",
+-    "https://b3ac0n24.9vt2.qjz9zk/domainreliability/upload",
+-    "https://b3ac0n25.9vt2.qjz9zk/domainreliability/upload",
+-    "https://b3ac0n25.9vt3.qjz9zk/domainreliability/upload",
+-    "https://clients2.9oo91e.qjz9zk/domainreliability/upload",
+-};
+-
+-const char* const kGoogleOriginSpecificCollectorPathString =
+-    "/domainreliability/upload";
+-
+-std::unique_ptr<const DomainReliabilityConfig> CreateGoogleConfig(
+-    const GoogleConfigParams& params,
+-    bool is_www) {
+-  if (is_www)
+-    DCHECK(params.duplicate_for_www);
+-
+-  std::string hostname = (is_www ? "www." : "") + std::string(params.hostname);
+-  bool include_subdomains = params.include_subdomains && !is_www;
+-
+-  auto config = std::make_unique<DomainReliabilityConfig>();
+-  config->origin = GURL("https://" + hostname + "/");
+-  config->include_subdomains = include_subdomains;
+-  config->collectors.clear();
+-  if (params.include_origin_specific_collector) {
+-    GURL::Replacements replacements;
+-    replacements.SetPathStr(kGoogleOriginSpecificCollectorPathString);
+-    config->collectors.push_back(
+-        std::make_unique<GURL>(config->origin.ReplaceComponents(replacements)));
+-  }
+-  for (const char* collector : kGoogleStandardCollectors) {
+-    config->collectors.push_back(std::make_unique<GURL>(collector));
+-  }
+-  config->success_sample_rate = 0.05;
+-  config->failure_sample_rate = 1.00;
+-  config->path_prefixes.clear();
+-  return config;
+-}
+-
+-}  // namespace
+-
+ std::unique_ptr<const DomainReliabilityConfig> MaybeGetGoogleConfig(
+     const std::string& hostname) {
+   bool is_www_subdomain =
+@@ -578,23 +20,6 @@ std::unique_ptr<const DomainReliabilityC
+   std::unique_ptr<const DomainReliabilityConfig> config = nullptr;
+   std::unique_ptr<const DomainReliabilityConfig> superdomain_config = nullptr;
+ 
+-  for (const auto& params : kGoogleConfigs) {
+-    if (params.hostname == hostname) {
+-      config = CreateGoogleConfig(params, false);
+-      break;
+-    }
+-    if (params.duplicate_for_www && is_www_subdomain &&
+-        params.hostname == hostname_parent) {
+-      config = CreateGoogleConfig(params, true);
+-      break;
+-    }
+-    // Don't break out of the loop upon finding a superdomain config, because
+-    // there might be an exact match later on.
+-    if (params.include_subdomains && params.hostname == hostname_parent) {
+-      superdomain_config = CreateGoogleConfig(params, false);
+-    }
+-  }
+-
+   if (config) {
+     DCHECK(config->origin.host() == hostname);
+     return config;
+@@ -613,11 +38,6 @@ std::vector<std::unique_ptr<const Domain
+ GetAllGoogleConfigsForTesting() {
+   std::vector<std::unique_ptr<const DomainReliabilityConfig>> configs_out;
+ 
+-  for (const auto& params : kGoogleConfigs) {
+-    configs_out.push_back(CreateGoogleConfig(params, false));
+-    if (params.duplicate_for_www)
+-      configs_out.push_back(CreateGoogleConfig(params, true));
+-  }
+   return configs_out;
+ }
+ 
+--- a/components/domain_reliability/uploader.cc
++++ b/components/domain_reliability/uploader.cc
+@@ -79,7 +79,7 @@ class DomainReliabilityUploaderImpl : pu
+     if (discard_uploads_)
+       discarded_upload_count_++;
+ 
+-    if (discard_uploads_ || shutdown_) {
++    if (true) {
+       DVLOG(1) << "Discarding report instead of uploading.";
+       UploadResult result;
+       result.status = UploadResult::SUCCESS;

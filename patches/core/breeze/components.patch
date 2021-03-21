@@ -1,0 +1,166 @@
+--- a/chrome/browser/BUILD.gn
++++ b/chrome/browser/BUILD.gn
+@@ -1961,4 +1961,5 @@ static_library("browser") {
+     "//components/component_updater",
+     "//components/component_updater:crl_set_remover",
++    "//components/component_updater:component_remover",
+     "//components/component_updater/installer_policies",
+     "//components/consent_auditor",
+--- a/chrome/browser/component_updater/registration.cc
++++ b/chrome/browser/component_updater/registration.cc
+@@ -10,23 +10,14 @@
+ #include "build/chromeos_buildflags.h"
+ #include "chrome/browser/browser_process.h"
+ #include "chrome/browser/buildflags.h"
+-#include "chrome/browser/component_updater/autofill_regex_component_installer.h"
+-#include "chrome/browser/component_updater/autofill_states_component_installer.h"
+ #include "chrome/browser/component_updater/crl_set_component_installer.h"
+-#include "chrome/browser/component_updater/crowd_deny_component_installer.h"
+-#include "chrome/browser/component_updater/file_type_policies_component_installer.h"
+ #include "chrome/browser/component_updater/first_party_sets_component_installer.h"
+-#include "chrome/browser/component_updater/floc_component_installer.h"
+ #include "chrome/browser/component_updater/games_component_installer.h"
+ #include "chrome/browser/component_updater/hyphenation_component_installer.h"
+ #include "chrome/browser/component_updater/mei_preload_component_installer.h"
+-#include "chrome/browser/component_updater/origin_trials_component_installer.h"
+ #include "chrome/browser/component_updater/pepper_flash_component_installer.h"
+-#include "chrome/browser/component_updater/ssl_error_assistant_component_installer.h"
+ #include "chrome/browser/component_updater/sth_set_component_remover.h"
+ #include "chrome/browser/component_updater/subresource_filter_component_installer.h"
+-#include "chrome/browser/component_updater/tls_deprecation_config_component_installer.h"
+ #include "chrome/browser/component_updater/trust_token_key_commitments_component_installer.h"
+-#include "chrome/browser/component_updater/zxcvbn_data_component_installer.h"
+ #include "chrome/common/buildflags.h"
+ #include "chrome/common/chrome_paths.h"
+@@ -32,6 +23,6 @@
+ #include "components/component_updater/component_updater_service.h"
+ #include "components/component_updater/crl_set_remover.h"
++#include "components/component_updater/component_remover.h"
+ #include "components/component_updater/installer_policies/on_device_head_suggest_component_installer.h"
+ #include "components/component_updater/installer_policies/optimization_hints_component_installer.h"
+-#include "components/component_updater/installer_policies/safety_tips_component_installer.h"
+ #include "components/nacl/common/buildflags.h"
+@@ -104,8 +104,6 @@ void RegisterComponentsForUpdate(bool is_off_the_record_profile,
+ #endif  // BUILDFLAG(IS_CHROMEOS_ASH)
+ #endif  // BUILDFLAG(ENABLE_NACL) && !defined(OS_ANDROID)
+ 
+-  RegisterFlocComponent(cus,
+-                        g_browser_process->floc_sorting_lsh_clusters_service());
+   RegisterOnDeviceHeadSuggestComponent(
+       cus, g_browser_process->GetApplicationLocale());
+   RegisterOptimizationHintsComponent(cus);
+@@ -126,8 +124,6 @@ void RegisterComponentsForUpdate(bool is_off_the_record_profile,
+     component_updater::DeleteLegacySTHSet(path);
+ #endif
+   }
+-  RegisterSSLErrorAssistantComponent(cus);
+-  RegisterFileTypePoliciesComponent(cus);
+ #if !BUILDFLAG(IS_CHROMEOS_ASH)
+   // CRLSetFetcher attempts to load a CRL set from either the local disk or
+   // network.
+@@ -135,7 +131,6 @@ void RegisterComponentsForUpdate(bool is_off_the_record_profile,
+   component_updater::RegisterCRLSetComponent(cus);
+ #endif  // !BUILDFLAG(IS_CHROMEOS_ASH)
+ 
+-  RegisterOriginTrialsComponent(cus);
+   RegisterMediaEngagementPreloadComponent(cus, base::OnceClosure());
+ 
+ #if defined(OS_WIN)
+@@ -154,9 +149,6 @@ void RegisterComponentsForUpdate(bool is_off_the_record_profile,
+   }
+ #endif
+ 
+-  RegisterSafetyTipsComponent(cus);
+-  RegisterCrowdDenyComponent(cus);
+-  RegisterTLSDeprecationConfigComponent(cus);
+ 
+ #if BUILDFLAG(GOOGLE_CHROME_BRANDING) && defined(OS_ANDROID)
+   component_updater::RegisterGamesComponent(cus, profile_prefs);
+@@ -181,9 +173,7 @@ void RegisterComponentsForUpdate(bool is_off_the_record_profile,
+   RegisterHyphenationComponent(cus);
+ #endif
+ 
+-  RegisterZxcvbnDataComponent(cus);
+ 
+-  RegisterAutofillStatesComponent(cus, g_browser_process->local_state());
+ }
+ 
+ }  // namespace component_updater
+--- a/components/component_updater/BUILD.gn
++++ b/components/component_updater/BUILD.gn
+@@ -40,4 +40,13 @@ static_library("crl_set_remover") {
+ }
+ 
++static_library("component_remover") {
++  sources = [
++    "component_remover.cc",
++    "component_remover.h",
++  ]
++
++  deps = [ "//base" ]
++}
++
+ static_library("crl_set_remover") {
+   sources = [
+--- /dev/null
++++ b/components/component_updater/component_remover.cc
+@@ -0,0 +1,38 @@
++// Copyright 2017 The Chromium Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++#include "components/component_updater/component_remover.h"
++
++#include "base/bind.h"
++#include "base/logging.h"
++#include "base/files/file_util.h"
++#include "base/task/post_task.h"
++#include "base/task/thread_pool.h"
++
++
++namespace component_updater {
++
++void DeleteUnwantedComponents(const base::FilePath& user_data_dir) {
++  const char* unwantedComponentsPaths[] = {
++    "AutofillStates",
++    "Crowd Deny",
++    "FileTypePolicies",
++    "OriginTrials",
++    "SafetyTips",
++    "SSLErrorAssistant",
++    "TLSDeprecationConfig",
++    "ZxcvbnData"
++  };
++  const int numOfComponents = 8;
++
++  for (int i = 0; i < numOfComponents; i++) {
++    VLOG(1) << "Removing:" << user_data_dir.AppendASCII(unwantedComponentsPaths[i]);
++    base::ThreadPool::PostTask(
++        FROM_HERE, {base::TaskPriority::BEST_EFFORT, base::MayBlock()},
++        base::BindOnce(base::GetDeletePathRecursivelyCallback(),
++                      user_data_dir.AppendASCII(unwantedComponentsPaths[i])));
++  }
++}
++
++}  // namespace component_updater
+--- /dev/null
++++ b/components/component_updater/component_remover.h
+@@ -0,0 +1,18 @@
++// Copyright 2017 The Chromium Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++#ifndef COMPONENTS_COMPONENT_UPDATER_COMPONENT_REMOVER_H_
++#define COMPONENTS_COMPONENT_UPDATER_COMPONENT_REMOVER_H_
++
++namespace base {
++class FilePath;
++}  // namespace base
++
++namespace component_updater {
++
++void DeleteUnwantedComponents(const base::FilePath& user_data_dir);
++
++}  // namespace component_updater
++
++#endif  // COMPONENTS_COMPONENT_UPDATER_COMPONENT_REMOVER_H_

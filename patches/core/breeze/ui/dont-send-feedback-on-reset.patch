@@ -1,0 +1,35 @@
+--- a/chrome/browser/resources/settings/reset_page/reset_profile_dialog.html
++++ b/chrome/browser/resources/settings/reset_page/reset_profile_dialog.html
+@@ -33,8 +33,10 @@
+           $i18n{resetDialogCommit}
+         </cr-button>
+       </div>
++<if expr="false">
+       <div slot="footer">
+         <cr-checkbox id="sendSettings">
+           $i18nRaw{resetPageFeedback}</cr-checkbox>
+       </div>
++</if>
+     </cr-dialog>
+--- a/chrome/browser/resources/settings/reset_page/reset_profile_dialog.js
++++ b/chrome/browser/resources/settings/reset_page/reset_profile_dialog.js
+@@ -95,8 +95,10 @@
+       this.browserProxy_.onHideResetProfileDialog();
+     });
+ 
++    // <if expr="false">
+     this.$$('cr-checkbox a')
+         .addEventListener('click', this.onShowReportedSettingsTap_.bind(this));
++    // </if>
+   },
+ 
+   /** @private */
+@@ -144,7 +146,7 @@
+     this.clearingInProgress_ = true;
+     this.browserProxy_
+         .performResetProfileSettings(
+-            this.$.sendSettings.checked, this.resetRequestOrigin_)
++            false, this.resetRequestOrigin_)
+         .then(() => {
+           this.clearingInProgress_ = false;
+           if (this.$.dialog.open) {

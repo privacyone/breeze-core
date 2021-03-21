@@ -1,0 +1,158 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<meta name="color-scheme" content="light dark">
+<title>Proprietary Components</title>
+<link rel="stylesheet" href="breeze://resources/css/text_defaults.css">
+<style>
+html {
+  --google-blue-50: rgb(232, 240, 254);
+  --google-blue-300: rgb(0, 174, 239);
+  --google-blue-600: rgb(26, 115, 232);
+  --google-blue-900: rgb(23, 78, 166);
+  --google-grey-200: rgb(232, 234, 237);
+  --google-grey-800: rgb(60, 64, 67);
+  --google-grey-900: rgb(32, 33, 36);
+
+  --interactive-color: var(--google-blue-600);
+  --primary-color: var(--google-grey-900);
+
+  --product-background: var(--google-blue-50);
+  --product-text-color: var(--google-blue-900);
+
+  background: white;
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    --interactive-color: var(--google-blue-300);
+    --primary-color: var(--google-grey-200);
+
+    --product-background: var(--google-grey-800);
+    --product-text-color: var(--google-grey-200);
+
+    background: var(--google-grey-900);
+  }
+}
+
+body {
+  color: var(--primary-color);
+  font-size: 84%;
+  max-width: 1020px;
+}
+a {
+  color: var(--interactive-color);
+}
+.page-title {
+  font-size: 164%;
+  font-weight: bold;
+}
+.product {
+  background-color: var(--product-background);
+  color: var(--product-text-color);
+  border-radius: 5px;
+  margin-top: 16px;
+  overflow: auto;
+  padding: 2px;
+}
+.product .title {
+  float: left;
+  font-size: 110%;
+  font-weight: bold;
+  margin: 3px;
+}
+.product .homepage {
+  color: var(--interactive-color);
+  float: right;
+  margin: 3px;
+  text-align: right;
+}
+.product .homepage::before {
+  content: " - ";
+}
+.product .show {
+  color: var(--interactive-color);
+  float: right;
+  margin: 3px;
+  text-align: right;
+  text-decoration: underline;
+}
+.licence {
+  border-radius: 3px;
+  clear: both;
+  display: none;
+  padding: 16px;
+}
+.licence h3 {
+  margin-top: 0;
+}
+.licence pre {
+  white-space: pre-wrap;
+}
+.dialog #print-link,
+.dialog .homepage {
+  display: none;
+}
+
+input + label + div {
+  display: none;
+}
+input + label::after {
+  content: "show notice";
+  cursor: pointer;
+}
+input:checked + label + div {
+  display: block;
+}
+input:checked + label::after {
+  content: "hide notice";
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+<span class="page-title" style="float:left;">Proprietary Components</span>
+<a id="print-link" href="#" style="float:right;" hidden>Print</a>
+<div style="clear:both; overflow:auto;"><!-- Fuck all these people -->
+
+<div class="product">
+<span class="title">AVC H.264</span>
+<span class="homepage"><a href="https://www.mpegla.com">homepage</a></span>
+<input type="checkbox" hidden id="0">
+<label class="show" for="0" tabindex="0"></label>
+<div class="licence">
+<pre>
+AVC PATENT PORTFOLIO LICENSE FOR THE PERSONAL USE OF A CONSUMER OR OTHER USES IN WHICH IT DOES NOT RECEIVE REMUNERATION TO (i) ENCODE VIDEO IN COMPLIANCE WITH THEAVC STANDARD (“AVC VIDEO”) AND/OR (ii) DECODE AVC VIDEO THAT WAS ENCODED BY A CONSUMER ENGAGED IN A PERSONAL ACTIVITY AND/OR WAS OBTAINED FROM A VIDEO PROVIDER LICENSED TO PROVIDE AVC VIDEO. NO LICENSE IS GRANTED OR SHALL BE IMPLIED FOR ANY OTHER USE. ADDITIONAL INFORMATION MAY BE OBTAINED FROM MPEG LA, L.L.C. SEE HTTP://WWW.MPEGLA.COM
+</pre>
+</div>
+</div>
+
+<div class="product">
+<span class="title">MPEG-4</span>
+<span class="homepage"><a href="https://www.mpegla.com">homepage</a></span>
+<input type="checkbox" hidden id="1">
+<label class="show" for="1" tabindex="0"></label>
+<div class="licence">
+<pre>
+THIS PRODUCT IS LICENSED UNDER THE MPEG-4 VISUAL PATENT PORTFOLIO LICENSE FOR THE PERSONAL AND NON-COMMERCIAL USE OF A CONSUMER FOR (i) ENCODING VIDEO IN COMPLIANCE WITH THE MPEG-4 VISUAL STANDARD ("MPEG-4 VIDEO") AND/OR (ii) DECODING MPEG-4 VIDEO THAT WAS ENCODED BY A CONSUMER ENGAGED IN A PERSONAL AND NONCOMMERCIAL ACTIVITY AND/OR WAS OBTAINED FROM A VIDEO PROVIDER LICENSED BY MPEG LA TO PROVIDE MPEG-4 VIDEO. NO LICENSE IS GRANTED OR SHALL BE IMPLIED FOR ANY OTHER USE. ADDITIONAL INFORMATION INCLUDING THAT RELATING TO PROMOTIONAL, INTERNAL AND COMMERCIAL USES AND LICENSING MAY BE OBTAINED FROM MPEG LA, LLC. SEE HTTP://WWW.MPEGLA.COM
+</pre>
+</div>
+</div>
+
+<div class="product">
+<span class="title">Widevine Content Decryption Module by Google Inc.</span>
+<span class="homepage"><a href="https://www.widevine.com/">homepage</a></span>
+<input type="checkbox" hidden id="2">
+<label class="show" for="2" tabindex="0"></label>
+<div class="licence">
+<pre>
+Widevine is a proprietary digital rights management system (DRM) provided by Google Inc. Breeze includes the Widevine content decryption module (CDM) as a component to enable playback of encrypted media in compliance with the Encrypted Media Extensions specification. Encrypted media is typically used by sites to protect against copying of premium media content. Visit https://www.w3.org/TR/encrypted-media/ for more information on Encrypted Media Extensions. Use of this component is subject to the Google Privacy Policy which can be found at https://policies.google.com/privacy
+</pre>
+</div>
+</div>
+
+</div>
+</body>
+</html>

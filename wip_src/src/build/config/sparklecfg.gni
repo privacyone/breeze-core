@@ -1,0 +1,7 @@
+import("//build/util/branding.gni")
+
+breeze_feed_url = "https://updates.breezebrowser.io/sparkle/Breeze/stable/appcast.xml"
+
+breeze_product_dir_name = "Privacy One/Breeze"
+
+breeze_ed_key = "CGMLjfDvbr0pEXgRreocTGn6guGW7+g8CxmegMtESrU="

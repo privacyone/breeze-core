@@ -1,0 +1,33 @@
+--- a/chrome/browser/renderer_context_menu/accessibility_labels_menu_observer.cc
++++ b/chrome/browser/renderer_context_menu/accessibility_labels_menu_observer.cc
+@@ -107,20 +107,7 @@ void AccessibilityLabelsMenuObserver::Ex
+ }
+ 
+ bool AccessibilityLabelsMenuObserver::ShouldShowLabelsItem() {
+-  // Hidden behind a feature flag.
+-  if (!base::FeatureList::IsEnabled(features::kExperimentalAccessibilityLabels))
+     return false;
+-
+-  // Disabled by policy.
+-  Profile* profile = Profile::FromBrowserContext(proxy_->GetBrowserContext());
+-  if (!profile->GetPrefs()->GetBoolean(
+-          prefs::kAccessibilityImageLabelsEnabled) &&
+-      profile->GetPrefs()->IsManagedPreference(
+-          prefs::kAccessibilityImageLabelsEnabled)) {
+-    return false;
+-  }
+-
+-  return accessibility_state_utils::IsScreenReaderEnabled();
+ }
+ 
+ void AccessibilityLabelsMenuObserver::ShowConfirmBubble(Profile* profile,
+--- a/chrome/browser/renderer_context_menu/render_view_context_menu.cc
++++ b/chrome/browser/renderer_context_menu/render_view_context_menu.cc
+@@ -2499,6 +2499,7 @@ bool RenderViewContextMenu::IsDevCommand
+ }
+ 
+ bool RenderViewContextMenu::IsTranslateEnabled() const {
++  return false;
+   ChromeTranslateClient* chrome_translate_client =
+       ChromeTranslateClient::FromWebContents(embedder_web_contents_);
+   // If no |chrome_translate_client| attached with this WebContents or we're

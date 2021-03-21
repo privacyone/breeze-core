@@ -1,0 +1,30 @@
+--- a/components/search_engines/prepopulated_engines.json
++++ b/components/search_engines/prepopulated_engines.json
+@@ -74,1 +74,1 @@
+-       "keyword": "bing.com",
++       "keyword": "!b",
+@@ -106,1 +106,1 @@
+-       "keyword": "duckduckgo.com",
++       "keyword": "!d",
+@@ -117,14 +117,4 @@
+-      "keyword": "9oo91e.qjz9zk",
+-      "favicon_url": "https://www.9oo91e.qjz9zk/images/branding/product/ico/googleg_lodp.ico",
+-      "search_url": "{google:baseURL}search?q={searchTerms}&{google:RLZ}{google:originalQueryForSuggestion}{google:assistedQueryStats}{google:searchFieldtrialParameter}{google:iOSSearchLanguage}{google:prefetchSource}{google:searchClient}{google:sourceId}{google:contextualSearchVersion}ie={inputEncoding}",
+-      "suggest_url": "{google:baseSuggestURL}search?{google:searchFieldtrialParameter}client={google:suggestClient}&gs_ri={google:suggestRid}&xssi=t&q={searchTerms}&{google:inputType}{google:omniboxFocusType}{google:cursorPosition}{google:currentPageUrl}{google:pageClassification}{google:searchVersion}{google:sessionToken}{google:prefetchQuery}sugkey={google:suggestAPIKeyParameter}",
+-      "image_url": "{google:baseURL}searchbyimage/upload",
+-      "contextual_search_url": "{google:baseURL}_/contextualsearch?{google:contextualSearchVersion}{google:contextualSearchContextData}",
+-      "image_url_post_params": "encoded_image={google:imageThumbnail},image_url={google:imageURL},sbisrc={google:imageSearchSource},original_width={google:imageOriginalWidth},original_height={google:imageOriginalHeight}",
+-      "alternate_urls": [
+-        "{google:baseURL}#q={searchTerms}",
+-        "{google:baseURL}search#q={searchTerms}",
+-        "{google:baseURL}webhp#q={searchTerms}",
+-        "{google:baseURL}s#q={searchTerms}",
+-        "{google:baseURL}s?q={searchTerms}"
+-      ],
++      "keyword": "!g",
++      "favicon_url": "https://www.google.com/images/branding/product/ico/googleg_lodp.ico",
++      "search_url": "https://www.google.com/search?q={searchTerms}",
++      "suggest_url": "https://www.google.com/complete/search?client=chrome&q={searchTerms}",
+@@ -208,1 +198,1 @@
+-       "keyword": "yahoo.com",
++       "keyword": "!y",

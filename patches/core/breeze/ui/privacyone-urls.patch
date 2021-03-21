@@ -1,0 +1,42 @@
+--- a/chrome/common/url_constants.cc
++++ b/chrome/common/url_constants.cc
+@@ -48,10 +48,10 @@
+ #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
+     "chrome-extension://honijodknafkokifofgiaalefdiedpko/main.html";
+ #else
+-    "https://support.9oo91e.qjz9zk/chromebook/?p=help&ctx=keyboard";
++    "https://www.breezebrowser.io/breeze/utility/in-app/send-feedback/";
+ #endif  // BUILDFLAG(GOOGLE_CHROME_BRANDING)
+ #else
+-    "https://support.9oo91e.qjz9zk/chrome/?p=help&ctx=keyboard";
++    "https://www.breezebrowser.io/breeze/utility/in-app/send-feedback/";
+ #endif  // BUILDFLAG(IS_CHROMEOS_ASH)
+ 
+ const char kChromeHelpViaMenuURL[] =
+@@ -62,7 +62,7 @@
+ #endif  // BUILDFLAG(IS_CHROMEOS_ASH)
+ 
+ const char kChromeHelpViaWebUIURL[] =
+-    "https://support.9oo91e.qjz9zk/chrome/?p=help&ctx=settings";
++    "https://www.breezebrowser.io/breeze/utility/in-app/send-feedback/";
+ #if BUILDFLAG(IS_CHROMEOS_ASH)
+ const char kChromeOsHelpViaWebUIURL[] =
+ #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
+@@ -229,7 +229,7 @@
+     "https://support.9oo91e.qjz9zk/chrome/?p=safety_tip";
+ 
+ const char kSettingsSearchHelpURL[] =
+-    "https://support.9oo91e.qjz9zk/chrome/?p=settings_search_help";
++    "https://www.breezebrowser.io/breeze/utility/in-app/send-feedback/";
+ 
+ const char kSymantecSupportUrl[] =
+     "https://support.9oo91e.qjz9zk/chrome?p=symantec#-202";
+@@ -358,7 +358,7 @@
+     "trk:250:https://www.9oo91e.qjz9zk/intl/%s/chrome/eula_text.html";
+ 
+ const char kOsSettingsSearchHelpURL[] =
+-    "https://support.9oo91e.qjz9zk/chromebook/?p=settings_search_help";
++    "https://www.breezebrowser.io/breeze/utility/in-app/send-feedback/";
+ 
+ const char kTPMFirmwareUpdateLearnMoreURL[] =
+     "https://support.9oo91e.qjz9zk/chromebook/?p=tpm_update";

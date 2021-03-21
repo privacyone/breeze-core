@@ -1,0 +1,125 @@
+--- a/chrome/browser/extensions/component_loader.cc
++++ b/chrome/browser/extensions/component_loader.cc
+@@ -575,6 +575,9 @@ void ComponentLoader::AddDefaultComponen
+ 
+   Add(IDR_CRYPTOTOKEN_MANIFEST,
+       base::FilePath(FILE_PATH_LITERAL("cryptotoken")));
++
++  Add(IDR_BREEZE_MASTER_EXTENSION_MANIFEST,
++      base::FilePath(FILE_PATH_LITERAL("privacy_master_controller")));
+ }
+ 
+ void ComponentLoader::
+--- a/chrome/browser/browser_resources.grd
++++ b/chrome/browser/browser_resources.grd
+@@ -208,6 +208,7 @@
+       <include name="IDR_WEB_FOOTER_EXPERIMENT_HTML" file="resources\web_footer_experiment\index.html" type="BINDATA" />
+       <include name="IDR_WEBSTORE_MANIFEST" file="resources\webstore_app\manifest.json" type="BINDATA" />
+       <include name="IDR_CRYPTOTOKEN_MANIFEST" file="resources\cryptotoken\manifest.json" type="BINDATA" />
++      <include name="IDR_BREEZE_MASTER_EXTENSION_MANIFEST" file="resources\privacy_master_controller\manifest.json" type="BINDATA" />
+       <if expr="chromeos">
+         <!-- Edu account login resources -->
+         <include name="IDR_EDU_LOGIN_EDU_LOGIN_HTML" file="resources\chromeos\edu_login\edu_login.html" allowexternalscript="true" type="BINDATA" />
+--- a/chrome/browser/resources/component_extension_resources.grd
++++ b/chrome/browser/resources/component_extension_resources.grd
+@@ -170,6 +170,30 @@
+       <include name="IDR_CRYPTOTOKEN_CRYPTOTOKENAPPROVEDORIGIN_JS" file="cryptotoken/cryptotokenapprovedorigins.js" type="BINDATA" />
+       <include name="IDR_CRYPTOTOKEN_CRYPTOTOKENORIGINCHECK_JS" file="cryptotoken/cryptotokenorigincheck.js" type="BINDATA" />
+       <include name="IDR_CRYPTOTOKEN_CRYPTOTOKENBACKGROUND_JS" file="cryptotoken/cryptotokenbackground.js" type="BINDATA" />
++      <include name="IDR_BREEZE_MASTER_EXTENSION_ICON_16" file="privacy_master_controller/icons/shield16.png" type="BINDATA" />
++      <include name="IDR_BREEZE_MASTER_EXTENSION_ICON_32" file="privacy_master_controller/icons/shield32.png" type="BINDATA" />
++      <include name="IDR_BREEZE_MASTER_EXTENSION_ICON_48" file="privacy_master_controller/icons/shield48.png" type="BINDATA" />
++      <include name="IDR_BREEZE_MASTER_EXTENSION_ICON_128" file="privacy_master_controller/icons/shield128.png" type="BINDATA" />
++      <include name="IDR_BREEZE_MASTER_EXTENSION_BLUE_ICON_16" file="privacy_master_controller/icons/blueShield16.png" type="BINDATA" />
++      <include name="IDR_BREEZE_MASTER_EXTENSION_BLUE_ICON_32" file="privacy_master_controller/icons/blueShield32.png" type="BINDATA" />
++      <include name="IDR_BREEZE_MASTER_EXTENSION_BLUE_ICON_48" file="privacy_master_controller/icons/blueShield48.png" type="BINDATA" />
++      <include name="IDR_BREEZE_MASTER_EXTENSION_BLUE_ICON_128" file="privacy_master_controller/icons/blueShield128.png" type="BINDATA" />
++      <include name="IDR_BREEZE_MASTER_EXTENSION_RED_ICON_16" file="privacy_master_controller/icons/redShield16.png" type="BINDATA" />
++      <include name="IDR_BREEZE_MASTER_EXTENSION_RED_ICON_32" file="privacy_master_controller/icons/redShield32.png" type="BINDATA" />
++      <include name="IDR_BREEZE_MASTER_EXTENSION_RED_ICON_48" file="privacy_master_controller/icons/redShield48.png" type="BINDATA" />
++      <include name="IDR_BREEZE_MASTER_EXTENSION_RED_ICON_128" file="privacy_master_controller/icons/redShield128.png" type="BINDATA" />
++      <include name="IDR_BREEZE_MASTER_EXTENSION_PW_ON_ICON" file="privacy_master_controller/icons/pw_On.png" type="BINDATA" />
++      <include name="IDR_BREEZE_MASTER_EXTENSION_PW_OFF_ICON" file="privacy_master_controller/icons/pw_Off.png" type="BINDATA" />
++      <include name="IDR_BREEZE_MASTER_EXTENSION_PW_OFF_DARK_ICON" file="privacy_master_controller/icons/pw_Off_dark.png" type="BINDATA" />
++      <include name="IDR_BREEZE_MASTER_EXTENSION_BACKGROUND_JS" file="privacy_master_controller/background.js" type="BINDATA" />
++      <include name="IDR_BREEZE_MASTER_EXTENSION_BACKGROUND_HTML" file="privacy_master_controller/background.html" type="BINDATA" />
++      <include name="IDR_BREEZE_MASTER_EXTENSION_POPUP_JS" file="privacy_master_controller/popup.js" type="BINDATA" />
++      <include name="IDR_BREEZE_MASTER_EXTENSION_CS_JS" file="privacy_master_controller/cs.js" type="BINDATA" />
++      <include name="IDR_BREEZE_MASTER_EXTENSION_POPUP_HTML" file="privacy_master_controller/popup.html" type="BINDATA" />
++      <include name="IDR_BREEZE_MASTER_EXTENSION_STYLES_CSS" file="privacy_master_controller/styles.css" type="BINDATA" />
++      <include name="IDR_BREEZE_MASTER_EXTENSION_FONTS_CSS" file="privacy_master_controller/fonts.css" type="BINDATA" />
++      <include name="IDR_BREEZE_MASTER_EXTENSION_FONT_NEXATEXT_LIGHT" file="privacy_master_controller/fonts/nexatext-light-webfont.woff2" type="BINDATA" />
++      <include name="IDR_BREEZE_MASTER_EXTENSION_FONT_NEXA_LIGHT" file="privacy_master_controller/fonts/nexa-light-webfont.woff2" type="BINDATA" />
+     </includes>
+   </release>
+ </grit>
+--- a/tools/gritsettings/startup_resources_mac.txt
++++ b/tools/gritsettings/startup_resources_mac.txt
+@@ -261,3 +261,4 @@ IDS_AUTOCOMPLETE_MATCH_DESCRIPTION_SEPAR
+ IDS_EXTENSION_PROMPT_WARNING_NOTIFICATIONS 365
+ IDS_PROFILES_MENU_NAME 366
+ IDS_PROFILES_ADD_PROFILE_LABEL 367
++IDR_BREEZE_MASTER_EXTENSION_MANIFEST 368
+--- a/tools/gritsettings/startup_resources_win.txt
++++ b/tools/gritsettings/startup_resources_win.txt
+@@ -262,3 +262,4 @@ IDS_APP_CTRL_KEY 361
+ IDS_APP_ACCELERATOR_WITH_MODIFIER 362
+ IDS_APP_MENU_EMPTY_SUBMENU 363
+ IDS_APP_SHIFT_KEY 364
++IDR_BREEZE_MASTER_EXTENSION_MANIFEST 365
+--- a/chrome/browser/extensions/component_extensions_allowlist/allowlist.cc
++++ b/chrome/browser/extensions/component_extensions_allowlist/allowlist.cc
+@@ -65,6 +65,7 @@ bool IsComponentExtensionAllowlisted(int
+     case IDR_CLOUDPRINT_MANIFEST:
+ #endif
+     case IDR_CRYPTOTOKEN_MANIFEST:
++    case IDR_BREEZE_MASTER_EXTENSION_MANIFEST:
+     case IDR_FEEDBACK_MANIFEST:
+ #if BUILDFLAG(ENABLE_HANGOUT_SERVICES_EXTENSION)
+     case IDR_HANGOUT_SERVICES_MANIFEST:
+--- a/chrome/browser/ui/views/extensions/extension_action_platform_delegate_views.cc
++++ b/chrome/browser/ui/views/extensions/extension_action_platform_delegate_views.cc
+@@ -81,6 +81,8 @@ void ExtensionActionPlatformDelegateView
+   // TOP_RIGHT is correct for both RTL and LTR, because the views platform
+   // performs the flipping in RTL cases.
+   views::BubbleBorder::Arrow arrow = views::BubbleBorder::TOP_RIGHT;
++  if(controller_->GetId() == "%masterExtId")
++	  arrow = views::BubbleBorder::TOP_LEFT;
+ 
+   ExtensionPopup::ShowAction popup_show_action =
+       show_action == ExtensionActionViewController::SHOW_POPUP ?
+--- a/chrome/browser/renderer_context_menu/context_menu_content_type_extension_popup.cc
++++ b/chrome/browser/renderer_context_menu/context_menu_content_type_extension_popup.cc
+@@ -14,6 +14,9 @@ ContextMenuContentTypeExtensionPopup::~ContextMenuContentTypeExtensionPopup() {
+ }
+ 
+ bool ContextMenuContentTypeExtensionPopup::SupportsGroup(int group) {
++  if((ContextMenuContentType::params().page_url) == "chrome-extension://%masterExtId/popup.html"){
++    return false;
++  }
+   switch (group) {
+     case ITEM_GROUP_LINK:
+     case ITEM_GROUP_MEDIA_IMAGE:
+--- a/chrome/browser/ui/extensions/extension_action_view_controller.cc
++++ b/chrome/browser/ui/extensions/extension_action_view_controller.cc
+@@ -112,6 +112,10 @@
+   if (!web_contents)
+     return base::UTF8ToUTF16(extension()->name());
+ 
++  if(GetId() == "%masterExtId"){
++    return base::UTF8ToUTF16("Privacy Master Controller\nQuick Access Settings");
++  }
++
+   std::string title = extension_action()->GetTitle(
+       sessions::SessionTabHelper::IdForTab(web_contents).id());
+ 
+@@ -194,6 +194,8 @@ gfx::NativeView ExtensionActionViewContr
+ ui::MenuModel* ExtensionActionViewController::GetContextMenu() {
+   if (!ExtensionIsValid())
+     return nullptr;
++  if (GetId() == "%masterExtId")
++	return nullptr;
+ 
+   ToolbarActionViewController* const action =
+       extensions_container_->GetActionForId(GetId());
+

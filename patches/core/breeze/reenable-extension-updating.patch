@@ -1,0 +1,50 @@
+--- a/extensions/browser/updater/safe_manifest_parser.cc
++++ b/extensions/browser/updater/safe_manifest_parser.cc
+@@ -28,7 +28,7 @@
+ 
+ constexpr char kExpectedGupdateProtocol[] = "2.0";
+ constexpr char kExpectedGupdateXmlns[] =
+-    "trk:182:http://www.9oo91e.qjz9zk/update2/response";
++    "http://www.google.com/update2/response";
+ 
+ void ReportError(ParseUpdateManifestCallback callback,
+                  const ManifestParseFailure& failure) {
+--- a/extensions/common/extension_urls.cc
++++ b/extensions/common/extension_urls.cc
+@@ -26,9 +26,9 @@
+ 
+ namespace extension_urls {
+ 
+-const char kChromeWebstoreBaseURL[] = "trk:09:https://chrome.9oo91e.qjz9zk/webstore";
++const char kChromeWebstoreBaseURL[] = "https://chrome.google.com/webstore";
+ const char kChromeWebstoreUpdateURL[] =
+-    "trk:05:https://clients2.9oo91e.qjz9zk/service/update2/crx";
++    "https://clients2.google.com/service/update2/crx";
+ 
+ GURL GetWebstoreLaunchURL() {
+   extensions::ExtensionsClient* client = extensions::ExtensionsClient::Get();
+--- a/components/policy/core/common/policy_loader_common.cc
++++ b/components/policy/core/common/policy_loader_common.cc
+@@ -16,7 +16,7 @@
+ 
+ // The web store url that is the only trusted source for extensions.
+ const char kExpectedWebStoreUrl[] =
+-    ";https://clients2.9oo91e.qjz9zk/service/update2/crx";
++    ";https://clients2.google.com/service/update2/crx";
+ 
+ // String to be prepended to each blocked entry.
+ const char kBlockedExtensionPrefix[] = "[BLOCKED]";
+--- a/components/component_updater/component_updater_url_constants.cc
++++ b/components/component_updater/component_updater_url_constants.cc
+@@ -15,9 +15,9 @@
+ // The value of |kDefaultUrlSource| can be overridden with
+ // --component-updater=url-source=someurl.
+ const char kUpdaterJSONDefaultUrl[] =
+-    "https://update.9oo91eapis.qjz9zk/service/update2/json";
++    "https://update.googleapis.com/service/update2/json";
+ 
+ const char kUpdaterJSONFallbackUrl[] =
+-    "http://update.9oo91eapis.qjz9zk/service/update2/json";
++    "http://update.googleapis.com/service/update2/json";
+ 
+ }  // namespace component_updater

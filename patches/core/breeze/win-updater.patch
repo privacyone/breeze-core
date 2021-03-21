@@ -1,0 +1,450 @@
+--- a/chrome/browser/BUILD.gn
++++ b/chrome/browser/BUILD.gn
+@@ -4296,7 +4296,16 @@ static_library("browser") {
+         "notifications/win/notification_util.h",
+       ]
+     }
++    if (is_win) {
++      sources += [
++        "//chrome/browser/google/google_update_win.cc",
++        "//chrome/browser/google/google_update_win.h",
++        "//chrome/browser/google/switches.cc",
++        "//chrome/browser/google/switches.h",
++      ]
+ 
++      deps += [ "//google_update" ]
++    }
+     if (is_chrome_branded) {
+       deps += [
+         "//chrome/browser/win/conflicts:module_list_proto",
+--- a/chrome/browser/ui/BUILD.gn
++++ b/chrome/browser/ui/BUILD.gn
+@@ -3070,10 +3070,12 @@ static_library("ui") {
+       deps += [ "//google_update" ]
+     } else {
+       sources += [
+-        "webui/help/version_updater_basic.cc",
+-        "webui/help/version_updater_basic.h",
++        "webui/help/version_updater_win.cc",
++        "webui/help/version_updater_win.h",
+       ]
++      deps += [ "//google_update" ]
+     }
++    
+   } else {  # 'OS!="win"
+     # The Cast Linux build sets toolkit_views to false, but many files in this
+     # target include views-related files unconditionally, causing `gn check`
+--- a/chrome/install_static/chromium_install_modes.cc
++++ b/chrome/install_static/chromium_install_modes.cc
+@@ -31,37 +31,36 @@ const InstallConstants kInstallModes[] = {
+         L"",             // Empty install_suffix for the primary install mode.
+         L"",             // No logo suffix for the primary install mode.
+-        L"",          // Empty app_guid since no integraion with Google Update.
+-        L"Chromium",  // A distinct base_app_name.
+-        L"Chromium",  // A distinct base_app_id.
+-        L"ChromiumHTM",                             // ProgID prefix.
+-        L"Chromium HTML Document",                  // ProgID description.
+-        L"{7D2B3E1D-D096-4594-9D8F-A6667F12E0AC}",  // Active Setup GUID.
+-        L"{A2DF06F9-A21A-44A8-8A99-8B9C84F29160}",  // CommandExecuteImpl CLSID.
+-        {0x635EFA6F,
+-         0x08D6,
+-         0x4EC9,
+-         {0xBD, 0x14, 0x8A, 0x0F, 0xDE, 0x97, 0x51,
+-          0x59}},  // Toast Activator CLSID.
+-        {0xD133B120,
+-         0x6DB4,
+-         0x4D6B,
+-         {0x8B, 0xFE, 0x83, 0xBF, 0x8C, 0xA1, 0xB1, 0xB0}},  // Elevator CLSID.
+-
+-        {0xb88c45b9,
+-         0x8825,
+-         0x4629,
+-         {0xb8, 0x3e, 0x77, 0xcc, 0x67, 0xd9, 0xce,
+-          0xed}},  // IElevator IID and TypeLib
+-                   // {B88C45B9-8825-4629-B83E-77CC67D9CEED}.
++        L"{BAD153F4-2C4B-4944-8016-85FFB2BAE7F3}",
++        L"Breeze",  // A distinct base_app_name.
++        L"Breeze",  // A distinct base_app_id.
++        L"BreezeHTML",                             // ProgID prefix.
++        L"Breeze HTML Document",                  // ProgID description.
++        L"{BAD153F4-2C4B-4944-8016-85FFB2BAE7F3}",  // Active Setup GUID.
++        L"{C6230470-C2A1-49D9-852D-896B7877382F}",  // CommandExecuteImpl CLSID.
++        {0xD1EBD06E,
++         0xEA4C,
++         0x4862,
++         {0x82, 0xB9, 0x6B, 0xD2, 0x87, 0x30, 0xF0,
++          0xE2}},  // Toast Activator CLSID.
++        {0x30983B48,
++         0x4611,
++         0x4957,
++         {0xA3, 0x35, 0xB4, 0x33, 0x65, 0x17, 0x52, 0xB5}},  // Elevator CLSID.
++        {0xAE220999,
++         0x529C,
++         0x46C1,
++         {0xB4, 0x34, 0x2D, 0x96, 0x5F, 0xE7, 0x4E,
++          0xD3}},  // IElevator IID and TypeLib
++                   // {AE220999-529C-46C1-B434-2D965FE74ED3}.
+         L"",       // Empty default channel name since no update integration.
+-        ChannelStrategy::UNSUPPORTED,
++        ChannelStrategy::ADDITIONAL_PARAMETERS,
+         true,   // Supports system-level installs.
+         true,   // Supports in-product set as default browser UX.
+-        false,  // Does not support retention experiments.
++        true,  // Does not support retention experiments.
+         icon_resources::kApplicationIndex,  // App icon resource index.
+         IDR_MAINFRAME,                      // App icon resource id.
+         L"S-1-15-2-3251537155-1984446955-2931258699-841473695-1938553385-"
+-        L"924012148-",  // App container sid prefix for sandbox.
++        L"994012148-",  // App container sid prefix for sandbox.
+     },
+ };
+ 
+--- a/content/public/browser/content_browser_client.cc
++++ b/content/public/browser/content_browser_client.cc
+@@ -709,7 +709,7 @@ base::string16 ContentBrowserClient::GetAppContainerSidForSandboxType(
+   // same AppContainer.
+   return base::string16(
+       L"S-1-15-2-3251537155-1984446955-2931258699-841473695-1938553385-"
+-      L"924012148-129201922");
++      L"994012148-129201922");
+ }
+ 
+ bool ContentBrowserClient::IsRendererCodeIntegrityEnabled() {
+--- a/chrome/installer/mini_installer/chrome_appid.cc
++++ b/chrome/installer/mini_installer/chrome_appid.cc
+@@ -14,7 +14,7 @@ const wchar_t kBetaAppGuid[] = L"{8237E44A-0054-442C-B6B6-EA0509993955}";
+ const wchar_t kDevAppGuid[] = L"{401C381F-E0DE-4B85-8BD8-3F3F14FBDA57}";
+ const wchar_t kSxSAppGuid[] = L"{4ea16ac7-fd5a-47c3-875b-dbf4a2008c20}";
+ #else   // BUILDFLAG(GOOGLE_CHROME_BRANDING)
+-const wchar_t kAppGuid[] = L"";
++const wchar_t kAppGuid[] = L"BAD153F4-2C4B-4944-8016-85FFB2BAE7F3";
+ #endif  // BUILDFLAG(GOOGLE_CHROME_BRANDING)
+ 
+ }  // namespace google_update
+--- a/chrome/installer/mini_installer/mini_installer_constants.cc
++++ b/chrome/installer/mini_installer/mini_installer_constants.cc
+@@ -70,12 +70,12 @@ const wchar_t kCleanupRegistryKey[] = L"Software\\Google";
+ #else
+ // The path to the key containing each app's Clients registry key.
+ // No trailing slash on this one because the app's GUID is not appended.
+-const wchar_t kClientsKeyBase[] = L"Software\\Chromium";
++const wchar_t kClientsKeyBase[] = L"Software\\Privacy One\\Update\\Clients\\";
+ // The path to the key containing each app's Client State registry key.
+ // No trailing slash on this one because the app's GUID is not appended.
+-const wchar_t kClientStateKeyBase[] = L"Software\\Chromium";
++const wchar_t kClientStateKeyBase[] = L"Software\\Privacy One\\Update\\ClientState\\";
+ // The path to the key in which kCleanupRegistryValue is found.
+-const wchar_t kCleanupRegistryKey[] = L"Software\\Chromium";
++const wchar_t kCleanupRegistryKey[] = L"Software\\Privacy One";
+ #endif
+ 
+ }  // namespace mini_installer
+--- a/chrome/installer/mini_installer/regkey.cc
++++ b/chrome/installer/mini_installer/regkey.cc
+@@ -89,7 +89,7 @@ LONG OpenClientsKey(HKEY root_key,
+   StackString<MAX_PATH> clients_key;
+   if (!clients_key.assign(kClientsKeyBase))
+     return ERROR_BUFFER_OVERFLOW;
+-#if BUILDFLAG(GOOGLE_CHROME_BRANDING)
++#if 1
+   if (!clients_key.append(app_guid))
+     return ERROR_BUFFER_OVERFLOW;
+ #endif
+@@ -104,7 +104,7 @@ LONG OpenClientStateKey(HKEY root_key,
+   StackString<MAX_PATH> client_state_key;
+   if (!client_state_key.assign(kClientStateKeyBase))
+     return ERROR_BUFFER_OVERFLOW;
+-#if BUILDFLAG(GOOGLE_CHROME_BRANDING)
++#if 1
+   if (!client_state_key.append(app_guid))
+     return ERROR_BUFFER_OVERFLOW;
+ #endif
+--- a/chrome/install_static/install_modes.cc
++++ b/chrome/install_static/install_modes.cc
+@@ -10,18 +10,18 @@ namespace install_static {
+ 
+ namespace {
+ 
+-#if BUILDFLAG(USE_GOOGLE_UPDATE_INTEGRATION)
++#if 1
+ std::wstring GetClientsKeyPathForApp(const wchar_t* app_guid) {
+-  return std::wstring(L"Software\\Google\\Update\\Clients\\").append(app_guid);
++  return std::wstring(L"Software\\Privacy One\\Update\\Clients\\").append(app_guid);
+ }
+ 
+ std::wstring GetClientStateKeyPathForApp(const wchar_t* app_guid) {
+-  return std::wstring(L"Software\\Google\\Update\\ClientState\\")
++  return std::wstring(L"Software\\Privacy One\\Update\\ClientState\\")
+       .append(app_guid);
+ }
+ 
+ std::wstring GetClientStateMediumKeyPathForApp(const wchar_t* app_guid) {
+-  return std::wstring(L"Software\\Google\\Update\\ClientStateMedium\\")
++  return std::wstring(L"Software\\Privacy One\\Update\\ClientStateMedium\\")
+       .append(app_guid);
+ }
+ #else
+@@ -33,7 +33,7 @@ std::wstring GetUnregisteredKeyPathForProduct() {
+ }  // namespace
+ 
+ std::wstring GetClientsKeyPath(const wchar_t* app_guid) {
+-#if !BUILDFLAG(USE_GOOGLE_UPDATE_INTEGRATION)
++#if 0
+   return GetUnregisteredKeyPathForProduct();
+ #else
+   return GetClientsKeyPathForApp(app_guid);
+@@ -41,7 +41,7 @@ std::wstring GetClientsKeyPath(const wchar_t* app_guid) {
+ }
+ 
+ std::wstring GetClientStateKeyPath(const wchar_t* app_guid) {
+-#if !BUILDFLAG(USE_GOOGLE_UPDATE_INTEGRATION)
++#if 0
+   return GetUnregisteredKeyPathForProduct();
+ #else
+   return GetClientStateKeyPathForApp(app_guid);
+@@ -49,7 +49,7 @@ std::wstring GetClientStateKeyPath(const wchar_t* app_guid) {
+ }
+ 
+ std::wstring GetClientStateMediumKeyPath(const wchar_t* app_guid) {
+-#if !BUILDFLAG(USE_GOOGLE_UPDATE_INTEGRATION)
++#if 0
+   return GetUnregisteredKeyPathForProduct();
+ #else
+   return GetClientStateMediumKeyPathForApp(app_guid);
+--- a/chrome/browser/first_run/upgrade_util_win.cc
++++ b/chrome/browser/first_run/upgrade_util_win.cc
+@@ -41,7 +41,7 @@
+ #include "components/prefs/pref_service.h"
+ #include "ui/base/ui_base_switches.h"
+ 
+-#if BUILDFLAG(GOOGLE_CHROME_BRANDING)
++#if 1
+ #include "google_update/google_update_idl.h"
+ #endif
+ 
+@@ -55,7 +55,7 @@ bool GetNewerChromeFile(base::FilePath* path) {
+ }
+ 
+ bool InvokeGoogleUpdateForRename() {
+-#if BUILDFLAG(GOOGLE_CHROME_BRANDING)
++#if 1
+   Microsoft::WRL::ComPtr<IProcessLauncher> ipl;
+   HRESULT hr = ::CoCreateInstance(__uuidof(ProcessLauncherClass), nullptr,
+                                   CLSCTX_ALL, IID_PPV_ARGS(&ipl));
+--- a/chrome/installer/gcapi/gcapi.cc
++++ b/chrome/installer/gcapi/gcapi.cc
+@@ -57,15 +57,15 @@ using Microsoft::WRL::ComPtr;
+ 
+ namespace {
+ 
+-const wchar_t kGCAPITempKey[] = L"Software\\Google\\GCAPITemp";
++const wchar_t kGCAPITempKey[] = L"Software\\Privacy One\\GCAPITemp";
+ 
+ const wchar_t kChromeRegVersion[] = L"pv";
+ const wchar_t kNoChromeOfferUntil[] =
+-    L"SOFTWARE\\Google\\No Chrome Offer Until";
++    L"SOFTWARE\\Privacy One\\No Chrome Offer Until";
+ 
+-const wchar_t kC1FPendingKey[] = L"Software\\Google\\Common\\Rlz\\Events\\C";
++const wchar_t kC1FPendingKey[] = L"Software\\Privacy One\\Common\\Rlz\\Events\\C";
+ const wchar_t kC1FSentKey[] =
+-    L"Software\\Google\\Common\\Rlz\\StatefulEvents\\C";
++    L"Software\\Privacy One\\Common\\Rlz\\StatefulEvents\\C";
+ const wchar_t kC1FKey[] = L"C1F";
+ 
+ const wchar_t kRelaunchBrandcodeValue[] = L"RelaunchBrandcode";
+--- a/chrome/installer/gcapi/google_update_util.cc
++++ b/chrome/installer/gcapi/google_update_util.cc
+@@ -12,14 +12,14 @@
+ namespace gcapi_internals {
+ 
+ const wchar_t kChromeRegClientsKey[] =
+-    L"Software\\Google\\Update\\Clients\\"
+-    L"{8A69D345-D564-463c-AFF1-A69D9E530F96}";
++    L"Software\\Privacy One\\Update\\Clients\\"
++    L"{BAD153F4-2C4B-4944-8016-85FFB2BAE7F3}";
+ const wchar_t kChromeRegClientStateKey[] =
+-    L"Software\\Google\\Update\\ClientState\\"
+-    L"{8A69D345-D564-463c-AFF1-A69D9E530F96}";
++    L"Software\\Privacy One\\Update\\ClientState\\"
++    L"{BAD153F4-2C4B-4944-8016-85FFB2BAE7F3}";
+ const wchar_t kChromeRegClientStateMediumKey[] =
+-    L"Software\\Google\\Update\\ClientStateMedium\\"
+-    L"{8A69D345-D564-463c-AFF1-A69D9E530F96}";
++    L"Software\\Privacy One\\Update\\ClientStateMedium\\"
++    L"{BAD153F4-2C4B-4944-8016-85FFB2BAE7F3}";
+ 
+ // Mirror the strategy used by GoogleUpdateSettings::GetBrand.
+ bool GetBrand(base::string16* value) {
+--- a/chrome/installer/launcher_support/chrome_launcher_support.cc
++++ b/chrome/installer/launcher_support/chrome_launcher_support.cc
+@@ -17,21 +17,22 @@ namespace chrome_launcher_support {
+ namespace {
+ 
+ // TODO(huangs) Refactor the constants: http://crbug.com/148538
+-#if BUILDFLAG(GOOGLE_CHROME_BRANDING)
++#if 1
++const wchar_t kInstallationRegKey[] = L"Software\\Privacy One";
+ const wchar_t kUpdateClientStateRegKey[] =
+-    L"Software\\Google\\Update\\ClientState";
++    L"Software\\Privacy One\\Update\\ClientState";
+ 
+-const wchar_t kUpdateClientsRegKey[] = L"Software\\Google\\Update\\Clients";
++const wchar_t kUpdateClientsRegKey[] = L"Software\\Privacy One\\Update\\Clients";
+ 
+ // Copied from google_chrome_install_modes.cc.
+-const wchar_t kBrowserAppGuid[] = L"{8A69D345-D564-463c-AFF1-A69D9E530F96}";
+-const wchar_t kSxSBrowserAppGuid[] = L"{4ea16ac7-fd5a-47c3-875b-dbf4a2008c20}";
++const wchar_t kBrowserAppGuid[] = L"{BAD153F4-2C4B-4944-8016-85FFB2BAE7F3}";
++const wchar_t kSxSBrowserAppGuid[] = L"{BAD153F4-2C4B-4944-8016-85FFB2BAE7F3}";
+ #else
+ const wchar_t kInstallationRegKey[] = L"Software\\Chromium";
+ #endif
+ 
+ // Copied from util_constants.cc.
+-const wchar_t kChromeExe[] = L"chrome.exe";
++const wchar_t kChromeExe[] = L"chrome.exe";
+ const wchar_t kUninstallStringField[] = L"UninstallString";
+ const wchar_t kVersionStringField[] = L"pv";
+ 
+@@ -95,7 +96,7 @@ base::FilePath GetSetupExeFromRegistry(InstallationLevel level,
+ // Returns the path to an existing setup.exe at the specified level, if it can
+ // be found via the registry.
+ base::FilePath GetSetupExeForInstallationLevel(InstallationLevel level) {
+-#if BUILDFLAG(GOOGLE_CHROME_BRANDING)
++#if 1
+   // Look in the registry for Chrome.
+   return GetSetupExeFromRegistry(level, kBrowserAppGuid);
+ #else
+--- a/chrome/installer/mini_installer/configuration.cc
++++ b/chrome/installer/mini_installer/configuration.cc
+@@ -24,7 +24,7 @@ namespace {
+ bool GetGoogleUpdateIsMachineEnvVar() {
+   const DWORD kBufferSize = 2;
+   StackString<kBufferSize> value;
+-  DWORD length = ::GetEnvironmentVariableW(L"GoogleUpdateIsMachine",
++  DWORD length = ::GetEnvironmentVariableW(L"BreezeUpdateIsMachine",
+                                            value.get(), kBufferSize);
+   return length == 1 && *value.get() == L'1';
+ }
+--- a/chrome/installer/mini_installer/mini_installer.cc
++++ b/chrome/installer/mini_installer/mini_installer.cc
+@@ -44,7 +44,8 @@
+ #include "chrome/installer/mini_installer/mini_installer_constants.h"
+ #include "chrome/installer/mini_installer/pe_resource.h"
+ #include "chrome/installer/mini_installer/regkey.h"
+-
++#undef BUILDFLAG_INTERNAL_GOOGLE_CHROME_BRANDING
++#define BUILDFLAG_INTERNAL_GOOGLE_CHROME_BRANDING() (1)
+ namespace mini_installer {
+ 
+ typedef StackString<MAX_PATH> PathString;
+--- a/chrome/installer/util/google_update_constants.cc
++++ b/chrome/installer/util/google_update_constants.cc
+@@ -6,18 +6,18 @@
+ 
+ namespace google_update {
+ 
+-const wchar_t kChromeUpgradeCode[] = L"{8A69D345-D564-463C-AFF1-A69D9E530F96}";
++const wchar_t kChromeUpgradeCode[] = L"{BAD153F4-2C4B-4944-8016-85FFB2BAE7F3}";
+ 
+ const wchar_t kGoogleUpdateUpgradeCode[] =
+-    L"{430FD4D0-B729-4F61-AA34-91526481799D}";
++    L"{9A0DCB84-2F6A-4B24-9A3A-1B6895F492DB}";
+ 
+-const wchar_t kGoogleUpdateSetupExe[] = L"GoogleUpdateSetup.exe";
++const wchar_t kGoogleUpdateSetupExe[] = L"BreezeUpdateSetup.exe";
+ 
+-const wchar_t kRegPathClients[] = L"Software\\Google\\Update\\Clients";
+-const wchar_t kRegPathClientState[] = L"Software\\Google\\Update\\ClientState";
++const wchar_t kRegPathClients[] = L"Software\\Privacy One\\Update\\Clients";
++const wchar_t kRegPathClientState[] = L"Software\\Privacy One\\Update\\ClientState";
+ const wchar_t kRegPathClientStateMedium[] =
+-    L"Software\\Google\\Update\\ClientStateMedium";
+-const wchar_t kRegPathGoogleUpdate[] = L"Software\\Google\\Update";
++    L"Software\\Privacy One\\Update\\ClientStateMedium";
++const wchar_t kRegPathGoogleUpdate[] = L"Software\\Privacy One\\Update";
+ 
+ const wchar_t kRegCommandsKey[] = L"Commands";
+ 
+--- a/chrome/installer/util/google_update_settings.cc
++++ b/chrome/installer/util/google_update_settings.cc
+@@ -30,7 +30,7 @@ using base::win::RegKey;
+ using installer::InstallationState;
+ 
+ const wchar_t GoogleUpdateSettings::kPoliciesKey[] =
+-    L"SOFTWARE\\Policies\\Google\\Update";
++    L"SOFTWARE\\Policies\\Privacy One\\Update";
+ const wchar_t GoogleUpdateSettings::kUpdatePolicyValue[] = L"UpdateDefault";
+ const wchar_t GoogleUpdateSettings::kDownloadPreferencePolicyValue[] =
+     L"DownloadPreference";
+@@ -42,6 +42,8 @@ const wchar_t GoogleUpdateSettings::kCheckPeriodOverrideMinutes[] =
+ const int GoogleUpdateSettings::kCheckPeriodOverrideMinutesMax =
+     60 * 24 * 7 * 6;
+ 
++#undef BUILDFLAG_INTERNAL_GOOGLE_CHROME_BRANDING
++#define BUILDFLAG_INTERNAL_GOOGLE_CHROME_BRANDING() (1)
+ const GoogleUpdateSettings::UpdatePolicy
+     GoogleUpdateSettings::kDefaultUpdatePolicy =
+ #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
+--- a/chrome/installer/util/util_constants.cc
++++ b/chrome/installer/util/util_constants.cc
+@@ -182,7 +182,9 @@ namespace env_vars {
+ // The presence of this environment variable with a value of 1 implies that
+ // setup.exe should run as a system installation regardless of what is on the
+ // command line.
+-const char kGoogleUpdateIsMachineEnvVar[] = "GoogleUpdateIsMachine";
++
++//Privacy One ili Breeze???
++const char kGoogleUpdateIsMachineEnvVar[] = "BreezeUpdateIsMachine";
+ 
+ }  // namespace env_vars
+ 
+@@ -197,7 +199,7 @@ const char kGoogleUpdateIsMachineEnvVar[] = "GoogleUpdateIsMachine";
+ // Active Setup.
+ const wchar_t kActiveSetupExe[] = L"chrmstp.exe";
+ const wchar_t kChromeDll[] = L"chrome.dll";
+-const wchar_t kChromeExe[] = L"chrome.exe";
++const wchar_t kChromeExe[] = L"chrome.exe";
+ const wchar_t kChromeNewExe[] = L"new_chrome.exe";
+ const wchar_t kChromeOldExe[] = L"old_chrome.exe";
+ const wchar_t kChromeProxyExe[] = L"chrome_proxy.exe";
+diff --git a/components/update_client/updater_state_win.cc b/components/update_client/updater_state_win.cc
+index 89c2c186f..c51691c19 100644
+--- a/components/update_client/updater_state_win.cc
++++ b/components/update_client/updater_state_win.cc
+@@ -25,20 +25,20 @@ namespace {
+ 
+ // Google Update group policy settings.
+ const wchar_t kGoogleUpdatePoliciesKey[] =
+-    L"SOFTWARE\\Policies\\Google\\Update";
++    L"SOFTWARE\\Policies\\Privacy One\\Update";
+ const wchar_t kCheckPeriodOverrideMinutes[] = L"AutoUpdateCheckPeriodMinutes";
+ const wchar_t kUpdatePolicyValue[] = L"UpdateDefault";
+ const wchar_t kChromeUpdatePolicyOverride[] =
+-    L"Update{8A69D345-D564-463C-AFF1-A69D9E530F96}";
++    L"Update{BAD153F4-2C4B-4944-8016-85FFB2BAE7F3}";
+ 
+ // Don't allow update periods longer than six weeks (Chrome release cadence).
+ const int kCheckPeriodOverrideMinutesMax = 60 * 24 * 7 * 6;
+ 
+ // Google Update registry settings.
+-const wchar_t kRegPathGoogleUpdate[] = L"Software\\Google\\Update";
++const wchar_t kRegPathGoogleUpdate[] = L"Software\\Privacy One\\Update";
+ const wchar_t kRegPathClientsGoogleUpdate[] =
+-    L"Software\\Google\\Update\\Clients\\"
+-    L"{430FD4D0-B729-4F61-AA34-91526481799D}";
++    L"Software\\Privacy One\\Update\\Clients\\"
++    L"{9A0DCB84-2F6A-4B24-9A3A-1B6895F492DB}";
+ const wchar_t kRegValueGoogleUpdatePv[] = L"pv";
+ const wchar_t kRegValueLastStartedAU[] = L"LastStartedAU";
+ const wchar_t kRegValueLastChecked[] = L"LastChecked";
+@@ -61,7 +61,7 @@ base::Time GetUpdaterTimeValue(bool is_machine, const wchar_t* value_name) {
+ }  // namespace
+ 
+ std::string UpdaterState::GetUpdaterName() {
+-  return std::string("Omaha");
++  return std::string("Omaha");
+ }
+ 
+ base::Version UpdaterState::GetUpdaterVersion(bool is_machine) {

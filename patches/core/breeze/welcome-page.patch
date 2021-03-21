@@ -1,0 +1,41 @@
+--- a/chrome/browser/ui/webui/welcome/welcome_ui.cc
++++ b/chrome/browser/ui/webui/welcome/welcome_ui.cc
+@@ -27,6 +27,9 @@
+ #include "net/base/url_util.h"
+ #include "ui/base/webui/web_ui_util.h"
+ 
++#include "chrome/browser/ui/webui/settings/import_data_handler.h"
++#include "chrome/browser/ui/webui/settings/search_engines_handler.h"
++
+ #if defined(OS_WIN)
+ #include "base/win/windows_version.h"
+ #endif
+@@ -182,6 +185,12 @@ WelcomeUI::WelcomeUI(content::WebUI* web
+ 
+   // Add set-as-default module.
+   web_ui->AddMessageHandler(std::make_unique<welcome::SetAsDefaultHandler>());
++  
++  // Add import bookmarks and settings module.
++  web_ui->AddMessageHandler(std::make_unique<settings::ImportDataHandler>());
++  
++  // Add search engines module.
++  web_ui->AddMessageHandler(std::make_unique<settings::SearchEnginesHandler>(profile));
+ 
+   html_source->AddString(
+       "newUserModules",
+--- a/chrome/browser/ui/webui/welcome/helpers.cc
++++ b/chrome/browser/ui/webui/welcome/helpers.cc
+@@ -185,13 +185,8 @@ void JoinOnboardingGroup(Profile* profil
+ }
+ 
+ bool IsEnabled(Profile* profile) {
+-#if BUILDFLAG(GOOGLE_CHROME_BRANDING)
+   return base::FeatureList::IsEnabled(welcome::kFeature) ||
+          base::FeatureList::IsEnabled(welcome::kForceEnabled);
+-#else
+-  // Allow enabling outside official builds for testing purposes.
+-  return base::FeatureList::IsEnabled(welcome::kForceEnabled);
+-#endif  // BUILDFLAG(GOOGLE_CHROME_BRANDING)
+ }
+ 
+ bool IsAppVariationEnabled() {

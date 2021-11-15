@@ -41,5 +41,5 @@
 +    {"close-window-with-last-tab",
 +     "Close window with last tab",
 +     "Determines whether a window should close once the last tab is closed.  ungoogled-chromium flag.",
-+     kOsDesktop, MULTI_VALUE_TYPE(kCloseWindowWithLastTab), kBreezeFlag},
++     kOsDesktop, MULTI_VALUE_TYPE(kCloseWindowWithLastTab)},
  #endif  // CHROME_BROWSER_UNGOOGLED_FLAG_ENTRIES_H_

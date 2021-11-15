@@ -106,21 +106,20 @@
  
  bool ShouldRetryRequest(const network::SimpleURLLoader* loader) {
    DCHECK(loader);
-# NOT USED IN BREEZE
-# @@ -332,12 +323,6 @@ void ExtensionDownloader::DoStartAllPend
-#    ReportStats();
-#    url_stats_ = URLStats();
-# 
-# -  for (auto it = fetches_preparing_.begin(); it != fetches_preparing_.end();
-# -       ++it) {
-# -    std::vector<std::unique_ptr<ManifestFetchData>>& list = it->second;
-# -    for (size_t i = 0; i < list.size(); ++i)
-# -      StartUpdateCheck(std::move(list[i]));
-# -  }
-#    fetches_preparing_.clear();
-#  }
-# 
-@@ -376,11 +361,6 @@ bool ExtensionDownloader::AddExtensionDa
+@@ -310,12 +301,6 @@ void ExtensionDownloader::DoStartAllPend
+   ReportStats();
+   url_stats_ = URLStats();
+ 
+-  for (auto it = fetches_preparing_.begin(); it != fetches_preparing_.end();
+-       ++it) {
+-    std::vector<std::unique_ptr<ManifestFetchData>>& list = it->second;
+-    for (size_t i = 0; i < list.size(); ++i)
+-      StartUpdateCheck(std::move(list[i]));
+-  }
+   fetches_preparing_.clear();
+ }
+ 
+@@ -354,11 +339,6 @@ bool ExtensionDownloader::AddExtensionDa
      return false;
    }
  
@@ -181,14 +180,3 @@
        return true;
      case ExtensionFetch::CREDENTIALS_OAUTH2_TOKEN:
        fetch->oauth2_attempt_count++;
---- a/extensions/common/extension_urls.cc
-+++ b/extensions/common/extension_urls.cc
-@@ -26,9 +26,9 @@ bool IsSourceFromAnExtension(const base:
- 
- namespace extension_urls {
- 
--const char kChromeWebstoreBaseURL[] = "https://chrome.9oo91e.qjz9zk/webstore";
-+const char kChromeWebstoreBaseURL[] = "trk:09:https://chrome.9oo91e.qjz9zk/webstore";
- const char kChromeWebstoreUpdateURL[] =
-     "trk:05:https://clients2.9oo91e.qjz9zk/service/update2/crx";
- 

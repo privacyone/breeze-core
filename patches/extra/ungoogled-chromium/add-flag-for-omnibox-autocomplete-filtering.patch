@@ -25,7 +25,7 @@
 @@ -48,4 +48,8 @@
       "Bookmark Bar on New-Tab-Page",
       "Disable the Bookmark Bar on the New-Tab-Page.  ungoogled-chromium flag.",
-      kOsDesktop, MULTI_VALUE_TYPE(kBookmarkBarNewTab), kBreezeFlag},
+      kOsDesktop, MULTI_VALUE_TYPE(kBookmarkBarNewTab)},
 +    {"omnibox-autocomplete-filtering",
 +     "Omnibox Autocomplete Filtering",
 +     "Restrict omnibox autocomplete results to a combination of search suggestions (if enabled), bookmarks, and internal chrome pages.  ungoogled-chromium flag.",

@@ -83,7 +83,7 @@
      const GURL& referrer_url) const {
 +  const base::CommandLine& command_line =
 +      *base::CommandLine::ForCurrentProcess();
-+  if (!command_line.HasSwitch("extension-mime-request-handling") ||
++  if (command_line.HasSwitch("extension-mime-request-handling") &&
 +      command_line.GetSwitchValueASCII("extension-mime-request-handling") ==
 +      "always-prompt-for-install") {
 +    return true;
@@ -112,9 +112,9 @@
 @@ -12,4 +12,8 @@
       "Enable stacking in the tab strip",
       "Forces tabs to be stacked in the tab strip. Otherwise, they follow default behavior.  ungoogled-chromium flag.",
-      kOsAll, SINGLE_VALUE_TYPE("enable-stacked-tab-strip"), kBreezeFlag},
+      kOsAll, SINGLE_VALUE_TYPE("enable-stacked-tab-strip")},
 +    {"extension-mime-request-handling",
 +     "Handling of extension MIME type requests",
 +     "Used when deciding how to handle a request for a CRX or User Script MIME type.  ungoogled-chromium flag.",
-+     kOsAll, MULTI_VALUE_TYPE(kExtensionHandlingChoices), kBreezeFlag},
++     kOsAll, MULTI_VALUE_TYPE(kExtensionHandlingChoices)},
  #endif  // CHROME_BROWSER_UNGOOGLED_FLAG_ENTRIES_H_

@@ -112,9 +112,9 @@
 @@ -12,4 +12,8 @@
       "Enable stacking in the tab strip",
       "Forces tabs to be stacked in the tab strip. Otherwise, they follow default behavior.  ungoogled-chromium flag.",
-      kOsAll, SINGLE_VALUE_TYPE("enable-stacked-tab-strip")},
+      kOsAll, SINGLE_VALUE_TYPE("enable-stacked-tab-strip"), kBreezeFlag},
 +    {"extension-mime-request-handling",
 +     "Handling of extension MIME type requests",
 +     "Used when deciding how to handle a request for a CRX or User Script MIME type.  ungoogled-chromium flag.",
-+     kOsAll, MULTI_VALUE_TYPE(kExtensionHandlingChoices)},
++     kOsAll, MULTI_VALUE_TYPE(kExtensionHandlingChoices), kBreezeFlag},
  #endif  // CHROME_BROWSER_UNGOOGLED_FLAG_ENTRIES_H_

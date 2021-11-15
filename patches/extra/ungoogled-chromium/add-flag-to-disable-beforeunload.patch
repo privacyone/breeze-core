@@ -5,11 +5,11 @@
 @@ -20,4 +20,8 @@
       "Disable search engine collection",
       "Prevents search engines from being added automatically.  ungoogled-chromium flag.",
-      kOsAll, SINGLE_VALUE_TYPE("disable-search-engine-collection")},
+      kOsAll, SINGLE_VALUE_TYPE("disable-search-engine-collection"), kBreezeFlag},
 +    {"disable-beforeunload",
 +     "Disable beforeunload",
 +     "Disables JavaScript dialog boxes triggered by beforeunload.  ungoogled-chromium flag.",
-+     kOsAll, SINGLE_VALUE_TYPE("disable-beforeunload")},
++     kOsAll, SINGLE_VALUE_TYPE("disable-beforeunload"), kBreezeFlag},
  #endif  // CHROME_BROWSER_UNGOOGLED_FLAG_ENTRIES_H_
 --- a/components/javascript_dialogs/app_modal_dialog_manager.cc
 +++ b/components/javascript_dialogs/app_modal_dialog_manager.cc

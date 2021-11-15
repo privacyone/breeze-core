@@ -13,9 +13,9 @@
 @@ -76,4 +76,8 @@
       "Disable QR Generator",
       "Disables the QR generator for sharing page links.  ungoogled-chromium flag",
-      kOsDesktop, FEATURE_VALUE_TYPE(kDisableQRGenerator)},
+      kOsDesktop, FEATURE_VALUE_TYPE(kDisableQRGenerator), kBreezeFlag},
 +    {"remove-grab-handle",
 +     "Remove Grab Handle",
 +     "Removes the reserved empty space in the tabstrip for moving the window.  ungoogled-chromium flag",
-+     kOsDesktop, SINGLE_VALUE_TYPE("remove-grab-handle")},
++     kOsDesktop, SINGLE_VALUE_TYPE("remove-grab-handle"), kBreezeFlag},
  #endif  // CHROME_BROWSER_UNGOOGLED_FLAG_ENTRIES_H_

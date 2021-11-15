@@ -69,11 +69,11 @@
 @@ -64,4 +64,8 @@
       "Keep old history",
       "Keep history older than 3 months.  ungoogled-chromium flag",
-      kOsAll, SINGLE_VALUE_TYPE("keep-old-history")},
+      kOsAll, SINGLE_VALUE_TYPE("keep-old-history"), kBreezeFlag},
 +    {"clear-data-on-exit",
 +     "Clear data on exit",
 +     "Clears all browsing data on exit.  ungoogled-chromium flag",
-+     kOsDesktop, FEATURE_VALUE_TYPE(browsing_data::features::kClearDataOnExit)},
++     kOsDesktop, FEATURE_VALUE_TYPE(browsing_data::features::kClearDataOnExit), kBreezeFlag},
  #endif  // CHROME_BROWSER_UNGOOGLED_FLAG_ENTRIES_H_
 --- a/components/browsing_data/core/features.cc
 +++ b/components/browsing_data/core/features.cc

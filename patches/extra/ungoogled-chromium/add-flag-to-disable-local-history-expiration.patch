@@ -5,11 +5,11 @@
 @@ -60,4 +60,8 @@
       "Popups to tabs",
       "Makes popups open in new tabs.  ungoogled-chromium flag",
-      kOsAll, SINGLE_VALUE_TYPE("popups-to-tabs")},
+      kOsAll, SINGLE_VALUE_TYPE("popups-to-tabs"), kBreezeFlag},
 +    {"keep-old-history",
 +     "Keep old history",
 +     "Keep history older than 3 months.  ungoogled-chromium flag",
-+     kOsAll, SINGLE_VALUE_TYPE("keep-old-history")},
++     kOsAll, SINGLE_VALUE_TYPE("keep-old-history"), kBreezeFlag},
  #endif  // CHROME_BROWSER_UNGOOGLED_FLAG_ENTRIES_H_
 --- a/components/history/core/browser/history_backend.cc
 +++ b/components/history/core/browser/history_backend.cc

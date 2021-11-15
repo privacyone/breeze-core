@@ -40,9 +40,9 @@
 @@ -44,4 +44,8 @@
       "Set internal PDF plugin name",
       "Sets the internal PDF viewer plugin name. Useful for sites that probe JS API navigator.plugins.  ungoogled-chromium flag.",
-      kOsDesktop, MULTI_VALUE_TYPE(kPDFPluginNameChoices)},
+      kOsDesktop, MULTI_VALUE_TYPE(kPDFPluginNameChoices), kBreezeFlag},
 +    {"bookmark-bar-ntp",
 +     "Bookmark Bar on New-Tab-Page",
 +     "Disable the Bookmark Bar on the New-Tab-Page.  ungoogled-chromium flag.",
-+     kOsDesktop, MULTI_VALUE_TYPE(kBookmarkBarNewTab)},
++     kOsDesktop, MULTI_VALUE_TYPE(kBookmarkBarNewTab), kBreezeFlag},
  #endif  // CHROME_BROWSER_UNGOOGLED_FLAG_ENTRIES_H_

@@ -41,11 +41,11 @@ with limited CPU/memory resources and it is disabled by default.
 @@ -12,4 +12,8 @@
       "Enable Canvas::measureText() fingerprint deception",
       "Scale the output values of Canvas::measureText() with a randomly selected factor in the range -0.0003% to 0.0003%, which are recomputed on every document initialization.  ungoogled-chromium flag, Bromite feature.",
-      kOsAll, SINGLE_VALUE_TYPE(switches::kFingerprintingCanvasMeasureTextNoise)},
+      kOsAll, SINGLE_VALUE_TYPE(switches::kFingerprintingCanvasMeasureTextNoise), kBreezeFlag},
 +    {"max-connections-per-host",
 +     flag_descriptions::kMaxConnectionsPerHostName,
 +     flag_descriptions::kMaxConnectionsPerHostDescription,
-+     kOsAll, MULTI_VALUE_TYPE(kMaxConnectionsPerHostChoices)},
++     kOsAll, MULTI_VALUE_TYPE(kMaxConnectionsPerHostChoices), kBreezeFlag},
  #endif  // CHROME_BROWSER_BROMITE_FLAG_ENTRIES_H_
 --- a/chrome/browser/browser_process_impl.cc
 +++ b/chrome/browser/browser_process_impl.cc

@@ -2,9 +2,9 @@
 
 --- a/chrome/common/google_url_loader_throttle.cc
 +++ b/chrome/common/google_url_loader_throttle.cc
-@@ -14,10 +14,6 @@
- #include "services/network/public/mojom/url_response_head.mojom.h"
- #include "services/network/public/mojom/x_frame_options.mojom.h"
+@@ -19,10 +19,6 @@
+ #include "ui/base/device_form_factor.h"
+ #endif
  
 -#if BUILDFLAG(ENABLE_EXTENSIONS)
 -#include "extensions/common/extension_urls.h"
@@ -13,7 +13,7 @@
  namespace {
  
  #if defined(OS_ANDROID)
-@@ -59,53 +55,6 @@ void GoogleURLLoaderThrottle::DetachFrom
+@@ -65,52 +61,6 @@ void GoogleURLLoaderThrottle::DetachFrom
  void GoogleURLLoaderThrottle::WillStartRequest(
      network::ResourceRequest* request,
      bool* defer) {
@@ -54,20 +54,19 @@
 -      google_util::IsGoogleHomePageUrl(request->url) ||
 -      google_util::IsGoogleSearchUrl(request->url);
 -  if (is_google_homepage_or_search) {
--    // TODO (crbug.com/1081510): Remove this experimental code once a final
--    // solution is agreed upon.
--    if (base::FeatureList::IsEnabled(features::kAndroidDarkSearch)) {
--      request->url = net::AppendOrReplaceQueryParameter(
--          request->url, "cs", night_mode_enabled_ ? "1" : "0");
+-    if (base::FeatureList::IsEnabled(features::kRequestDesktopSiteForTablets) &&
+-        ui::GetDeviceFormFactor() == ui::DEVICE_FORM_FACTOR_TABLET) {
+-      request->headers.SetHeader(kRequestDesktopDataHeader,
+-                                 is_tab_large_enough_ ? "1" : "0");
+-      base::UmaHistogramBoolean("Android.RequestDesktopSite.TabletEligible",
+-                                is_tab_large_enough_);
 -    }
--    base::UmaHistogramBoolean("Android.DarkTheme.DarkSearchRequested",
--                              night_mode_enabled_);
 -  }
 -#endif
  }
  
  void GoogleURLLoaderThrottle::WillRedirectRequest(
-@@ -115,37 +64,6 @@ void GoogleURLLoaderThrottle::WillRedire
+@@ -120,37 +70,6 @@ void GoogleURLLoaderThrottle::WillRedire
      std::vector<std::string>* to_be_removed_headers,
      net::HttpRequestHeaders* modified_headers,
      net::HttpRequestHeaders* modified_cors_exempt_headers) {
@@ -105,7 +104,7 @@
  }
  
  #if BUILDFLAG(ENABLE_EXTENSIONS)
-@@ -153,22 +71,5 @@ void GoogleURLLoaderThrottle::WillProces
+@@ -158,23 +77,5 @@ void GoogleURLLoaderThrottle::WillProces
      const GURL& response_url,
      network::mojom::URLResponseHead* response_head,
      bool* defer) {
@@ -122,6 +121,7 @@
 -    CHECK(response_head->parsed_headers);
 -    if (response_head->parsed_headers->xfo !=
 -        network::mojom::XFrameOptionsValue::kDeny) {
+-      response_head->headers->SetHeader("X-Frame-Options", "SAMEORIGIN");
 -      response_head->parsed_headers->xfo =
 -          network::mojom::XFrameOptionsValue::kSameOrigin;
 -    }
@@ -130,7 +130,7 @@
  #endif
 --- a/components/google/core/common/google_util.cc
 +++ b/components/google/core/common/google_util.cc
-@@ -33,109 +33,6 @@ namespace google_util {
+@@ -33,111 +33,6 @@ namespace google_util {
  
  namespace {
  
@@ -217,6 +217,8 @@
 -      youtube_tlds(
 -          std::initializer_list<base::StringPiece>({YOUTUBE_TLD_LIST}));
 -  return IsValidHostName(canonical_host, "youtube", subdomain_permission,
+-                         *youtube_tlds) ||
+-      IsValidHostName(canonical_host, "youtubekids", subdomain_permission,
 -                         *youtube_tlds);
 -}
 -
@@ -240,20 +242,20 @@
  }  // namespace
  
  // Global functions -----------------------------------------------------------
-@@ -143,12 +40,6 @@ bool IsGoogleSearchSubdomainUrl(const GU
+@@ -145,12 +40,6 @@ bool IsGoogleSearchSubdomainUrl(const GU
  const char kGoogleHomepageURL[] = "trk:113:https://www.9oo91e.qjz9zk/";
  
  bool HasGoogleSearchQueryParam(base::StringPiece str) {
 -  url::Component query(0, static_cast<int>(str.length())), key, value;
 -  while (url::ExtractQueryKeyValue(str.data(), &query, &key, &value)) {
 -    base::StringPiece key_str = str.substr(key.begin, key.len);
--    if (key_str == "q" || key_str == "as_q")
+-    if (key_str == "q" || key_str == "as_q" || key_str == "imgurl")
 -      return true;
 -  }
    return false;
  }
  
-@@ -159,161 +50,53 @@ std::string GetGoogleLocale(const std::s
+@@ -161,161 +50,53 @@ std::string GetGoogleLocale(const std::s
  
  GURL AppendGoogleLocaleParam(const GURL& url,
                               const std::string& application_locale) {
@@ -281,7 +283,7 @@
 -  // so use Spain instead.
 -  if (country_code == "cat")
 -    return "es";
--  return country_code.as_string();
+-  return std::string(country_code);
 +  return "nolocale";
  }
  
@@ -364,7 +366,7 @@
 -  // Make sure the path is a known search path.
 -  base::StringPiece path(url.path_piece());
 -  bool is_home_page_base = IsPathHomePageBase(path);
--  if (!is_home_page_base && (path != "/search"))
+-  if (!is_home_page_base && path != "/search" && path != "/imgres")
 -    return false;
 -
 -  // Check for query parameter in URL parameter and hash fragment, depending on
@@ -427,11 +429,11 @@
  
 --- a/components/page_load_metrics/browser/page_load_metrics_util.cc
 +++ b/components/page_load_metrics/browser/page_load_metrics_util.cc
-@@ -188,9 +188,7 @@ bool DidObserveLoadingBehaviorInAnyFrame
+@@ -196,9 +196,7 @@ bool DidObserveLoadingBehaviorInAnyFrame
  }
  
  bool IsGoogleSearchHostname(const GURL& url) {
--  base::Optional<std::string> result =
+-  absl::optional<std::string> result =
 -      page_load_metrics::GetGoogleHostnamePrefix(url);
 -  return result && result.value() == "www";
 +  return false;
@@ -440,10 +442,10 @@
  bool IsGoogleSearchResultUrl(const GURL& url) {
 --- a/components/page_load_metrics/common/page_load_metrics_util.cc
 +++ b/components/page_load_metrics/common/page_load_metrics_util.cc
-@@ -12,38 +12,7 @@
- namespace page_load_metrics {
+@@ -36,38 +36,7 @@ const char* kBufferTimerDelayParamName =
+ }  // namespace
  
- base::Optional<std::string> GetGoogleHostnamePrefix(const GURL& url) {
+ absl::optional<std::string> GetGoogleHostnamePrefix(const GURL& url) {
 -  const size_t registry_length =
 -      net::registry_controlled_domains::GetRegistryLength(
 -          url,
@@ -459,7 +461,7 @@
 -  const base::StringPiece hostname = url.host_piece();
 -  if (registry_length == 0 || registry_length == std::string::npos ||
 -      registry_length >= hostname.length()) {
--    return base::Optional<std::string>();
+-    return absl::optional<std::string>();
 -  }
 -
 -  // Removes the tld and the preceding dot.
@@ -471,18 +473,18 @@
 -
 -  if (!base::EndsWith(hostname_minus_registry, ".google",
 -                      base::CompareCase::INSENSITIVE_ASCII)) {
--    return base::Optional<std::string>();
+-    return absl::optional<std::string>();
 -  }
 -
 -  return std::string(hostname_minus_registry.substr(
 -      0, hostname_minus_registry.length() - strlen(".google")));
-+  return base::Optional<std::string>();
++  return absl::optional<std::string>();
  }
  
  bool IsGoogleHostname(const GURL& url) {
 --- a/components/search_engines/template_url.cc
 +++ b/components/search_engines/template_url.cc
-@@ -526,11 +526,7 @@ base::string16 TemplateURLRef::SearchTer
+@@ -526,11 +526,7 @@ std::u16string TemplateURLRef::SearchTer
  bool TemplateURLRef::HasGoogleBaseURLs(
      const SearchTermsData& search_terms_data) const {
    ParseIfNecessary(search_terms_data);
@@ -497,7 +499,7 @@
  bool TemplateURLRef::ExtractSearchTermsFromURL(
 --- a/components/variations/net/variations_http_headers.cc
 +++ b/components/variations/net/variations_http_headers.cc
-@@ -27,10 +27,6 @@
+@@ -26,10 +26,6 @@
  
  namespace variations {
  
@@ -508,7 +510,7 @@
  namespace {
  
  // The result of checking whether a request to a URL should have variations
-@@ -236,29 +232,7 @@ class VariationsHeaderHelper {
+@@ -235,29 +231,7 @@ class VariationsHeaderHelper {
    }
  
    bool AppendHeaderIfNeeded(const GURL& url, InIncognito incognito) {
@@ -539,7 +541,7 @@
    }
  
   private:
-@@ -328,8 +302,6 @@ void RemoveVariationsHeaderIfNeeded(
+@@ -327,8 +301,6 @@ void RemoveVariationsHeaderIfNeeded(
      const net::RedirectInfo& redirect_info,
      const network::mojom::URLResponseHead& response_head,
      std::vector<std::string>* to_be_removed_headers) {
@@ -548,7 +550,7 @@
  }
  
  std::unique_ptr<network::SimpleURLLoader>
-@@ -359,14 +331,11 @@ CreateSimpleURLLoaderWithVariationsHeade
+@@ -358,14 +330,11 @@ CreateSimpleURLLoaderWithVariationsHeade
  }
  
  bool IsVariationsHeader(const std::string& header_name) {
@@ -565,7 +567,7 @@
  }
  
  bool ShouldAppendVariationsHeaderForTesting(
-@@ -377,12 +346,6 @@ bool ShouldAppendVariationsHeaderForTest
+@@ -376,12 +345,6 @@ bool ShouldAppendVariationsHeaderForTest
  
  void UpdateCorsExemptHeaderForVariations(
      network::mojom::NetworkContextParams* params) {
@@ -580,7 +582,7 @@
  }  // namespace variations
 --- a/net/base/url_util.cc
 +++ b/net/base/url_util.cc
-@@ -430,27 +430,6 @@ bool HasGoogleHost(const GURL& url) {
+@@ -442,27 +442,6 @@ bool HasGoogleHost(const GURL& url) {
  }
  
  bool IsGoogleHost(base::StringPiece host) {

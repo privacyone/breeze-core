@@ -2,7 +2,7 @@
 
 --- a/chrome/browser/extensions/chrome_content_browser_client_extensions_part.cc
 +++ b/chrome/browser/extensions/chrome_content_browser_client_extensions_part.cc
-@@ -587,10 +587,6 @@ std::vector<url::Origin> ChromeContentBr
+@@ -655,10 +655,6 @@ std::vector<url::Origin> ChromeContentBr
      GetOriginsRequiringDedicatedProcess() {
    std::vector<url::Origin> list;
  
@@ -15,7 +15,7 @@
  
 --- a/chrome/browser/extensions/chrome_content_verifier_delegate.cc
 +++ b/chrome/browser/extensions/chrome_content_verifier_delegate.cc
-@@ -289,17 +289,7 @@ bool ChromeContentVerifierDelegate::IsFr
+@@ -288,17 +288,7 @@ bool ChromeContentVerifierDelegate::IsFr
    // between which extensions are considered in-store.
    // See https://crbug.com/766806 for details.
    if (!InstallVerifier::IsFromStore(extension, context_)) {
@@ -54,7 +54,7 @@
 -                  base::Value(extension_urls::GetWebstoreUpdateUrl().spec()));
 +                  base::Value(chrome_blank_.spec()));
  
-     prefs->SetWithoutPathExpansion(new_id_, std::move(entry));
+     prefs->SetKey(new_id_, base::Value::FromUniquePtrValue(std::move(entry)));
    }
 --- a/chrome/browser/extensions/extension_migrator.h
 +++ b/chrome/browser/extensions/extension_migrator.h
@@ -147,7 +147,7 @@
    } else {
      url_stats_.other_url_count++;
    }
-@@ -842,20 +820,6 @@ void ExtensionDownloader::HandleManifest
+@@ -846,20 +824,6 @@ void ExtensionDownloader::HandleManifest
          update->info);
    }
  
@@ -168,7 +168,7 @@
    NotifyExtensionsDownloadStageChanged(
        no_updates, ExtensionDownloaderDelegate::Stage::FINISHED);
    NotifyExtensionsDownloadFailed(
-@@ -1404,11 +1368,7 @@ bool ExtensionDownloader::IterateFetchCr
+@@ -1418,11 +1382,7 @@ bool ExtensionDownloader::IterateFetchCr
    // fetch.
    switch (fetch->credentials) {
      case ExtensionFetch::CREDENTIALS_NONE:

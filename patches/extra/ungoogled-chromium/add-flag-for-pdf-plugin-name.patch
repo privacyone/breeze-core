@@ -1,17 +1,17 @@
 --- a/chrome/browser/chrome_content_browser_client.cc
 +++ b/chrome/browser/chrome_content_browser_client.cc
-@@ -5921,7 +5921,7 @@ bool ChromeContentBrowserClient::ShouldA
+@@ -5818,7 +5818,7 @@ bool ChromeContentBrowserClient::ShouldA
      const url::Origin& embedder_origin,
      const content::PepperPluginInfo& plugin_info) {
  #if BUILDFLAG(ENABLE_PDF)
 -  if (plugin_info.name == ChromeContentClient::kPDFInternalPluginName) {
 +  if (plugin_info.name == ChromeContentClient::GetPDFInternalPluginName()) {
- #if BUILDFLAG(ENABLE_EXTENSIONS)
-     // Allow embedding the internal PDF plugin in the built-in PDF extension.
-     if (embedder_origin.scheme() == extensions::kExtensionScheme &&
+     return IsPdfInternalPluginAllowedOrigin(embedder_origin);
+   }
+ #endif  // BUILDFLAG(ENABLE_PDF)
 --- a/chrome/browser/pdf/pdf_extension_util.cc
 +++ b/chrome/browser/pdf/pdf_extension_util.cc
-@@ -172,7 +172,7 @@ std::string GetManifest() {
+@@ -170,7 +170,7 @@ std::string GetManifest() {
    DCHECK(manifest_contents.find(kNameTag) != std::string::npos);
    base::ReplaceFirstSubstringAfterOffset(
        &manifest_contents, 0, kNameTag,
@@ -22,7 +22,7 @@
  }
 --- a/chrome/browser/plugins/pdf_iframe_navigation_throttle_unittest.cc
 +++ b/chrome/browser/plugins/pdf_iframe_navigation_throttle_unittest.cc
-@@ -66,7 +66,7 @@ class PDFIFrameNavigationThrottleTest :
+@@ -65,7 +65,7 @@ class PDFIFrameNavigationThrottleTest :
      // Register a fake PDF Viewer plugin into our plugin service.
      content::WebPluginInfo info;
      info.name =
@@ -35,7 +35,7 @@
 +++ b/chrome/browser/plugins/plugin_prefs.cc
 @@ -37,9 +37,9 @@ namespace {
  
- bool IsPDFViewerPlugin(const base::string16& plugin_name) {
+ bool IsPDFViewerPlugin(const std::u16string& plugin_name) {
    return (plugin_name ==
 -          base::ASCIIToUTF16(ChromeContentClient::kPDFExtensionPluginName)) ||
 +          base::ASCIIToUTF16(ChromeContentClient::GetPDFExtensionPluginName())) ||
@@ -254,17 +254,17 @@
  #endif  // CHROME_BROWSER_UNGOOGLED_FLAG_ENTRIES_H_
 --- a/chrome/common/BUILD.gn
 +++ b/chrome/common/BUILD.gn
-@@ -245,6 +245,7 @@ static_library("common") {
+@@ -246,6 +246,7 @@ static_library("common") {
      "//components/no_state_prefetch/common",
      "//components/no_state_prefetch/common:mojo_bindings",
      "//components/page_load_metrics/common:common",
 +    "//components/ungoogled:ungoogled_switches",
    ]
  
-   if (enable_plugins) {
+   if (enable_pdf) {
 --- a/chrome/common/chrome_content_client.cc
 +++ b/chrome/common/chrome_content_client.cc
-@@ -141,7 +141,7 @@ void ComputeBuiltInPlugins(std::vector<c
+@@ -122,7 +122,7 @@ void ComputeBuiltInPlugins(std::vector<c
    content::PepperPluginInfo pdf_info;
    pdf_info.is_internal = true;
    pdf_info.is_out_of_process = true;
@@ -275,7 +275,7 @@
    content::WebPluginMimeType pdf_mime_type(
 --- a/chrome/common/chrome_content_client.h
 +++ b/chrome/common/chrome_content_client.h
-@@ -41,8 +41,8 @@ class ChromeContentClient : public conte
+@@ -42,8 +42,8 @@ class ChromeContentClient : public conte
    static const base::FilePath::CharType kNaClPluginFileName[];
  #endif
  
@@ -288,23 +288,24 @@
    ChromeContentClient();
 --- a/chrome/common/chrome_content_client_constants.cc
 +++ b/chrome/common/chrome_content_client_constants.cc
-@@ -2,7 +2,11 @@
+@@ -2,8 +2,12 @@
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
 +#include <string>
 +
 +#include "base/command_line.h"
+ #include "build/branding_buildflags.h"
  #include "chrome/common/chrome_content_client.h"
 +#include "components/ungoogled/ungoogled_switches.h"
  
- #if defined(GOOGLE_CHROME_BUILD)
+ #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
  const base::FilePath::CharType ChromeContentClient::kNotPresent[] =
-@@ -14,15 +18,52 @@ const base::FilePath::CharType ChromeCon
+@@ -15,15 +19,52 @@ const base::FilePath::CharType ChromeCon
      FILE_PATH_LITERAL("internal-nacl-plugin");
  #endif
  
--#if defined(GOOGLE_CHROME_BUILD)
+-#if BUILDFLAG(GOOGLE_CHROME_BRANDING)
 -const char ChromeContentClient::kPDFExtensionPluginName[] = "Chrome PDF Viewer";
 -const char ChromeContentClient::kPDFInternalPluginName[] = "Chrome PDF Plugin";
 -#else
@@ -362,7 +363,7 @@
      FILE_PATH_LITERAL("internal-pdf-viewer");
 --- a/chrome/renderer/chrome_content_renderer_client.cc
 +++ b/chrome/renderer/chrome_content_renderer_client.cc
-@@ -945,7 +945,7 @@ WebPlugin* ChromeContentRendererClient::
+@@ -1043,7 +1043,7 @@ WebPlugin* ChromeContentRendererClient::
              }
            }
          } else if (info.name ==
@@ -371,7 +372,16 @@
            // Report PDF load metrics. Since the PDF plugin is comprised of an
            // extension that loads a second plugin, avoid double counting by
            // ignoring the creation of the second plugin.
-@@ -981,7 +981,7 @@ WebPlugin* ChromeContentRendererClient::
+@@ -1075,7 +1075,7 @@ WebPlugin* ChromeContentRendererClient::
+ 
+ #if BUILDFLAG(ENABLE_PDF)
+         if (info.name ==
+-            ASCIIToUTF16(ChromeContentClient::kPDFInternalPluginName)) {
++            ASCIIToUTF16(ChromeContentClient::GetPDFInternalPluginName())) {
+           return pdf::CreateInternalPlugin(
+               info, std::move(params), render_frame,
+               std::make_unique<ChromePdfInternalPluginDelegate>());
+@@ -1088,7 +1088,7 @@ WebPlugin* ChromeContentRendererClient::
          PluginUMAReporter::GetInstance()->ReportPluginDisabled(orig_mime_type,
                                                                 url);
          if (info.name ==

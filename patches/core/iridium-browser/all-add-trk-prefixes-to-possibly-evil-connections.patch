@@ -45,7 +45,6 @@ by default.
  .../core/browser/web_history_service.cc       |  6 +++---
  components/metrics/url_constants.cc           |  2 +-
  .../core/browser/password_store.cc            |  8 ++++----
- components/rappor/rappor_service_impl.cc      |  2 +-
  .../safe_search_url_checker_client.cc         |  2 +-
  .../safe_search_api/stub_url_checker.cc       |  2 +-
  .../core/browser/translate_url_fetcher.cc     |  1 +
@@ -78,9 +77,9 @@ by default.
  
    _RemoveKeys(plist, 'KSChannelID')
    if base_tag != '':
---- a/chrome/browser/chromeos/customization/customization_document.cc
-+++ b/chrome/browser/chromeos/customization/customization_document.cc
-@@ -172,7 +172,7 @@ std::string ReadFileInBackground(const b
+--- a/chrome/browser/ash/customization/customization_document.cc
++++ b/chrome/browser/ash/customization/customization_document.cc
+@@ -175,7 +175,7 @@ std::string ReadFileInBackground(const b
  
  // Template URL where to fetch OEM services customization manifest from.
  const char ServicesCustomizationDocument::kManifestUrl[] =
@@ -89,20 +88,9 @@ by default.
  
  // A custom extensions::ExternalLoader that the ServicesCustomizationDocument
  // creates and uses to publish OEM default apps to the extensions system.
---- a/chrome/browser/chromeos/extensions/file_manager/private_api_drive.cc
-+++ b/chrome/browser/chromeos/extensions/file_manager/private_api_drive.cc
-@@ -860,7 +860,7 @@ void FileManagerPrivateInternalGetDownlo
-   const CoreAccountId& account_id =
-       identity_manager->GetPrimaryAccountId(signin::ConsentLevel::kNotRequired);
-   std::vector<std::string> scopes;
--  scopes.emplace_back("https://www.9oo91eapis.qjz9zk/auth/drive.readonly");
-+  scopes.emplace_back("trk:208:https://www.9oo91eapis.qjz9zk/auth/drive.readonly");
- 
-   scoped_refptr<network::SharedURLLoaderFactory> url_loader_factory =
-       content::BrowserContext::GetDefaultStoragePartition(
 --- a/chrome/browser/chromeos/extensions/file_manager/private_api_misc.cc
 +++ b/chrome/browser/chromeos/extensions/file_manager/private_api_misc.cc
-@@ -82,7 +82,7 @@ namespace {
+@@ -87,7 +87,7 @@ namespace {
  
  using api::file_manager_private::ProfileInfo;
  
@@ -111,26 +99,9 @@ by default.
  
  // Thresholds for mountCrostini() API.
  constexpr base::TimeDelta kMountCrostiniSlowOperationThreshold =
---- a/chrome/browser/chromeos/policy/remote_commands/crd_host_delegate.cc
-+++ b/chrome/browser/chromeos/policy/remote_commands/crd_host_delegate.cc
-@@ -78,11 +78,11 @@ constexpr char kCRDConnectClientKey[] =
- 
- // OAuth2 Token scopes
- constexpr char kCloudDevicesOAuth2Scope[] =
--    "https://www.9oo91eapis.qjz9zk/auth/clouddevices";
-+    "trk:233:https://www.9oo91eapis.qjz9zk/auth/clouddevices";
- constexpr char kChromotingRemoteSupportOAuth2Scope[] =
--    "https://www.9oo91eapis.qjz9zk/auth/chromoting.remote.support";
-+    "trk:234:https://www.9oo91eapis.qjz9zk/auth/chromoting.remote.support";
- constexpr char kTachyonOAuth2Scope[] =
--    "https://www.9oo91eapis.qjz9zk/auth/tachyon";
-+    "trk:235:https://www.9oo91eapis.qjz9zk/auth/tachyon";
- 
- }  // namespace
- 
 --- a/chrome/browser/extensions/api/cryptotoken_private/cryptotoken_private_api.cc
 +++ b/chrome/browser/extensions/api/cryptotoken_private/cryptotoken_private_api.cc
-@@ -42,8 +42,8 @@ namespace {
+@@ -46,8 +46,8 @@ namespace {
  
  const char kGoogleDotCom[] = "9oo91e.qjz9zk";
  constexpr const char* kGoogleGstaticAppIds[] = {
@@ -143,7 +114,7 @@ by default.
  // elements of |list| equals |hash|.
 --- a/chrome/browser/extensions/install_signer.cc
 +++ b/chrome/browser/extensions/install_signer.cc
-@@ -65,7 +65,7 @@ const int kSignatureFormatVersion = 2;
+@@ -67,7 +67,7 @@ const int kSignatureFormatVersion = 2;
  const size_t kSaltBytes = 32;
  
  const char kBackendUrl[] =
@@ -154,7 +125,7 @@ by default.
      "-----BEGIN PUBLIC KEY-----"                                        \
 --- a/chrome/browser/media/webrtc/webrtc_event_log_uploader.cc
 +++ b/chrome/browser/media/webrtc/webrtc_event_log_uploader.cc
-@@ -122,7 +122,7 @@ void OnURLLoadUploadProgress(uint64_t cu
+@@ -125,7 +125,7 @@ void OnURLLoadUploadProgress(uint64_t cu
  }  // namespace
  
  const char WebRtcEventLogUploaderImpl::kUploadURL[] =
@@ -165,7 +136,7 @@ by default.
      scoped_refptr<base::SequencedTaskRunner> task_runner)
 --- a/chrome/browser/media/webrtc/webrtc_log_uploader.cc
 +++ b/chrome/browser/media/webrtc/webrtc_log_uploader.cc
-@@ -482,7 +482,7 @@ void WebRtcLogUploader::UploadCompressed
+@@ -485,7 +485,7 @@ void WebRtcLogUploader::UploadCompressed
              "Not implemented, it would be good to do so."
          })");
  
@@ -176,7 +147,7 @@ by default.
                                ? upload_url_for_testing_
 --- a/chrome/browser/nacl_host/nacl_infobar_delegate.cc
 +++ b/chrome/browser/nacl_host/nacl_infobar_delegate.cc
-@@ -32,7 +32,7 @@ base::string16 NaClInfoBarDelegate::GetL
+@@ -33,7 +33,7 @@ std::u16string NaClInfoBarDelegate::GetL
  }
  
  GURL NaClInfoBarDelegate::GetLinkURL() const {
@@ -184,10 +155,10 @@ by default.
 +  return GURL("trk:143:https://support.9oo91e.qjz9zk/chrome/?p=ib_nacl");
  }
  
- base::string16 NaClInfoBarDelegate::GetMessageText() const {
+ std::u16string NaClInfoBarDelegate::GetMessageText() const {
 --- a/chrome/browser/profiles/profile_avatar_downloader.cc
 +++ b/chrome/browser/profiles/profile_avatar_downloader.cc
-@@ -19,7 +19,7 @@
+@@ -20,7 +20,7 @@
  
  namespace {
  const char kHighResAvatarDownloadUrlPrefix[] =
@@ -198,7 +169,7 @@ by default.
  ProfileAvatarDownloader::ProfileAvatarDownloader(size_t icon_index,
 --- a/chrome/browser/resources/default_apps/external_extensions.json
 +++ b/chrome/browser/resources/default_apps/external_extensions.json
-@@ -27,17 +27,17 @@
+@@ -23,17 +23,17 @@
    },
    // Google Sheets
    "aapocclcgogkmnckokdopfmhonfmgoek" : {
@@ -232,7 +203,7 @@ by default.
  DownloadFeedbackFactory* DownloadFeedback::factory_ = nullptr;
 --- a/chrome/browser/spellchecker/spellcheck_hunspell_dictionary.cc
 +++ b/chrome/browser/spellchecker/spellcheck_hunspell_dictionary.cc
-@@ -278,7 +278,7 @@ GURL SpellcheckHunspellDictionary::GetDi
+@@ -279,7 +279,7 @@ GURL SpellcheckHunspellDictionary::GetDi
    DCHECK(!bdict_file.empty());
  
    static const char kDownloadServerUrl[] =
@@ -243,18 +214,18 @@ by default.
                base::ToLowerASCII(bdict_file));
 --- a/chrome/browser/supervised_user/supervised_user_service.cc
 +++ b/chrome/browser/supervised_user/supervised_user_service.cc
-@@ -85,7 +85,7 @@ namespace {
+@@ -87,7 +87,7 @@ namespace {
  
  // The URL from which to download a host denylist if no local one exists yet.
  const char kDenylistURL[] =
--    "https://www.95tat1c.qjz9zk/chrome/supervised_user/blacklist-20141001-1k.bin";
-+    "trk:272:https://www.95tat1c.qjz9zk/chrome/supervised_user/blacklist-20141001-1k.bin";
- // The filename under which we'll store the denylist (in the user data dir).
- const char kDenylistFilename[] = "su-blacklist.bin";
- 
+-    "https://www.95tat1c.qjz9zk/chrome/supervised_user/denylist-20141001-1k.bin";
++    "trk:272:https://www.95tat1c.qjz9zk/chrome/supervised_user/denylist-20141001-1k.bin";
+ // The filename under which we'll store the denylist (in the user data dir). The
+ // old file will be used as a backup in case the new file has not been loaded
+ // yet.
 --- a/chrome/browser/tracing/crash_service_uploader.cc
 +++ b/chrome/browser/tracing/crash_service_uploader.cc
-@@ -41,7 +41,7 @@ using std::string;
+@@ -42,7 +42,7 @@ using std::string;
  
  namespace {
  
@@ -276,7 +247,7 @@ by default.
  // The maximum number of ignored bubble we track in the NumLaterPerReinstall
 --- a/chrome/browser/ui/webui/ntp/ntp_resource_cache.cc
 +++ b/chrome/browser/ui/webui/ntp/ntp_resource_cache.cc
-@@ -81,22 +81,22 @@ namespace {
+@@ -67,17 +67,17 @@ namespace {
  // The URL for the the Learn More page shown on incognito new tab.
  const char kLearnMoreIncognitoUrl[] =
  #if BUILDFLAG(IS_CHROMEOS_ASH)
@@ -297,13 +268,7 @@ by default.
 +    "trk:261:https://support.9oo91e.qjz9zk/chrome/?p=ui_guest";
  #endif
  
- // The URL for the Learn More page shown on ephermal guest session new tab.
- const char kLearnMoreEphemeralGuestSessionUrl[] =
--    "https://support.9oo91e.qjz9zk/chrome/?p=ui_guest";
-+    "trk:261:https://support.9oo91e.qjz9zk/chrome/?p=ui_guest";
- 
- SkColor GetThemeColor(const ui::ThemeProvider& tp, int id) {
-   SkColor color = tp.GetColor(id);
+ std::string ReplaceTemplateExpressions(
 --- a/chrome/chrome_cleaner/components/recovery_component.cc
 +++ b/chrome/chrome_cleaner/components/recovery_component.cc
 @@ -37,7 +37,7 @@ namespace chrome_cleaner {
@@ -328,7 +293,7 @@ by default.
  bool g_is_connected_to_crash_handler = false;
 --- a/chrome/common/extensions/chrome_extensions_client.cc
 +++ b/chrome/common/extensions/chrome_extensions_client.cc
-@@ -44,9 +44,9 @@ namespace {
+@@ -45,9 +45,9 @@ namespace {
  
  // TODO(battre): Delete the HTTP URL once the blocklist is downloaded via HTTPS.
  const char kExtensionBlocklistUrlPrefix[] =
@@ -345,12 +310,12 @@ by default.
 @@ -37,7 +37,7 @@ namespace installer {
  namespace {
  
- constexpr base::StringPiece16 kUninstallSurveyUrl(
+ constexpr base::WStringPiece kUninstallSurveyUrl(
 -    L"https://support.9oo91e.qjz9zk/chrome?p=chrome_uninstall_survey");
 +    L"trk:253:https://support.9oo91e.qjz9zk/chrome?p=chrome_uninstall_survey");
  
- bool NavigateToUrlWithEdge(const base::string16& url) {
-   base::string16 protocol_url = L"microsoft-edge:" + url;
+ bool NavigateToUrlWithEdge(const std::wstring& url) {
+   std::wstring protocol_url = L"microsoft-edge:" + url;
 --- a/chromecast/browser/service/cast_service_simple.cc
 +++ b/chromecast/browser/service/cast_service_simple.cc
 @@ -27,7 +27,7 @@ GURL GetStartupURL() {
@@ -364,7 +329,7 @@ by default.
    if (url.is_valid() && url.has_scheme())
 --- a/chromecast/crash/linux/minidump_uploader.cc
 +++ b/chromecast/crash/linux/minidump_uploader.cc
-@@ -40,7 +40,7 @@ namespace {
+@@ -41,7 +41,7 @@ namespace {
  
  const char kProductName[] = "Eureka";
  
@@ -386,7 +351,7 @@ by default.
  
 --- a/components/cloud_devices/common/cloud_devices_urls.cc
 +++ b/components/cloud_devices/common/cloud_devices_urls.cc
-@@ -14,14 +14,14 @@
+@@ -13,14 +13,14 @@
  namespace cloud_devices {
  
  const char kCloudPrintAuthScope[] =
@@ -419,7 +384,7 @@ by default.
  // Mime type to create a directory.
 --- a/components/feedback/feedback_uploader.cc
 +++ b/components/feedback/feedback_uploader.cc
-@@ -25,7 +25,7 @@ constexpr base::FilePath::CharType kFeed
+@@ -27,7 +27,7 @@ constexpr base::FilePath::CharType kFeed
      FILE_PATH_LITERAL("Feedback Reports");
  
  constexpr char kFeedbackPostUrl[] =
@@ -428,23 +393,9 @@ by default.
  
  constexpr char kProtoBufMimeType[] = "application/x-protobuf";
  
---- a/components/gcm_driver/gcm_account_tracker.cc
-+++ b/components/gcm_driver/gcm_account_tracker.cc
-@@ -27,9 +27,9 @@ namespace gcm {
- namespace {
- 
- // Scopes needed by the OAuth2 access tokens.
--const char kGCMGroupServerScope[] = "https://www.9oo91eapis.qjz9zk/auth/gcm";
-+const char kGCMGroupServerScope[] = "trk:230:https://www.9oo91eapis.qjz9zk/auth/gcm";
- const char kGCMCheckinServerScope[] =
--    "https://www.9oo91eapis.qjz9zk/auth/android_checkin";
-+    "trk:231:https://www.9oo91eapis.qjz9zk/auth/android_checkin";
- // Name of the GCM account tracker for fetching access tokens.
- const char kGCMAccountTrackerName[] = "gcm_account_tracker";
- // Minimum token validity when sending to GCM groups server.
 --- a/components/google/core/common/google_util.cc
 +++ b/components/google/core/common/google_util.cc
-@@ -140,7 +140,7 @@ bool IsGoogleSearchSubdomainUrl(const GU
+@@ -142,7 +142,7 @@ bool IsGoogleSearchSubdomainUrl(const GU
  
  // Global functions -----------------------------------------------------------
  
@@ -455,7 +406,7 @@ by default.
    url::Component query(0, static_cast<int>(str.length())), key, value;
 --- a/components/history/core/browser/web_history_service.cc
 +++ b/components/history/core/browser/web_history_service.cc
-@@ -41,13 +41,13 @@ namespace history {
+@@ -42,13 +42,13 @@ namespace history {
  namespace {
  
  const char kHistoryOAuthScope[] =
@@ -483,37 +434,9 @@ by default.
  
  const char kNewMetricsServerUrlInsecure[] =
      "http://clientservices.9oo91eapis.qjz9zk/uma/v2";
---- a/components/password_manager/core/browser/password_store.cc
-+++ b/components/password_manager/core/browser/password_store.cc
-@@ -298,10 +298,10 @@ void PasswordStore::GetLogins(const Form
-   // TODO(mdm): actually delete them at some point, say M24 or so.
-   base::Time cutoff;  // the null time
-   if (form.scheme == PasswordForm::Scheme::kHtml &&
--      (form.signon_realm == "http://www.9oo91e.qjz9zk" ||
--       form.signon_realm == "http://www.9oo91e.qjz9zk/" ||
--       form.signon_realm == "https://www.9oo91e.qjz9zk" ||
--       form.signon_realm == "https://www.9oo91e.qjz9zk/")) {
-+      (form.signon_realm == "trk:187:http://www.9oo91e.qjz9zk" ||
-+       form.signon_realm == "trk:188:http://www.9oo91e.qjz9zk/" ||
-+       form.signon_realm == "trk:189:https://www.9oo91e.qjz9zk" ||
-+       form.signon_realm == "trk:190:https://www.9oo91e.qjz9zk/")) {
-     static const base::Time::Exploded exploded_cutoff = {
-         2012, 1, 0, 1, 0, 0, 0, 0};  // 00:00 Jan 1 2012
-     base::Time out_time;
---- a/components/rappor/rappor_service_impl.cc
-+++ b/components/rappor/rappor_service_impl.cc
-@@ -32,7 +32,7 @@ const char kMimeType[] = "application/vn
- const char kRapporDailyEventHistogram[] = "Rappor.DailyEvent.IntervalType";
- 
- // The rappor server's URL.
--const char kDefaultServerUrl[] = "https://clients4.9oo91e.qjz9zk/rappor";
-+const char kDefaultServerUrl[] = "trk:266:https://clients4.9oo91e.qjz9zk/rappor";
- 
- }  // namespace
- 
 --- a/components/safe_browsing/content/browser/client_side_detection_service.cc
 +++ b/components/safe_browsing/content/browser/client_side_detection_service.cc
-@@ -53,7 +53,7 @@ const int ClientSideDetectionService::kN
+@@ -62,7 +62,7 @@ const int ClientSideDetectionService::kN
  const int ClientSideDetectionService::kPositiveCacheIntervalMinutes = 30;
  
  const char ClientSideDetectionService::kClientReportPhishingUrl[] =
@@ -524,7 +447,7 @@ by default.
    std::unique_ptr<network::SimpleURLLoader> loader;
 --- a/components/safe_search_api/safe_search/safe_search_url_checker_client.cc
 +++ b/components/safe_search_api/safe_search/safe_search_url_checker_client.cc
-@@ -29,7 +29,7 @@ namespace safe_search_api {
+@@ -28,7 +28,7 @@ namespace safe_search_api {
  namespace {
  
  const char kSafeSearchApiUrl[] =
@@ -535,7 +458,7 @@ by default.
  
 --- a/components/safe_search_api/stub_url_checker.cc
 +++ b/components/safe_search_api/stub_url_checker.cc
-@@ -20,7 +20,7 @@ namespace safe_search_api {
+@@ -21,7 +21,7 @@ namespace safe_search_api {
  namespace {
  
  constexpr char kSafeSearchApiUrl[] =
@@ -578,7 +501,7 @@ by default.
      "http://clientservices.9oo91eapis.qjz9zk/chrome-variations/seed";
 --- a/content/browser/speech/speech_recognition_engine.cc
 +++ b/content/browser/speech/speech_recognition_engine.cc
-@@ -30,7 +30,7 @@ namespace content {
+@@ -33,7 +33,7 @@ namespace content {
  namespace {
  
  const char kWebServiceBaseUrl[] =
@@ -589,45 +512,37 @@ by default.
  
 --- a/content/browser/webauth/authenticator_common.cc
 +++ b/content/browser/webauth/authenticator_common.cc
-@@ -167,9 +167,9 @@ base::Optional<std::string> ProcessAppId
-   // special-case AppIDs. Firefox also does this:
-   // https://groups.9oo91e.qjz9zk/forum/#!msg/mozilla.dev.platform/Uiu3fwnA2xw/201ynAiPAQAJ
-   const GURL kGstatic1 =
--      GURL("https://www.95tat1c.qjz9zk/securitykey/origins.json");
-+      GURL("trk:276:https://www.95tat1c.qjz9zk/securitykey/origins.json");
-   const GURL kGstatic2 =
--      GURL("https://www.95tat1c.qjz9zk/securitykey/a/9oo91e.qjz9zk/origins.json");
-+      GURL("trk:277:https://www.95tat1c.qjz9zk/securitykey/a/9oo91e.qjz9zk/origins.json");
-   DCHECK(kGstatic1.is_valid() && kGstatic2.is_valid());
+@@ -88,9 +88,9 @@ enum class RequestExtension {
+ namespace {
  
-   if (origin.DomainIs("9oo91e.qjz9zk") && !appid_url.has_ref() &&
+ constexpr char kGstaticAppId[] =
+-    "https://www.95tat1c.qjz9zk/securitykey/origins.json";
++    "trk:276:https://www.95tat1c.qjz9zk/securitykey/origins.json";
+ constexpr char kGstaticCorpAppId[] =
+-    "https://www.95tat1c.qjz9zk/securitykey/a/9oo91e.qjz9zk/origins.json";
++    "trk:277:https://www.95tat1c.qjz9zk/securitykey/a/9oo91e.qjz9zk/origins.json";
+ 
+ WebAuthenticationDelegate* GetWebAuthenticationDelegate() {
+   return GetContentClient()->browser()->GetWebAuthenticationDelegate();
 --- a/content/shell/browser/shell_browser_main_parts.cc
 +++ b/content/shell/browser/shell_browser_main_parts.cc
-@@ -88,7 +88,7 @@ GURL GetStartupURL() {
+@@ -95,7 +95,7 @@ GURL GetStartupURL() {
  #else
    const base::CommandLine::StringVector& args = command_line->GetArgs();
    if (args.empty())
 -    return GURL("https://www.9oo91e.qjz9zk/");
 +    return GURL("trk:183:https://www.9oo91e.qjz9zk/");
  
-   GURL url(args[0]);
-   if (url.is_valid() && url.has_scheme())
---- a/extensions/browser/updater/safe_manifest_parser.cc
-+++ b/extensions/browser/updater/safe_manifest_parser.cc
-@@ -28,7 +28,7 @@ namespace {
- 
- constexpr char kExpectedGupdateProtocol[] = "2.0";
- constexpr char kExpectedGupdateXmlns[] =
--    "http://www.9oo91e.qjz9zk/update2/response";
-+    "trk:182:http://www.9oo91e.qjz9zk/update2/response";
- 
- void ReportError(ParseUpdateManifestCallback callback,
-                  const ManifestParseFailure& failure) {
+ #if defined(OS_WIN)
+   GURL url(base::WideToUTF16(args[0]));
 --- a/extensions/common/extension_urls.cc
 +++ b/extensions/common/extension_urls.cc
-@@ -28,7 +28,7 @@ namespace extension_urls {
+@@ -26,9 +26,9 @@ bool IsSourceFromAnExtension(const std::
  
- const char kChromeWebstoreBaseURL[] = "https://chrome.9oo91e.qjz9zk/webstore";
+ namespace extension_urls {
+ 
+-const char kChromeWebstoreBaseURL[] = "https://chrome.9oo91e.qjz9zk/webstore";
++const char kChromeWebstoreBaseURL[] = "trk:09:https://chrome.9oo91e.qjz9zk/webstore";
  const char kChromeWebstoreUpdateURL[] =
 -    "https://clients2.9oo91e.qjz9zk/service/update2/crx";
 +    "trk:05:https://clients2.9oo91e.qjz9zk/service/update2/crx";
@@ -636,60 +551,179 @@ by default.
    extensions::ExtensionsClient* client = extensions::ExtensionsClient::Get();
 --- a/google_apis/gaia/gaia_constants.cc
 +++ b/google_apis/gaia/gaia_constants.cc
-@@ -25,23 +25,23 @@ const char kSyncService[] = "chromiumsyn
+@@ -25,133 +25,133 @@ const char kSyncService[] = "chromiumsyn
  const char kRemotingService[] = "chromoting";
  
  // OAuth scopes.
 -const char kOAuth1LoginScope[] = "https://www.9oo91e.qjz9zk/accounts/OAuthLogin";
-+const char kOAuth1LoginScope[] = "trk:181:https://www.9oo91e.qjz9zk/accounts/OAuthLogin";
- const char kOAuthWrapBridgeUserInfoScope[] =
--    "https://www.9oo91eapis.qjz9zk/auth/userinfo.email";
-+    "trk:101:https://www.9oo91eapis.qjz9zk/auth/userinfo.email";
++const char kOAuth1LoginScope[] = "trk:069:https://www.9oo91e.qjz9zk/accounts/OAuthLogin";
  
  // Service/scope names for device management (cloud-based policy) server.
  const char kDeviceManagementServiceOAuth[] =
 -    "https://www.9oo91eapis.qjz9zk/auth/chromeosdevicemanagement";
-+    "trk:102:https://www.9oo91eapis.qjz9zk/auth/chromeosdevicemanagement";
++    "trk:070:https://www.9oo91eapis.qjz9zk/auth/chromeosdevicemanagement";
  
  // OAuth2 scope for access to all Google APIs.
 -const char kAnyApiOAuth2Scope[] = "https://www.9oo91eapis.qjz9zk/auth/any-api";
-+const char kAnyApiOAuth2Scope[] = "trk:103:https://www.9oo91eapis.qjz9zk/auth/any-api";
++const char kAnyApiOAuth2Scope[] = "trk:071:https://www.9oo91eapis.qjz9zk/auth/any-api";
  
  // OAuth2 scope for access to Chrome sync APIs
  const char kChromeSyncOAuth2Scope[] =
 -    "https://www.9oo91eapis.qjz9zk/auth/chromesync";
-+    "trk:104:https://www.9oo91eapis.qjz9zk/auth/chromesync";
++    "trk:072:https://www.9oo91eapis.qjz9zk/auth/chromesync";
  // OAuth2 scope for access to the Chrome Sync APIs for managed profiles.
  const char kChromeSyncSupervisedOAuth2Scope[] =
 -    "https://www.9oo91eapis.qjz9zk/auth/chromesync_playpen";
-+    "trk:105:https://www.9oo91eapis.qjz9zk/auth/chromesync_playpen";
++    "trk:073:https://www.9oo91eapis.qjz9zk/auth/chromesync_playpen";
  
  // OAuth2 scope for access to Kid Management API.
  const char kKidManagementOAuth2Scope[] =
-@@ -53,16 +53,16 @@ const char kKidManagementPrivilegedOAuth
+-    "https://www.9oo91eapis.qjz9zk/auth/kid.management";
++    "trk:074:https://www.9oo91eapis.qjz9zk/auth/kid.management";
+ 
+ // OAuth2 scope for parental consent logging for secondary account addition.
+ const char kKidManagementPrivilegedOAuth2Scope[] =
+-    "https://www.9oo91eapis.qjz9zk/auth/kid.management.privileged";
++    "trk:075:https://www.9oo91eapis.qjz9zk/auth/kid.management.privileged";
  
  // OAuth2 scope for access to Google Family Link Supervision Setup.
  const char kKidsSupervisionSetupChildOAuth2Scope[] =
 -    "https://www.9oo91eapis.qjz9zk/auth/kids.supervision.setup.child";
-+    "trk:262:https://www.9oo91eapis.qjz9zk/auth/kids.supervision.setup.child";
++    "trk:076:https://www.9oo91eapis.qjz9zk/auth/kids.supervision.setup.child";
  
  // OAuth2 scope for access to Google Talk APIs (XMPP).
  const char kGoogleTalkOAuth2Scope[] =
 -    "https://www.9oo91eapis.qjz9zk/auth/googletalk";
-+    "trk:106:https://www.9oo91eapis.qjz9zk/auth/googletalk";
++    "trk:077:https://www.9oo91eapis.qjz9zk/auth/googletalk";
  
+ // OAuth2 scope for access to Google account information.
  const char kGoogleUserInfoEmail[] =
 -    "https://www.9oo91eapis.qjz9zk/auth/userinfo.email";
-+    "trk:107:https://www.9oo91eapis.qjz9zk/auth/userinfo.email";
++    "trk:078:https://www.9oo91eapis.qjz9zk/auth/userinfo.email";
  const char kGoogleUserInfoProfile[] =
 -    "https://www.9oo91eapis.qjz9zk/auth/userinfo.profile";
-+    "trk:260:https://www.9oo91eapis.qjz9zk/auth/userinfo.profile";
++    "trk:079:https://www.9oo91eapis.qjz9zk/auth/userinfo.profile";
  
- // OAuth scope for access to the people API (read-only).
+ // OAuth2 scope for access to the people API (read-only).
  const char kPeopleApiReadOnlyOAuth2Scope[] =
+-    "https://www.9oo91eapis.qjz9zk/auth/peopleapi.readonly";
++    "trk:080:https://www.9oo91eapis.qjz9zk/auth/peopleapi.readonly";
+ 
+ // OAuth2 scope for access to the Reauth flow.
+ const char kAccountsReauthOAuth2Scope[] =
+-    "https://www.9oo91eapis.qjz9zk/auth/accounts.reauth";
++    "trk:081:https://www.9oo91eapis.qjz9zk/auth/accounts.reauth";
+ 
+ // OAuth2 scope for access to audit recording (ARI).
+ const char kAuditRecordingOAuth2Scope[] =
+-    "https://www.9oo91eapis.qjz9zk/auth/auditrecording-pa";
++    "trk:082:https://www.9oo91eapis.qjz9zk/auth/auditrecording-pa";
+ 
+ // OAuth2 scope for access to clear cut logs.
+-const char kClearCutOAuth2Scope[] = "https://www.9oo91eapis.qjz9zk/auth/cclog";
++const char kClearCutOAuth2Scope[] = "trk:083:https://www.9oo91eapis.qjz9zk/auth/cclog";
+ 
+ // OAuth2 scope for FCM, the Firebase Cloud Messaging service.
+ const char kFCMOAuthScope[] =
+-    "https://www.9oo91eapis.qjz9zk/auth/firebase.messaging";
++    "trk:084:https://www.9oo91eapis.qjz9zk/auth/firebase.messaging";
+ 
+ // OAuth2 scope for access to Tachyon api.
+-const char kTachyonOAuthScope[] = "https://www.9oo91eapis.qjz9zk/auth/tachyon";
++const char kTachyonOAuthScope[] = "trk:085:https://www.9oo91eapis.qjz9zk/auth/tachyon";
+ 
+ // OAuth2 scope for access to the Photos API.
+-const char kPhotosOAuth2Scope[] = "https://www.9oo91eapis.qjz9zk/auth/photos";
++const char kPhotosOAuth2Scope[] = "trk:086:https://www.9oo91eapis.qjz9zk/auth/photos";
+ 
+ // OAuth2 scope for access to Cast backdrop API.
+ const char kCastBackdropOAuth2Scope[] =
+-    "https://www.9oo91eapis.qjz9zk/auth/cast.backdrop";
++    "trk:087:https://www.9oo91eapis.qjz9zk/auth/cast.backdrop";
+ 
+ // OAuth scope for access to Cloud Translation API.
+ const char kCloudTranslationOAuth2Scope[] =
+-    "https://www.9oo91eapis.qjz9zk/auth/cloud-translation";
++    "trk:088:https://www.9oo91eapis.qjz9zk/auth/cloud-translation";
+ 
+ // OAuth2 scope for access to passwords leak checking API.
+ const char kPasswordsLeakCheckOAuth2Scope[] =
+-    "https://www.9oo91eapis.qjz9zk/auth/identity.passwords.leak.check";
++    "trk:089:https://www.9oo91eapis.qjz9zk/auth/identity.passwords.leak.check";
+ 
+ // OAuth2 scope for access to Chrome safe browsing API.
+ const char kChromeSafeBrowsingOAuth2Scope[] =
+-    "https://www.9oo91eapis.qjz9zk/auth/chrome-safe-browsing";
++    "trk:090:https://www.9oo91eapis.qjz9zk/auth/chrome-safe-browsing";
+ 
+ // OAuth2 scope for access to kid permissions by URL.
+ const char kClassifyUrlKidPermissionOAuth2Scope[] =
+-    "https://www.9oo91eapis.qjz9zk/auth/kid.permission";
++    "trk:091:https://www.9oo91eapis.qjz9zk/auth/kid.permission";
+ const char kKidFamilyReadonlyOAuth2Scope[] =
+-    "https://www.9oo91eapis.qjz9zk/auth/kid.family.readonly";
++    "trk:092:https://www.9oo91eapis.qjz9zk/auth/kid.family.readonly";
+ 
+ // OAuth2 scope for access to payments.
+ const char kPaymentsOAuth2Scope[] =
+-    "https://www.9oo91eapis.qjz9zk/auth/wallet.chrome";
++    "trk:093:https://www.9oo91eapis.qjz9zk/auth/wallet.chrome";
+ 
+ const char kCryptAuthOAuth2Scope[] =
+-    "https://www.9oo91eapis.qjz9zk/auth/cryptauth";
++    "trk:094:https://www.9oo91eapis.qjz9zk/auth/cryptauth";
+ 
+ // OAuth2 scope for access to Drive.
+-const char kDriveOAuth2Scope[] = "https://www.9oo91eapis.qjz9zk/auth/drive";
++const char kDriveOAuth2Scope[] = "trk:095:https://www.9oo91eapis.qjz9zk/auth/drive";
+ 
+ // The scope required for an access token in order to query ItemSuggest.
+ const char kDriveReadOnlyOAuth2Scope[] =
+-    "https://www.9oo91eapis.qjz9zk/auth/drive.readonly";
++    "trk:096:https://www.9oo91eapis.qjz9zk/auth/drive.readonly";
+ 
+ // OAuth2 scope for access to Assistant SDK.
+ const char kAssistantOAuth2Scope[] =
+-    "https://www.9oo91eapis.qjz9zk/auth/assistant-sdk-prototype";
++    "trk:097:https://www.9oo91eapis.qjz9zk/auth/assistant-sdk-prototype";
+ 
+ // OAuth2 scope for access to nearby devices (fast pair) APIs.
+ const char kCloudPlatformProjectsOAuth2Scope[] =
+-    "https://www.9oo91eapis.qjz9zk/auth/cloudplatformprojects";
++    "trk:098:https://www.9oo91eapis.qjz9zk/auth/cloudplatformprojects";
+ 
+ // OAuth2 scope for access to nearby sharing.
+ const char kNearbyShareOAuth2Scope[] =
+-    "https://www.9oo91eapis.qjz9zk/auth/nearbysharing-pa";
++    "trk:099:https://www.9oo91eapis.qjz9zk/auth/nearbysharing-pa";
+ 
+ // OAuth2 scopes for access to GCM account tracker.
+-const char kGCMGroupServerOAuth2Scope[] = "https://www.9oo91eapis.qjz9zk/auth/gcm";
++const char kGCMGroupServerOAuth2Scope[] = "trk:100:https://www.9oo91eapis.qjz9zk/auth/gcm";
+ const char kGCMCheckinServerOAuth2Scope[] =
+-    "https://www.9oo91eapis.qjz9zk/auth/android_checkin";
++    "trk:101:https://www.9oo91eapis.qjz9zk/auth/android_checkin";
+ 
+ // OAuth2 scope for access to readonly Chrome web store.
+ const char kChromeWebstoreOAuth2Scope[] =
+-    "https://www.9oo91eapis.qjz9zk/auth/chromewebstore.readonly";
++    "trk:102:https://www.9oo91eapis.qjz9zk/auth/chromewebstore.readonly";
+ 
+ // OAuth2 scope for access to Account Capabilities API.
+ const char kAccountCapabilitiesOAuth2Scope[] =
+-    "https://www.9oo91eapis.qjz9zk/auth/account.capabilities";
++    "trk:103:https://www.9oo91eapis.qjz9zk/auth/account.capabilities";
+ 
+ // OAuth2 scope for support content API.
+ const char kSupportContentOAuth2Scope[] =
+-    "https://www.9oo91eapis.qjz9zk/auth/supportcontent";
++    "trk:104:https://www.9oo91eapis.qjz9zk/auth/supportcontent";
+ 
+ // Used to mint uber auth tokens when needed.
+ const char kGaiaSid[] = "sid";
 --- a/google_apis/gaia/gaia_urls.cc
 +++ b/google_apis/gaia/gaia_urls.cc
-@@ -23,6 +23,7 @@
+@@ -24,6 +24,7 @@
  namespace {
  
  // Gaia service constants
@@ -734,18 +768,18 @@ by default.
      const jingle_xmpp::QName QN_GOOGLE_AUTH_CLIENT_USES_FULL_BIND_RESULT(
 --- a/remoting/base/breakpad_mac.mm
 +++ b/remoting/base/breakpad_mac.mm
-@@ -52,7 +52,7 @@ void InitializeCrashReporting() {
-       [breakpad_config setObject:@"21600" forKey:@BREAKPAD_REPORT_INTERVAL];
+@@ -50,7 +50,7 @@ void InitializeCrashReporting() {
+       breakpad_config[@BREAKPAD_REPORT_INTERVAL] = @"21600";
      }
-     if (![breakpad_config objectForKey:@BREAKPAD_URL]) {
--      [breakpad_config setObject:@"https://clients2.9oo91e.qjz9zk/cr/report"
-+      [breakpad_config setObject:@"trk:310:https://clients2.9oo91e.qjz9zk/cr/report"
-                           forKey:@BREAKPAD_URL];
+     if (!breakpad_config[@BREAKPAD_URL]) {
+-      breakpad_config[@BREAKPAD_URL] = @"https://clients2.9oo91e.qjz9zk/cr/report";
++      breakpad_config[@BREAKPAD_URL] = @"trk:310:https://clients2.9oo91e.qjz9zk/cr/report";
      }
  
+     if (!BreakpadCreate(breakpad_config)) {
 --- a/remoting/protocol/jingle_messages.cc
 +++ b/remoting/protocol/jingle_messages.cc
-@@ -25,7 +25,7 @@ const char kJabberNamespace[] = "jabber:
+@@ -27,7 +27,7 @@ const char kJabberNamespace[] = "jabber:
  const char kJingleNamespace[] = "urn:xmpp:jingle:1";
  
  // Namespace for transport messages when using standard ICE.
@@ -756,7 +790,7 @@ by default.
  
 --- a/rlz/lib/lib_values.cc
 +++ b/rlz/lib/lib_values.cc
-@@ -41,7 +41,7 @@ const char kSetDccResponseVariable[] = "
+@@ -40,7 +40,7 @@ const char kSetDccResponseVariable[] = "
  //
  
  const char kFinancialPingPath[] = "/tools/pso/ping";

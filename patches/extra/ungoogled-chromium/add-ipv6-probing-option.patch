@@ -9,13 +9,13 @@
 +    {"set-ipv6-probe-false",
 +     "SetIpv6ProbeFalse",
 +     "Forces the result of the browser's IPv6 probing (i.e. IPv6 connectivity test) to be unsuccessful. This causes IPv4 addresses to be prioritized over IPv6 addresses. Without this flag, the probing result is set to be successful, which causes IPv6 to be used over IPv4 when possible.  ungoogled-chromium flag.",
-+     kOsAll, FEATURE_VALUE_TYPE(net::features::kSetIpv6ProbeFalse), kBreezeFlag},
++     kOsAll, FEATURE_VALUE_TYPE(net::features::kSetIpv6ProbeFalse)},
  #endif  // CHROME_BROWSER_UNGOOGLED_FLAG_ENTRIES_H_
 --- a/net/base/features.cc
 +++ b/net/base/features.cc
-@@ -199,5 +199,7 @@ constexpr base::Feature kFirstPartySets{
- const base::FeatureParam<bool> kFirstPartySetsIsDogfooder{
-     &kFirstPartySets, "FirstPartySetsIsDogfooder", false};
+@@ -266,5 +266,7 @@ const base::Feature kPartitionedCookies{
+ const base::Feature kExtraCookieValidityChecks{
+     "ExtraCookieValidityChecks", base::FEATURE_ENABLED_BY_DEFAULT};
  
 +const base::Feature kSetIpv6ProbeFalse{"SetIpv6ProbeFalse", base::FEATURE_DISABLED_BY_DEFAULT};
 +
@@ -23,9 +23,9 @@
  }  // namespace net
 --- a/net/base/features.h
 +++ b/net/base/features.h
-@@ -294,6 +294,8 @@ NET_EXPORT extern const base::Feature kF
- // feature.
- NET_EXPORT extern const base::FeatureParam<bool> kFirstPartySetsIsDogfooder;
+@@ -400,6 +400,8 @@ NET_EXPORT extern const base::Feature kP
+ // feature flag, assuming no breakage occurs with it enabled.
+ NET_EXPORT extern const base::Feature kExtraCookieValidityChecks;
  
 +NET_EXPORT extern const base::Feature kSetIpv6ProbeFalse;
 +
@@ -34,7 +34,7 @@
  
 --- a/net/dns/host_resolver_manager.cc
 +++ b/net/dns/host_resolver_manager.cc
-@@ -132,11 +132,6 @@ const unsigned kMinimumTTLSeconds = kCac
+@@ -138,11 +138,6 @@ const unsigned kMinimumTTLSeconds = kCac
  // cached.
  const int kIPv6ProbePeriodMs = 1000;
  
@@ -46,7 +46,7 @@
  enum DnsResolveStatus {
    RESOLVE_STATUS_DNS_SUCCESS = 0,
    RESOLVE_STATUS_PROC_SUCCESS,
-@@ -3370,7 +3365,7 @@ bool HostResolverManager::IsIPv6Reachabl
+@@ -3693,7 +3688,7 @@ bool HostResolverManager::IsIPv6Reachabl
        (tick_clock_->NowTicks() - last_ipv6_probe_time_).InMilliseconds() >
            kIPv6ProbePeriodMs) {
      SetLastIPv6ProbeResult(

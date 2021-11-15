@@ -2,7 +2,7 @@
 
 --- a/chrome/browser/ui/browser_commands.cc
 +++ b/chrome/browser/ui/browser_commands.cc
-@@ -407,11 +407,6 @@ int GetContentRestrictions(const Browser
+@@ -438,11 +438,6 @@ int GetContentRestrictions(const Browser
      CoreTabHelper* core_tab_helper =
          CoreTabHelper::FromWebContents(current_tab);
      content_restrictions = core_tab_helper->content_restrictions();
@@ -14,7 +14,7 @@
    }
    return content_restrictions;
  }
-@@ -1202,8 +1197,7 @@ bool CanSavePage(const Browser* browser)
+@@ -1338,8 +1333,7 @@ bool CanSavePage(const Browser* browser)
            prefs::kAllowFileSelectionDialogs)) {
      return false;
    }
@@ -37,7 +37,7 @@
  OfflinePageModel::OfflinePageModel() = default;
 --- a/content/common/url_schemes.cc
 +++ b/content/common/url_schemes.cc
-@@ -22,6 +22,9 @@ namespace {
+@@ -23,6 +23,9 @@ namespace {
  bool g_registered_url_schemes = false;
  
  const char* const kDefaultSavableSchemes[] = {
@@ -47,7 +47,7 @@
    url::kHttpScheme,
    url::kHttpsScheme,
    url::kFileScheme,
-@@ -29,7 +32,13 @@ const char* const kDefaultSavableSchemes
+@@ -30,7 +33,13 @@ const char* const kDefaultSavableSchemes
    url::kFtpScheme,
    kChromeDevToolsScheme,
    kChromeUIScheme,
@@ -64,7 +64,7 @@
  // These lists are lazily initialized below and are leaked on shutdown to
 --- a/content/public/common/url_utils.cc
 +++ b/content/public/common/url_utils.cc
-@@ -26,11 +26,7 @@ bool HasWebUIScheme(const GURL& url) {
+@@ -27,11 +27,7 @@ bool HasWebUIScheme(const GURL& url) {
  }
  
  bool IsSavableURL(const GURL& url) {

@@ -15,9 +15,9 @@
  .learn-more-button {
 -  color: rgb(138, 180, 248);
 +  color: rgb(0, 174, 239);
+   text-decoration: none;
  }
  
- /** Icon -------------------------------------------------------------------- */
 @@ -104,7 +104,7 @@ em {
  
  #cookie-controls {
@@ -35,6 +35,6 @@
    background-attachment: fixed;
 -  background-color: $i18n{colorBackground};
 +  background-color: rgb(10, 10, 10);
-   background-position: $i18n{backgroundBarDetached};
+   background-position: $i18n{backgroundPosition};
    background-repeat: $i18n{backgroundTiling};
    height: 100%;

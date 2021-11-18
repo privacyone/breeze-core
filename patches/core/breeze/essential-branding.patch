@@ -1,11 +1,6 @@
 --- a/chrome/common/chrome_constants.cc
 +++ b/chrome/common/chrome_constants.cc
-@@ -11,11 +11,11 @@
- #define FPL FILE_PATH_LITERAL
- 
- #if defined(OS_MAC)
--#define CHROMIUM_PRODUCT_STRING "Chromium"
-+#define CHROMIUM_PRODUCT_STRING "Breeze"
+@@ -15,7 +15,7 @@
  #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
  #define PRODUCT_STRING "Google Chrome"
  #elif BUILDFLAG(CHROMIUM_BRANDING)
@@ -29,16 +24,14 @@
  #if defined(DLOPEN_PULSEAUDIO)
 --- a/chrome/test/chromedriver/chrome/chrome_finder.cc
 +++ b/chrome/test/chromedriver/chrome/chrome_finder.cc
-@@ -134,16 +134,17 @@
+@@ -137,14 +137,17 @@
 -bool FindChrome(base::FilePath* browser_exe) {
 -  base::FilePath browser_exes_array[] = {
 -#if defined(OS_WIN) || defined(OS_MAC)
 -    base::FilePath(chrome::kBrowserProcessExecutablePath),
--    base::FilePath(chrome::kBrowserProcessExecutablePathChromium)
 -#elif defined(OS_LINUX) || defined(OS_CHROMEOS)
 -    base::FilePath("google-chrome"),
 -    base::FilePath(chrome::kBrowserProcessExecutablePath),
--    base::FilePath(chrome::kBrowserProcessExecutablePathChromium),
 -    base::FilePath("chromium"),
 -    base::FilePath("chromium-browser")
 -#else
@@ -76,16 +69,16 @@
 +PRODUCT_SHORTNAME=Breeze
 -PRODUCT_INSTALLER_FULLNAME=Chromium Installer
 -PRODUCT_INSTALLER_SHORTNAME=Chromium Installer
--COPYRIGHT=Copyright 2020 The Chromium Authors. All rights reserved.
+-COPYRIGHT=Copyright @LASTCHANGE_YEAR@ The Chromium Authors. All rights reserved.
 +PRODUCT_INSTALLER_FULLNAME=Breeze Installer
 +PRODUCT_INSTALLER_SHORTNAME=Breeze Installer
-+COPYRIGHT=Copyright 2020 Privacy One LLC. All rights reserved.
++COPYRIGHT=Copyright @LASTCHANGE_YEAR@ Privacy One LLC. All rights reserved.
  MAC_BUNDLE_ID=org.chromium.Chromium
  MAC_CREATOR_CODE=Cr24
 -MAC_TEAM_ID=
 +MAC_TEAM_ID=G64LM97BC6
 --- a/chrome/common/chrome_paths_mac.mm
 +++ b/chrome/common/chrome_paths_mac.mm
-@@ -63,1 +63,1 @@
+@@ -62,1 +62,1 @@
 -       product_dir_name = "Chromium";
 +       product_dir_name = "/Privacy One/Breeze";

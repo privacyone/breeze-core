@@ -20,8 +20,8 @@
 --- a/chrome/browser/resources/settings/a11y_page/a11y_page.js
 +++ b/chrome/browser/resources/settings/a11y_page/a11y_page.js
 @@ -153,1 +153,1 @@
--         'https://chrome.9oo91e.qjz9zk/webstore/category/collection/accessibility');
-+         'https://chrome.google.com/webstore/category/collection/accessibility');
+-         'https://chrome.9oo91e.qjz9zk/webstore/category/collection/3p_accessibility_extensions');
++         'https://chrome.google.com/webstore/category/collection/3p_accessibility_extensions');
 --- a/chrome/browser/ui/webui/extensions/extensions_ui.cc
 +++ b/chrome/browser/ui/webui/extensions/extensions_ui.cc
 @@ -284,7 +284,7 @@

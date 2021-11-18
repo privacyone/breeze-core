@@ -71,9 +71,9 @@
 --- a/chrome/browser/ui/startup/startup_browser_creator.cc
 +++ b/chrome/browser/ui/startup/startup_browser_creator.cc
 @@ -75,6 +75,14 @@
- #include "content/public/common/content_switches.h"
  #include "extensions/common/switches.h"
  #include "printing/buildflags/buildflags.h"
+ #include "third_party/abseil-cpp/absl/types/optional.h"
 +#include "base/path_service.h"
 +#include "chrome/browser/extensions/crx_installer.h"
 +#include "chrome/browser/extensions/extension_install_prompt.h"
@@ -83,8 +83,8 @@
 +#include "extensions/browser/extension_prefs.h"
 +#include "extensions/browser/extension_registry.h"
  
- #if defined(OS_CHROMEOS)
- #include "chrome/browser/chromeos/app_mode/app_launch_utils.h"
+ #if BUILDFLAG(IS_CHROMEOS_ASH)
+ #include "ash/constants/ash_switches.h"
 @@ -442,6 +450,37 @@
      in_synchronous_profile_launch_ = false;
    }
@@ -157,9 +157,9 @@
 --- a/chrome/BUILD.gn
 +++ b/chrome/BUILD.gn
 @@ -965,6 +965,7 @@ if (is_win) {
+       "Helpers",
        "Libraries",
        "Resources",
-       "XPCServices",
 +      "Default Extensions",
      ]
  

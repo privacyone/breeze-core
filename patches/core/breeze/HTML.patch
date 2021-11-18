@@ -49,36 +49,16 @@
 +        Another program on your computer added a theme that may change the way Breeze works.
        </message>
  
---- a/chrome/app/settings_chromium_strings.grdp
-+++ b/chrome/app/settings_chromium_strings.grdp
-@@ -181,5 +181,5 @@
- <if expr="not chromeos">
-   <message name="IDS_SETTINGS_PROFILE_NAME_AND_PICTURE" desc="Label of the link that takes you to the page to edit your name and picture for your chrome profile.">
--    Breeze name and picture
-+    Profile name and photo
-   </message>
- </if>
 --- a/chrome/app/settings_strings.grdp
 +++ b/chrome/app/settings_strings.grdp
-@@ -1934,8 +1934,8 @@
-   </message>
-   <message name="IDS_SETTINGS_SITE_SETTINGS_PAYMENT_HANDLER" desc="Label for the payment handler site settings.">
--    Payment Handlers
-+    Payments
-   </message>
-   <message name="IDS_SETTINGS_SITE_SETTINGS_PAYMENT_HANDLER_ALLOW" desc="The allow label for payment handler installation in site settings.">
--    Allow sites to install payment handlers
-+    Change the way sites are allowed to view, process and handle payment data
-   </message>
-   <message name="IDS_SETTINGS_SITE_SETTINGS_PAYMENT_HANDLER_ALLOW_RECOMMENDED" desc="The allow label for payment handler installation in site settings (with the 'recommended' suffix).">
-@@ -1949,5 +1949,5 @@
+@@ -2487,5 +2487,5 @@
    </message>
    <message name="IDS_SETTINGS_SITE_SETTINGS_PDF_DOWNLOAD_PDFS" desc="Label for downloading PDF documents instead of automatically opening them in Chrome.">
 -    Download PDF files instead of automatically opening them in Chrome
 +    Download PDF files instead of automatically opening them in Breeze
    </message>
    <message name="IDS_SETTINGS_SITE_SETTINGS_POPUPS" desc="Label for the pop-ups and redirects site settings.">
-@@ -2720,5 +2720,5 @@
+@@ -3184,5 +3184,5 @@
      <!-- Import Settings Dialog -->
      <message name="IDS_SETTINGS_IMPORT_SETTINGS_TITLE" desc="Dialog title for import dialog.">
 -      Import bookmarks and settings
@@ -110,30 +90,17 @@
 -    </div>
      <div class="cr-row first">
        <h2 id="savedPasswordsHeading" class="flex">
---- a/chrome/browser/resources/settings/autofill_page/passwords_section.js
-+++ b/chrome/browser/resources/settings/autofill_page/passwords_section.js
-@@ -676,7 +676,9 @@ Polymer({
+--- a/chrome/browser/resources/settings/autofill_page/passwords_section.ts
++++ b/chrome/browser/resources/settings/autofill_page/passwords_section.ts
+@@ -676,6 +676,8 @@ Polymer({
      // element, with additional entries that correspond to subpage trigger
      // elements residing in this element's Shadow DOM.
 +    if (false) {
      this.focusConfig.set(assert(routes.CHECK_PASSWORDS).path, () => {
-       focusWithoutInk(assert(this.$$('#icon')));
+       focusWithoutInk(assert(this.shadowRoot!.querySelector('#icon')!));
      });
 +    }
-   },
- });
---- a/chrome/browser/resources/settings/autofill_page/payments_section.html
-+++ b/chrome/browser/resources/settings/autofill_page/payments_section.html
-@@ -54,9 +54,4 @@
-     </template>
- 
--    <div id="manageLink" class="cr-row first">
--      <!-- This span lays out the link correctly, relative to the text. -->
--      <div class="cr-padded-text">$i18nRaw{manageCreditCardsLabel}</div>
--    </div>
--
-     <div class="cr-row continuation">
-       <h2 class="flex">$i18n{creditCards}</h2>
+   }
 --- a/chrome/browser/resources/settings/basic_page/basic_page.html
 +++ b/chrome/browser/resources/settings/basic_page/basic_page.html
 @@ -163,4 +163,5 @@
@@ -234,25 +201,26 @@
 +          on-click="onShowResetProfileDialog_"></cr-link-row>
          <!-- Keep a single instance of reset-profile-dialog on purpose, to
            preserve state across show/hide operations. -->
---- a/chrome/browser/resources/settings/reset_page/reset_page.js
-+++ b/chrome/browser/resources/settings/reset_page/reset_page.js
+--- a/chrome/browser/resources/settings/reset_page/reset_page.ts
++++ b/chrome/browser/resources/settings/reset_page/reset_page.ts
 @@ -13,4 +13,6 @@ import '../settings_page/settings_animated_pages.m.js';
- import '../settings_shared_css.m.js';
+ import './reset_profile_dialog.js';
  
 +import '../clear_browsing_data_dialog/clear_browsing_data_dialog.js';
 +
  // <if expr="_google_chrome and is_win">
  import '../chrome_cleanup_page/chrome_cleanup_page.js';
-@@ -83,4 +85,9 @@ Polymer({
-   },
+@@ -83,4 +85,10 @@ Polymer({
+   }
  
 +  /** @private */
 +  onClearBrowsingDataTap_() {
 +
 +    Router.getInstance().navigateTo(routes.CLEAR_BROWSER_DATA);
-+  },
++  }
++ 
    // <if expr="_google_chrome and is_win">
-   /** @private */
+   private onChromeCleanupTap_() {
 --- a/chrome/browser/resources/settings/route.js
 +++ b/chrome/browser/resources/settings/route.js
 @@ -68,5 +68,4 @@ function addPrivacyChildRoutes(r) {
@@ -268,14 +236,19 @@
 -    r.SYNC_ADVANCED = r.SYNC.createChild('/syncSetup/advanced');
    }
  
-@@ -164,9 +161,4 @@ function createBrowserSettingsRoutes() {
+@@ -164,14 +161,5 @@ function createBrowserSettingsRoutes() {
      r.ADVANCED = new Route('/advanced');
  
 -    r.LANGUAGES = r.ADVANCED.createSection('/languages', 'languages');
--    // <if expr="not is_macosx">
+-    // <if expr="not chromeos and not is_macosx">
 -    r.EDIT_DICTIONARY = r.LANGUAGES.createChild('/editDictionary');
 -    // </if>
--
+-    // <if expr="not chromeos and not lacros">
+-    if (loadTimeData.getBoolean('enableDesktopRestructuredLanguageSettings')) {
+-      r.LANGUAGE_SETTINGS = r.LANGUAGES.createChild('/languageSettings');
+-    }
+-    // </if>
+ 
      if (visibility.downloads !== false) {
        r.DOWNLOADS = r.ADVANCED.createSection('/downloads', 'downloads');
 --- a/chrome/browser/resources/settings/settings_menu/settings_menu.html
@@ -292,11 +265,7 @@
                    disabled$="[[!advancedOpened]]">
 --- a/chrome/browser/resources/settings/site_settings_page/site_settings_page.js
 +++ b/chrome/browser/resources/settings/site_settings_page/site_settings_page.js
-@@ -218,14 +218,8 @@ function getCategoryItemMap() {
-       icon: 'settings:payment-handler',
-       enabledLabel: 'siteSettingsPaymentHandlerAllow',
--      disabledLabel: 'siteSettingsPaymentHandlerBlock',
-+      disabledLabel: 'siteSettingsPaymentHandlerAllow',
+@@ -228,13 +228,5 @@ function getCategoryItemMap() {
        shouldShow: () =>
            loadTimeData.getBoolean('enablePaymentHandlerContentSetting'),
      },
@@ -305,9 +274,11 @@
 -      id: 'pdfDocuments',
 -      label: 'siteSettingsPdfDocuments',
 -      icon: 'settings:pdf',
+-      enabledLabel: 'siteSettingsPdfsAllowed',
+-      disabledLabel: 'siteSettingsPdfsBlocked',
 -    },
      {
-       route: routes.SITE_SETTINGS_FLASH,
+       route: routes.SITE_SETTINGS_POPUPS,
 @@ -402,5 +396,4 @@ Polymer({
              Id.ADS,
              Id.ZOOM_LEVELS,

@@ -50,9 +50,9 @@
 +    master_extension_container_->SetProperty(views::kInternalPaddingKey,
 +                                  gfx::Insets(0, GetLayoutConstant(TOOLBAR_STANDARD_SPACING)));
 +  }
+   if (OmniboxPrefixRichAutocompletionEnabled())
+     ime_prefix_autocomplete_view_->SetFontList(font_list);
    ime_inline_autocomplete_view_->SetFontList(font_list);
-   selected_keyword_view_->SetFontList(font_list);
-   for (ContentSettingImageView* view : content_setting_views_)
 @@ -1288,6 +1306,29 @@ gfx::ImageSkia LocationBarView::GetLocat
                                        std::move(on_icon_fetched))
               : ui::ImageModel();
@@ -97,16 +97,14 @@
  class CommandUpdater;
  class ContentSettingBubbleModelDelegate;
  class GURL;
-@@ -74,7 +79,8 @@ class LocationBarView : public LocationB
+@@ -74,6 +79,7 @@ class LocationBarView : public LocationB
                          public IconLabelBubbleView::Delegate,
                          public LocationIconView::Delegate,
                          public ContentSettingImageView::Delegate,
--                        public PageActionIconView::Delegate {
-+                        public PageActionIconView::Delegate,
-+						       public BrowserActionsContainer::Delegate {
-  public:
-   class Delegate {
-    public:
++						       public BrowserActionsContainer::Delegate,
+                         public PageActionIconView::Delegate,
+                         public device::GeolocationManager::PermissionObserver,
+                         public accuracy_tips::AccuracyService::Observer {
 @@ -403,6 +409,14 @@ class LocationBarView : public LocationB
  
    // The container for page action icons.

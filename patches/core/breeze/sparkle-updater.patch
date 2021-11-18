@@ -54,15 +54,19 @@
    compile_entitlements("entitlements") {
      entitlements_templates = [ "app/app-entitlements.plist" ]
      output_name = "$target_gen_dir/app-entitlements.plist"
-@@ -594,7 +623,7 @@
+@@ -594,11 +623,7 @@
  
        output_name = chrome_helper_name + invoker.helper_name_suffix
  
--      info_plist_target = ":chrome_helper_plist"
+-      if (defined(invoker.info_plist_target)) {
+-        info_plist_target = invoker.info_plist_target
+-      } else {
+-        info_plist_target = ":chrome_helper_plist"
+-      }
 +      info_plist_target = ":sparkle_helper_plist"
+ 
        extra_substitutions = [
          "CHROMIUM_BUNDLE_ID=$chrome_mac_bundle_id",
-         "CHROMIUM_SHORT_NAME=$chrome_product_short_name",
 @@ -951,6 +980,7 @@
        "Resources",
        "XPCServices",
@@ -246,17 +250,17 @@
  }
  
  void VersionUpdaterMac::UpdateStatus(NSDictionary* dictionary) {
--  AutoupdateStatus keystone_status =
-+  AutoupdateStatus sparkle_status =
-       static_cast<AutoupdateStatus>([base::mac::ObjCCastStrict<NSNumber>(
-           [dictionary objectForKey:kAutoupdateStatusStatus]) intValue]);
+-  AutoupdateStatus keystone_status = static_cast<AutoupdateStatus>(
++  AutoupdateStatus sparkle_status = static_cast<AutoupdateStatus>(
+       [base::mac::ObjCCastStrict<NSNumber>(dictionary[kAutoupdateStatusStatus])
+           intValue]);
    std::string error_messages =
        base::SysNSStringToUTF8(base::mac::ObjCCastStrict<NSString>(
-           [dictionary objectForKey:kAutoupdateStatusErrorMessages]));
+           dictionary[kAutoupdateStatusErrorMessages]));
  
 -  bool enable_promote_button = true;
 +  //bool enable_promote_button = true;
-   base::string16 message;
+   std::u16string message;
  
    Status status;
 -  switch (keystone_status) {
@@ -431,14 +435,14 @@
 +#endif // defined(OS_MAC)
  }
  
- base::string16 CurrentlyInstalledVersion() {
+ std::u16string CurrentlyInstalledVersion() {
 -  KeystoneGlue* keystoneGlue = [KeystoneGlue defaultKeystoneGlue];
 -  NSString* version = [keystoneGlue currentlyInstalledVersion];
 -  return base::SysNSStringToUTF16(version);
 +#if defined(OS_MAC)
 +  return sparkle_glue::CurrentlyInstalledVersion();
 +#else
-+  return base::string16();
++  return base::u16string();
 +#endif // defined(OS_MAC)
  }
  
@@ -513,25 +517,25 @@
 +      "views/update_recommended_message_box_mac.mm",
 +      "views/update_recommended_message_box_mac.h",
 +      # End Sparkle
-       "views/user_education/feature_promo_bubble_params.cc",
-       "views/user_education/feature_promo_bubble_params.h",
-       "views/user_education/feature_promo_bubble_timeout.cc",
---- a/chrome/browser/resources/settings/lifetime_browser_proxy.js
-+++ b/chrome/browser/resources/settings/lifetime_browser_proxy.js
+       "views/user_education/feature_promo_bubble_owner.cc",
+       "views/user_education/feature_promo_bubble_owner.h",
+       "views/user_education/feature_promo_bubble_owner_impl.cc",
+--- a/chrome/browser/resources/settings/lifetime_browser_proxy.ts
++++ b/chrome/browser/resources/settings/lifetime_browser_proxy.ts
 @@ -15,6 +15,13 @@
-     // Triggers a browser relaunch.
-     relaunch() {}
+   // Triggers a browser relaunch.
+   relaunch(): void;
  
-+     // <if expr="is_macosx">
-+     // Use separate api for relaunch after update on Mac.
-+     // Chromium's relaunch api isn't compatible with sparkle framework.
-+     // So, sparkle framework's relaunch api is used on Mac.
-+     relaunchOnMac() {}
-+     // </if>
++  // <if expr="is_macosx">
++  // Use separate api for relaunch after update on Mac.
++  // Chromium's relaunch api isn't compatible with sparkle framework.
++  // So, sparkle framework's relaunch api is used on Mac.
++  relaunchOnMac(): void;
++  // </if>
 +
-     // <if expr="chromeos">
-     // First signs out current user and then performs a restart.
-     signOutAndRestart() {}
+   // <if expr="chromeos">
+   // First signs out current user and then performs a restart.
+   signOutAndRestart(): void;
 @@ -40,6 +47,13 @@
      relaunch() {
        chrome.send('relaunch');
@@ -546,22 +550,22 @@
  
      // <if expr="chromeos">
      /** @override */
---- a/chrome/browser/resources/settings/about_page/about_page.js
-+++ b/chrome/browser/resources/settings/about_page/about_page.js
+--- a/chrome/browser/resources/settings/about_page/about_page.ts
++++ b/chrome/browser/resources/settings/about_page/about_page.ts
 @@ -213,7 +213,14 @@
+   }
  
-   /** @private */
-   onRelaunchTap_() {
--    this.lifetimeBrowserProxy_.relaunch();
-+     // <if expr="is_macosx">
-+     // Sparkle framework's relaunch api is used.
-+     this.lifetimeBrowserProxy_.relaunchOnMac();
-+     // </if>
+   private onRelaunchTap_() {
+-    LifetimeBrowserProxyImpl.getInstance().relaunch();
++    // <if expr="is_macosx">
++    // Sparkle framework's relaunch api is used.
++    LifetimeBrowserProxyImpl.getInstance().relaunchOnMac();
++    // </if>
 + 
-+     // <if expr="not is_macosx">
-+     this.lifetimeBrowserProxy_.relaunch();
-+     // </if>
-   },
++    // <if expr="not is_macosx">
++    LifetimeBrowserProxyImpl.getInstance().relaunch();
++    // </if>
+   }
  
    // <if expr="not chromeos">
 --- a/chrome/browser/ui/views/update_recommended_message_box.h

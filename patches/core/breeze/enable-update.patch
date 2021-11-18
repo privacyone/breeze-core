@@ -13,9 +13,9 @@
 +constexpr auto kDefaultLowThreshold = base::TimeDelta::FromHours(12);
 +constexpr auto kDefaultElevatedThreshold = base::TimeDelta::FromDays(1);
 +constexpr auto kDefaultHighThreshold = base::TimeDelta::FromDays(2);
+ constexpr auto kDefaultGraceThreshold =
+     kDefaultHighThreshold - base::TimeDelta::FromHours(1);
  
- // How long to wait (each cycle) before checking which severity level we should
- // be at. Once we reach the highest severity, the timer will stop.
 @@ -67,9 +67,9 @@
  
  // How often to check to see if the build has become outdated.

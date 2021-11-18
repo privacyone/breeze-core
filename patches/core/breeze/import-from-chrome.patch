@@ -205,7 +205,7 @@
 @@ -92,12 +94,16 @@
      "pstore_declarations.h",
    ]
-   if (is_chromeos || is_linux) {
+   if (is_chromeos || is_linux || is_fuchsia) {
 -    sources += [ "firefox_importer_utils_linux.cc" ]
 +    sources += [ 
 +      "firefox_importer_utils_linux.cc", 
@@ -298,9 +298,9 @@
 +#include "base/command_line.h"
 +#include "base/strings/utf_string_conversions.h"
 +
- #if defined(OS_MAC)
- #include <stdlib.h>
- 
+ ProfileImportImpl::ProfileImportImpl(
+     mojo::PendingReceiver<chrome::mojom::ProfileImport> receiver)
+     : receiver_(this, std::move(receiver)) {}
 @@ -55,6 +58,34 @@ void ProfileImportImpl::StartImport(
    }
  
@@ -338,7 +338,7 @@
    import_thread_.reset(new base::Thread("import_thread"));
 --- a/components/os_crypt/key_storage_libsecret.cc
 +++ b/components/os_crypt/key_storage_libsecret.cc
-@@ -12,12 +12,14 @@
+@@ -12,6 +12,8 @@
  #include "build/branding_buildflags.h"
  #include "components/os_crypt/libsecret_util_linux.h"
  
@@ -346,19 +346,12 @@
 +
  namespace {
  
- #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
- const char kApplicationName[] = "chrome";
- #else
--const char kApplicationName[] = "chromium";
-+const char kApplicationName[] = "breeze";
- #endif
- 
  const SecretSchema kKeystoreSchemaV2 = {
 @@ -88,7 +90,34 @@ KeyStorageLibsecret::AddRandomPasswordIn
  
- base::Optional<std::string> KeyStorageLibsecret::GetKeyImpl() {
+ absl::optional<std::string> KeyStorageLibsecret::GetKeyImpl() {
    LibsecretAttributesBuilder attrs;
--  attrs.Append("application", kApplicationName);
+-  attrs.Append("application", application_name_);
 +  
 +  const char* application_name;
 +  base::CommandLine* command_line = base::CommandLine::ForCurrentProcess();
@@ -390,6 +383,17 @@
  
    LibsecretLoader::SearchHelper helper;
    helper.Search(&kKeystoreSchemaV2, attrs.Get(),
+--- a/components/os_crypt/key_storage_linux.cc
++++ b/components/os_crypt/key_storage_linux.cc
+@@ -151,7 +151,7 @@
+ #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
+   static const base::NoDestructor<std::string> kDefaultApplicationName("chrome");
+ #else
+-  static const base::NoDestructor<std::string> kDefaultApplicationName("chromium");
++  static const base::NoDestructor<std::string> kDefaultApplicationName("breeze");
+ #endif
+ 
+   std::unique_ptr<KeyStorageLinux> key_storage;
 --- a/components/os_crypt/keychain_password_mac.mm
 +++ b/components/os_crypt/keychain_password_mac.mm
 @@ -13,6 +13,8 @@
@@ -401,17 +405,16 @@
  using crypto::AppleKeychain;
  
  namespace {
-@@ -51,8 +53,8 @@ std::string AddRandomPasswordToKeychain(
- const char KeychainPassword::service_name[] = "Chrome Safe Storage";
- const char KeychainPassword::account_name[] = "Chrome";
+@@ -51,7 +53,7 @@ std::string AddRandomPasswordToKeychain(
+ const char kDefaultServiceName[] = "Chrome Safe Storage";
+ const char kDefaultAccountName[] = "Chrome";
  #else
--const char KeychainPassword::service_name[] = "Chromium Safe Storage";
--const char KeychainPassword::account_name[] = "Chromium";
-+const char KeychainPassword::service_name[] = "Breeze Safe Storage";
-+const char KeychainPassword::account_name[] = "Breeze";
+-const char kDefaultServiceName[] = "Chromium Safe Storage";
+-const char kDefaultAccountName[] = "Chromium";
++const char kDefaultServiceName[] = "Breeze Safe Storage";
++const char kDefaultAccountName[] = "Breeze";
  #endif
  
- KeychainPassword::KeychainPassword(const AppleKeychain& keychain)
 @@ -61,6 +63,39 @@ KeychainPassword::KeychainPassword(const
  KeychainPassword::~KeychainPassword() = default;
  
@@ -465,7 +468,7 @@
      : desktop_env_(desktop_env), app_name_(std::move(app_name)) {}
 @@ -91,11 +93,44 @@ base::Optional<std::string> KeyStorageKW
    if (!InitFolder())
-     return base::nullopt;
+     return absl::nullopt;
  
 +  const char *folder_name, *key;
 +  base::CommandLine* command_line = base::CommandLine::ForCurrentProcess();
@@ -501,14 +504,14 @@
 +  }
 +
    // Read password
-   base::Optional<std::string> password;
+   absl::optional<std::string> password;
    error =
 -      kwallet_dbus_->ReadPassword(handle_, KeyStorageLinux::kFolderName,
 -                                  KeyStorageLinux::kKey, app_name_, &password);
 +      kwallet_dbus_->ReadPassword(handle_, folder_name,
 +                                  key, app_name_, &password);
    if (error)
-     return base::nullopt;
+     return absl::nullopt;
  
 @@ -117,8 +152,36 @@ base::Optional<std::string> KeyStorageKW
  
@@ -550,7 +553,7 @@
  
 --- a/components/os_crypt/key_storage_keyring.cc
 +++ b/components/os_crypt/key_storage_keyring.cc
-@@ -13,12 +13,14 @@
+@@ -13,6 +13,8 @@
  #include "build/branding_buildflags.h"
  #include "components/os_crypt/keyring_util_linux.h"
  
@@ -558,17 +561,10 @@
 +
  namespace {
  
- #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
- const char kApplicationName[] = "chrome";
- #else
--const char kApplicationName[] = "chromium";
-+const char kApplicationName[] = "breeze";
- #endif
- 
  const GnomeKeyringPasswordSchema kSchema = {
-@@ -47,9 +49,37 @@ base::Optional<std::string> KeyStorageKe
+@@ -43,10 +43,37 @@ base::Optional<std::string> KeyStorageKe
  
-   base::Optional<std::string> password;
+   absl::optional<std::string> password;
    gchar* password_c = nullptr;
 +  
 +  const char* application_name;
@@ -600,22 +596,22 @@
 +  
    GnomeKeyringResult result =
        GnomeKeyringLoader::gnome_keyring_find_password_sync_ptr(
--          &kSchema, &password_c, "application", kApplicationName, nullptr);
+-          &kSchema, &password_c, "application", application_name_.c_str(),
+-          nullptr);
 +          &kSchema, &password_c, "application", application_name, nullptr);
    if (result == GNOME_KEYRING_RESULT_OK) {
      password = password_c;
      GnomeKeyringLoader::gnome_keyring_free_password_ptr(password_c);
 --- a/chrome/browser/importer/profile_writer.cc
 +++ b/chrome/browser/importer/profile_writer.cc
-@@ -90,13 +90,9 @@ bool ProfileWriter::TemplateURLServiceIsLoaded() const {
- void ProfileWriter::AddPasswordForm(
+@@ -90,12 +90,9 @@ bool ProfileWriter::TemplateURLServiceIsLoaded() const {
      const password_manager::PasswordForm& form) {
    DCHECK(profile_);
--
+ 
 -  if (profile_->GetPrefs()->GetBoolean(
 -          password_manager::prefs::kCredentialsEnableService)) {
-     PasswordStoreFactory::GetForProfile(profile_,
-                                         ServiceAccessType::EXPLICIT_ACCESS)
+     PasswordStoreFactory::GetInterfaceForProfile(
+         profile_, ServiceAccessType::EXPLICIT_ACCESS)
          ->AddLogin(form);
 -  }
  }

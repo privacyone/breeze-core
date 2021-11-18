@@ -5,9 +5,9 @@
  #define IDC_TOGGLE_COMMANDER     40261
  #define IDC_SHOW_KALEIDOSCOPE          40262
 +#define IDC_SEND_FEEDBACK              40263
+ #define IDC_CHROME_TIPS                40263
+ #define IDC_CHROME_WHATS_NEW           40264
  
- // Spell-check
- // Insert any additional suggestions before _LAST; these have to be consecutive.
 --- a/chrome/browser/ui/toolbar/app_menu_model.cc
 +++ b/chrome/browser/ui/toolbar/app_menu_model.cc
 @@ -609,6 +609,8 @@ void AppMenuModel::LogMenuMetrics(int command_id) {
@@ -45,9 +45,9 @@
    command_updater_.UpdateCommandEnabled(IDC_VIEW_PASSWORDS, show_main_ui);
    command_updater_.UpdateCommandEnabled(IDC_ABOUT, show_main_ui);
 +  command_updater_.UpdateCommandEnabled(IDC_SEND_FEEDBACK, show_main_ui);
-   command_updater_.UpdateCommandEnabled(IDC_QRCODE_GENERATOR, show_main_ui);
-   command_updater_.UpdateCommandEnabled(IDC_SHOW_APP_MENU, show_main_ui);
-   command_updater_.UpdateCommandEnabled(IDC_SEND_TAB_TO_SELF, show_main_ui);
+ #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
+   command_updater_.UpdateCommandEnabled(IDC_CHROME_TIPS, show_main_ui);
+   command_updater_.UpdateCommandEnabled(IDC_CHROME_WHATS_NEW, show_main_ui);
 --- a/chrome/browser/ui/chrome_pages.cc
 +++ b/chrome/browser/ui/chrome_pages.cc
 @@ -477,6 +477,11 @@ void ShowAboutChrome(Browser* browser) {

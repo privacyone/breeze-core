@@ -6,17 +6,19 @@
 +using flags_ui::kBreezeFlag;
  
  namespace about_flags {
-@@ -6899,7 +6900,8 @@ void GetFlagFeatureEntries(flags_ui::FlagsStorage* flags_storage,
+@@ -6899,9 +6900,10 @@ void GetFlagFeatureEntries(flags_ui::FlagsStorage* flags_storage,
+ void GetFlagFeatureEntries(flags_ui::FlagsStorage* flags_storage,
                             flags_ui::FlagAccess access,
-                            base::ListValue* supported_entries,
--                           base::ListValue* unsupported_entries) {
-+                           base::ListValue* unsupported_entries,
-+                           base::ListValue* breeze_entries) {
+                            base::Value::ListStorage& supported_entries,
+-                           base::Value::ListStorage& unsupported_entries) {
++                           base::Value::ListStorage& unsupported_entries,
++                           base::Value::ListStorage& breeze_entries) {
    FlagsStateSingleton::GetFlagsState()->GetFlagFeatureEntries(
 -      flags_storage, access, supported_entries, unsupported_entries,
 +      flags_storage, access, supported_entries, unsupported_entries, breeze_entries,
-       base::BindRepeating(&SkipConditionalFeatureEntry,
+       base::BindRepeating(&ShouldSkipConditionalFeatureEntry,
                            // Unretained: this callback doesn't outlive this
+                           // stack frame.
 @@ -6914,5 +6916,5 @@ void GetFlagFeatureEntriesForDeprecatedPage(
      base::ListValue* unsupported_entries) {
    FlagsStateSingleton::GetFlagsState()->GetFlagFeatureEntries(
@@ -26,14 +28,16 @@
  }
 --- a/chrome/browser/about_flags.h
 +++ b/chrome/browser/about_flags.h
-@@ -62,5 +62,6 @@ void GetFlagFeatureEntries(flags_ui::FlagsStorage* flags_storage,
+@@ -62,7 +62,8 @@ void GetFlagFeatureEntries(flags_ui::FlagsStorage* flags_storage,
+ void GetFlagFeatureEntries(flags_ui::FlagsStorage* flags_storage,
                             flags_ui::FlagAccess access,
-                            base::ListValue* supported_entries,
--                           base::ListValue* unsupported_entries);
-+                           base::ListValue* unsupported_entries,
-+                           base::ListValue* breeze_entries);
+                            base::Value::ListStorage& supported_entries,
+-                           base::Value::ListStorage& unsupported_entries);
++                           base::Value::ListStorage& unsupported_entries,
++                           base::Value::ListStorage& breeze_entries);
  
  // Gets the list of feature entries for the deprecated flags page. Entries that
+ // are available for the current platform are appended to |supported_entries|;
 --- a/chrome/browser/ui/webui/flags/flags_ui_handler.cc
 +++ b/chrome/browser/ui/webui/flags/flags_ui_handler.cc
 @@ -73,4 +73,5 @@ void FlagsUIHandler::HandleRequestExperimentalFeatures(
@@ -42,17 +46,18 @@
 +  std::unique_ptr<base::ListValue> breeze_features(new base::ListValue);
  
    if (deprecated_features_only_) {
-@@ -81,9 +82,11 @@ void FlagsUIHandler::HandleRequestExperimentalFeatures(
+@@ -81,10 +82,12 @@ void FlagsUIHandler::HandleRequestExperimentalFeatures(
      about_flags::GetFlagFeatureEntries(flags_storage_.get(), access_,
-                                        supported_features.get(),
--                                       unsupported_features.get());
-+                                       unsupported_features.get(),
-+                                       breeze_features.get());
+                                        supported_features,
+-                                       unsupported_features);
++                                       unsupported_features,
++                                       breeze_features);
    }
  
-   results.Set(flags_ui::kSupportedFeatures, std::move(supported_features));
-   results.Set(flags_ui::kUnsupportedFeatures, std::move(unsupported_features));
-+  results.Set(flags_ui::kBreezeSupportedFeatures, std::move(breeze_features));
+   results.SetKey(flags_ui::kSupportedFeatures, base::Value(supported_features));
+   results.SetKey(flags_ui::kUnsupportedFeatures,
+                  base::Value(unsupported_features));
++  results.SetKey(flags_ui::kSupportedFeatures, base::Value(breeze_features));
    results.SetBoolean(flags_ui::kNeedsRestart,
                       about_flags::IsRestartNeededToCommitChanges());
 --- a/components/flags_strings.grdp
@@ -75,32 +80,32 @@
    // Check whether internal |name| matches this FeatureEntry. Depending on the
 --- a/components/flags_ui/flags_state.cc
 +++ b/components/flags_ui/flags_state.cc
-@@ -615,4 +615,5 @@ void FlagsState::GetFlagFeatureEntries(
-     base::ListValue* supported_entries,
-     base::ListValue* unsupported_entries,
-+    base::ListValue* breeze_entries,
+@@ -573,4 +573,5 @@ void FlagsState::GetFlagFeatureEntries(
+     base::Value::ListStorage& supported_entries,
+     base::Value::ListStorage& unsupported_entries,
++    base::Value::ListStorage& breeze_entries,
      base::RepeatingCallback<bool(const FeatureEntry&)> skip_feature_entry) {
    DCHECK(flags_storage);
-@@ -638,4 +639,5 @@ void FlagsState::GetFlagFeatureEntries(
+@@ -600,4 +600,5 @@ void FlagsState::GetFlagFeatureEntries(
      bool is_default_value = IsDefaultValue(entry, enabled_entries);
-     data->SetBoolean("is_default", is_default_value);
-+    data->SetBoolean("is_breeze_flag", entry.is_breeze_flag);
+     data.SetBoolKey("is_default", is_default_value);
++    data.SetBoolKey("is_breeze_flag", entry.is_breeze_flag);
  
      switch (entry.type) {
-@@ -670,7 +672,10 @@ void FlagsState::GetFlagFeatureEntries(
+@@ -633,7 +633,11 @@ void FlagsState::GetFlagFeatureEntries(
      }
  #endif
--
--    if (supported)
--      supported_entries->Append(std::move(data));
-+    if (supported) {
+ 
+-     if (supported)
+-       supported_entries.push_back(std::move(data));
++     if (supported) {
 +      if (entry.is_breeze_flag)
-+        breeze_entries->Append(std::move(data));
++        breeze_entries.push_back(std::move(data));
 +      else
-+        supported_entries->Append(std::move(data));
++        supported_entries.push_back(std::move(data));
 +    }
      else
-       unsupported_entries->Append(std::move(data));
+       unsupported_entries.push_back(std::move(data));
 --- a/components/flags_ui/flags_state.h
 +++ b/components/flags_ui/flags_state.h
 @@ -57,4 +57,6 @@ enum {

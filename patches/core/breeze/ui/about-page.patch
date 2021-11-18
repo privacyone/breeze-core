@@ -17,8 +17,8 @@
 
    html_source->AddBoolean("aboutObsoleteNowOrSoon",
                            ObsoleteSystem::IsObsoleteNowOrSoon());
---- a/chrome/browser/resources/settings/settings_page/settings_subpage.js
-+++ b/chrome/browser/resources/settings/settings_page/settings_subpage.js
+--- a/chrome/browser/resources/settings/settings_page/settings_subpage.ts
++++ b/chrome/browser/resources/settings/settings_page/settings_subpage.ts
 @@ -22,8 +22,6 @@
  
      titleIcon: String,
@@ -31,14 +31,14 @@
 --- a/chrome/browser/resources/settings/about_page/about_page.html
 +++ b/chrome/browser/resources/settings/about_page/about_page.html
 @@ -47,7 +47,7 @@
-                     breeze://theme/current-channel-logo@2x 2x"
              alt="$i18n{aboutProductLogoAlt}"
              role="presentation">
+ </if>
 -        <h1 class="product-title">$i18n{aboutProductTitle}</h1>
 +        <h1 class="product-title">Breeze Beta</h1>
        </div>
        <div class="cr-row two-line">
-         <!-- TODO(dpapad): Investigate why vulcanize does not handle well
+         <!-- Set the icon from the iconset (when it's obsolete/EOL and
 @@ -148,8 +148,15 @@
            <div class="secondary">$i18nRaw{aboutProductLicense}</div>
          </div>

@@ -1,6 +1,6 @@
 --- a/chrome/app/chromium_strings.grd
 +++ b/chrome/app/chromium_strings.grd
-@@ -187,16 +187,16 @@ If you update this file, be sure also to update google_chrome_strings.grd. -->
+@@ -187,32 +187,32 @@ If you update this file, be sure also to update google_chrome_strings.grd. -->
        <message name="IDS_PRODUCT_NAME" desc="The Chrome application name">
 -        Chromium
 +        Breeze
@@ -22,6 +22,26 @@
          <message name="IDS_PRODUCT_DESCRIPTION" desc="Browser description">
 -          Chromium is a web browser that runs webpages and applications with lightning speed. It's fast, stable, and easy to use. Browse the web more safely with malware and phishing protection built into Chromium.
 +          Breeze is a web browser that runs webpages and applications with lightning speed. It's fast, stable, and easy to use. Browse the web more safely with malware and phishing protection built into Breeze.
+         </message>
+         <message name="IDS_WELCOME_TO_CHROME" desc="Welcoming text announced via screen readers the first time Chrome is launched at the conclusion of installation.">
+-           Welcome to Chromium; new browser window opened
++           Welcome to Breeze; new browser window opened
+         </message>
+       </if>
+       <if expr="is_macosx or is_linux">
+         <message name="IDS_FIRST_RUN_DIALOG_WINDOW_TITLE" desc="Window title of First Run dialog on Mac and Linux, displayed in title bar">
+-          Welcome to Chromium
++          Welcome to Breeze
+         </message>
+       </if>
+       <if expr="chromeos">
+         <message name="IDS_PRODUCT_OS_NAME" desc="The Chrome OS application name">
+-          Chromium OS
++          Breeze OS
+         </message>
+         <message name="IDS_SHORT_PRODUCT_OS_NAME" desc="The Chrome OS application short name">
+-          Chromium OS
++          Breeze OS
          </message>
 @@ -225,3 +225,3 @@ If you update this file, be sure also to update google_chrome_strings.grd. -->
          <message name="IDS_TASK_MANAGER_TITLE" desc="The title of the Task Manager window">
@@ -78,7 +98,15 @@
 -        Copyright <ph name="YEAR">{0,date,y}<ex>2016</ex></ph> The Chromium Authors. All rights reserved.
 +        Copyright © <ph name="YEAR">{0,date,y}<ex>2016</ex></ph> Privacy One LLC. All rights reserved.
        </message>
-@@ -290,3 +290,3 @@
+@@ -290,9 +290,9 @@
+         <message name="IDS_ABOUT_CROS_VERSION_LICENSE" desc="Additional text displayed beneath the Chromium open source URLs for Chrome OS.">
+-          Chromium OS is made possible by additional <ph name="BEGIN_LINK_CROS_OSS">&lt;a target="_blank" href="$1"&gt;</ph>open source software<ph name="END_LINK_CROS_OSS">&lt;/a&gt;</ph>.
++          Breeze OS is made possible by additional <ph name="BEGIN_LINK_CROS_OSS">&lt;a target="_blank" href="$1"&gt;</ph>open source software<ph name="END_LINK_CROS_OSS">&lt;/a&gt;</ph>.
+         </message>
+         <message name="IDS_ABOUT_CROS_WITH_LINUX_VERSION_LICENSE" desc="Additional text displayed beneath the Chromium open source URLs for Chrome OS when Crostini is installed.">
+-          Chromium OS is made possible by additional <ph name="BEGIN_LINK_CROS_OSS">&lt;a target="_blank" href="$1"&gt;</ph>open source software<ph name="END_LINK_CROS_OSS">&lt;/a&gt;</ph>, as is <ph name="BEGIN_LINK_LINUX_OSS">&lt;a target="_blank" href="$2"&gt;</ph>Linux development environment<ph name="END_LINK_LINUX_OSS">&lt;/a&gt;</ph>.
++          Breeze OS is made possible by additional <ph name="BEGIN_LINK_CROS_OSS">&lt;a target="_blank" href="$1"&gt;</ph>open source software<ph name="END_LINK_CROS_OSS">&lt;/a&gt;</ph>, as is <ph name="BEGIN_LINK_LINUX_OSS">&lt;a target="_blank" href="$2"&gt;</ph>Linux development environment<ph name="END_LINK_LINUX_OSS">&lt;/a&gt;</ph>.
+         </message>
          <message name="IDS_ABOUT_SAFETY_INFORMATION" desc="The safety label in the About box." translateable="false">
 -          Not used in Chromium. Placeholder to keep resource maps in sync.
 +          Not used in Breeze. Placeholder to keep resource maps in sync.
@@ -108,6 +136,19 @@
 -          Chromium is unresponsive. Relaunch now?
 +          Breeze is unresponsive. Relaunch now?
          </message>
+@@ -318,9 +318,9 @@
+       <message name="IDS_BROWSER_SHARING_CLICK_TO_CALL_DIALOG_HELP_TEXT_NO_DEVICES" desc="The label to be shown as a help text of the dialog when user click on a phone number, if there are no phones to choose from.">
+-        To send a number from here to your Android phone, sign in to Chromium on both devices.
++        To send a number from here to your Android phone, sign in to Breeze on both devices.
+       </message>
+       <message name="IDS_BROWSER_SHARING_CLICK_TO_CALL_DIALOG_HELP_TEXT_NO_DEVICES_ORIGIN" desc="The label to be shown as a help text of the dialog when user click on a phone number, if there are no phones to choose from.">
+-        To send a number from <ph name="ORIGIN">$1<ex>www.9oo91e.qjz9zk</ex></ph> to your Android phone, sign in to Chromium on both devices.
++        To send a number from <ph name="ORIGIN">$1<ex>www.9oo91e.qjz9zk</ex></ph> to your Android phone, sign in to Breeze on both devices.
+       </message>
+       <message name="IDS_BROWSER_SHARING_ERROR_DIALOG_TEXT_DEVICE_NOT_FOUND" desc="The text to be shown on the dialog when an error occurred because the device is not synced.">
+-        Make sure you are signed in to Chromium on your <ph name="TARGET_DEVICE_NAME">$1<ex>Pixel XL</ex></ph> and then try sending again.
++        Make sure you are signed in to Breeze on your <ph name="TARGET_DEVICE_NAME">$1<ex>Pixel XL</ex></ph> and then try sending again.
+       </message>
 @@ -330,9 +330,9 @@ If you update this file, be sure also to update google_chrome_strings.grd. -->
          <message name="IDS_UNINSTALL_CLOSE_APP" desc="Message to user when uninstall detects other app instance running">
 -          Please close all Chromium windows and try again.
@@ -328,6 +369,11 @@
 -        This file may be dangerous, so Chromium has blocked it.
 +        This file may be dangerous, so Breeze has blocked it.
        </message>
+@@ -528,3 +528,3 @@
+         desc="Body prompt text for the confirmation dialog asking whether the user really meant to keep a download deemed to be associated with account compromise by safebrowsing">
+-        Chromium recommends that you don't download or open this file
++        Breeze recommends that you don't download or open this file
+       </message>
 @@ -531,3 +531,3 @@ Chromium is unable to recover your settings.
          <message name="IDS_ABANDON_DOWNLOAD_DIALOG_BROWSER_MESSAGE" desc="Message on a dialog shown when the user closes the browser while one or more downloads are in progress. This string is shown on Windows, Chrome OS, and Linux, which all use 'Exit' to refer to closing a browser.">
 -          Exit Chromium anyway?
@@ -353,27 +399,27 @@
 -          <ph name="EXTENSION_NAME">$1<ex>Gmail Checker</ex></ph> has been added to Chromium
 +          <ph name="EXTENSION_NAME">$1<ex>Gmail Checker</ex></ph> has been added to Breeze
          </message>
-@@ -561,3 +561,3 @@ Chromium is unable to recover your settings.
+@@ -561,11 +561,11 @@ Chromium is unable to recover your settings.
          <message name="IDS_EXTENSION_UNINSTALL_PROMPT_REMOVE_DATA_CHECKBOX" desc="Checkbox text to ask the user whether they want to remove associated data at uninstall time. Only used when uninstalling an app associated with a particular website.">
 -          Also clear data from Chromium (<ph name="URL">$1<ex>www.9oo91e.qjz9zk</ex></ph>)
 +          Also clear data from Breeze (<ph name="URL">$1<ex>www.9oo91e.qjz9zk</ex></ph>)
          </message>
-@@ -567,3 +567,3 @@ Chromium is unable to recover your settings.
-           <message name="IDS_EXTENSIONS_HIDE_BUTTON_IN_MENU" desc="The extension context menu item to hide the button in the application menu (sentence case).">
--            Hide in Chromium menu
-+            Hide in Breeze menu
-           </message>
-@@ -572,3 +572,3 @@ Chromium is unable to recover your settings.
-           <message name="IDS_EXTENSIONS_HIDE_BUTTON_IN_MENU" desc="The extension context menu item to hide the button in the application menu (title case).">
--            Hide in Chromium Menu
-+            Hide in Breeze Menu
-           </message>
+ 
+         <!-- Extension alerts. -->
+         <message name="IDS_EXTENSION_ALERT_ITEM_BLOCKLISTED_MALWARE" desc="A statement that an extension has been newly blocklisted for malware.">
+-          Chromium found that "<ph name="EXTENSION_NAME">$1<ex>Gmail Checker</ex></ph>" contains malware
++          Breeze found that "<ph name="EXTENSION_NAME">$1<ex>Gmail Checker</ex></ph>" contains malware
+         </message>
+         <message name="IDS_EXTENSIONS_ALERT_ITEM_BLOCKLISTED_MALWARE_TITLE" desc="A statement that multiple extension/apps have been newly blocklisted for malware.">
+-           Chromium found that these items contain malware:
++           Breeze found that these items contain malware:
+         </message>
 @@ -578,10 +578,10 @@ Chromium is unable to recover your settings.
        <!-- breeze://settings/extensions page -->
--      <message name="IDS_EXTENSIONS_INCOGNITO_WARNING" desc="Warns the user that Chromium cannot prevent extensions from recording history in incognito mode. Displayed in extensions management UI after an extension is selected to be run in incognito mode.">
--        Warning: Chromium cannot prevent extensions from recording your browsing history. To disable this extension in incognito mode, unselect this option.
-+      <message name="IDS_EXTENSIONS_INCOGNITO_WARNING" desc="Warns the user that Breeze cannot prevent extensions from recording history in incognito mode. Displayed in extensions management UI after an extension is selected to be run in incognito mode.">
-+        Warning: Breeze cannot prevent extensions from recording your browsing history. To disable this extension in incognito mode, unselect this option.
+-      <message name="IDS_EXTENSIONS_INCOGNITO_WARNING" desc="Warns the user that Chromium cannot prevent extensions from recording history in Incognito mode. Displayed in extensions management UI after an extension is selected to be run in Incognito mode.">
+-        Warning: Chromium cannot prevent extensions from recording your browsing history. To disable this extension in Incognito mode, unselect this option.
++      <message name="IDS_EXTENSIONS_INCOGNITO_WARNING" desc="Warns the user that Breeze cannot prevent extensions from recording history in Incognito mode. Displayed in extensions management UI after an extension is selected to be run in Incognito mode.">
++        Warning: Breeze cannot prevent extensions from recording your browsing history. To disable this extension in Incognito mode, unselect this option.
        </message>
        <message name="IDS_EXTENSIONS_UNINSTALL" desc="The link for uninstalling extensions.">
 -        Remove from Chromium...
@@ -412,7 +458,7 @@
 -        &amp;Open in Chromium
 +        &amp;Open in Breeze
        </message>
-@@ -620,6 +620,6 @@ Chromium is unable to recover your settings.
+@@ -620,9 +620,9 @@ Chromium is unable to recover your settings.
          <message name="IDS_ABOUT" desc="In Title Case: The text label of the About Chrome menu item">
 -          About &amp;Chromium
 +          About &amp;Breeze
@@ -421,7 +467,11 @@
 -          Update &amp;Chromium
 +          Update &amp;Breeze
          </message>
-@@ -628,6 +628,6 @@ Chromium is unable to recover your settings.
+         <message name="IDS_RELAUNCH_TO_UPDATE" desc="In Title Case: The text label of the Update Chrome menu item, when relaunch to update experiment is enabled">
+-          Relaunch to Update &amp;Chromium
++          Relaunch to Update &amp;Breeze
+         </message>
+@@ -628,9 +628,9 @@ Chromium is unable to recover your settings.
          <message name="IDS_ABOUT" desc="The text label of the About Chrome menu item">
 -          About &amp;Chromium
 +          About &amp;Breeze
@@ -430,7 +480,11 @@
 -          Update &amp;Chromium
 +          Update &amp;Breeze
          </message>
-@@ -636,6 +636,6 @@ Chromium is unable to recover your settings.
+         <message name="IDS_RELAUNCH_TO_UPDATE" desc="The text label of the Update Chrome menu item, when relaunch to update experiment is enabled">
+-          Relaunch to update &amp;Chromium
++          Relaunch to update &amp;Breeze
+         </message>
+@@ -636,9 +636,9 @@ Chromium is unable to recover your settings.
          <message name="IDS_ABOUT" desc="The text label of the About Chrome menu item">
 -          About &amp;Chromium
 +          About &amp;Breeze
@@ -438,6 +492,10 @@
          <message name="IDS_UPDATE_NOW" desc="The text label of the Update Chrome OS Now menu item">
 -          Update &amp;Chromium OS
 +          Update &amp;Breeze OS
+         </message>
+         <message name="IDS_RELAUNCH_TO_UPDATE" desc="The text label of the Update Chrome OS menu item, when relaunch to update experiment is enabled">
+-          Relaunch to update &amp;Chromium OS
++          Relaunch to update &amp;Breeze OS
          </message>
 @@ -645,9 +645,9 @@ Chromium is unable to recover your settings.
          <message name="IDS_APP_MENU_PRODUCT_NAME" desc="The application's short name, used for the Mac's application menu, activity monitor, etc. This should be less than 16 characters. Example: Chrome, not Google Chrome.">
@@ -489,6 +547,11 @@
 -          You are signing in with a managed account and giving its administrator control over your Chromium profile. Your Chromium data, such as your apps, bookmarks, history, passwords, and other settings will become permanently tied to <ph name="USER_NAME">$1<ex>pat@example.com</ex></ph>. You will be able to delete this data via the Google Accounts Dashboard, but you will not be able to associate this data with another account. You can optionally create a new profile to keep your existing Chromium data separate. <ph name="LEARN_MORE">$2<ex>Learn more</ex></ph>
 +          You are signing in with a managed account and giving its administrator control over your Breeze profile. Your Breeze data, such as your apps, bookmarks, history, passwords, and other settings will become permanently tied to <ph name="USER_NAME">$1<ex>pat@example.com</ex></ph>. You will be able to delete this data via the Google Accounts Dashboard, but you will not be able to associate this data with another account. You can optionally create a new profile to keep your existing Breeze data separate. <ph name="LEARN_MORE">$2<ex>Learn more</ex></ph>
          </message>
+@@ -690,3 +690,3 @@
+         <message name="IDS_ENTERPRISE_SIGNIN_WORK_PROFILE_EXPLANATION" desc="The warning message displayed to an enterprise user about to link their profile to their Google account. This message is followed by a 'Learn more' link.">
+-          Any Chromium data that is generated during the use of this profile (such as the creation of bookmarks, history, passwords, and other settings) can be removed by the work profile administrator. <ph name="LEARN_MORE">$1<ex>Learn more</ex></ph>
++          Any Breeze data that is generated during the use of this profile (such as the creation of bookmarks, history, passwords, and other settings) can be removed by the work profile administrator. <ph name="LEARN_MORE">$1<ex>Learn more</ex></ph>
+         </message>
 @@ -698,6 +698,6 @@ Chromium is unable to recover your settings.
          <message name="IDS_ABOUT_BROWSER_SWITCH_DESCRIPTION_UNKNOWN_BROWSER" desc="Description shown while waiting for an alternative browser to open, when the browser name is not auto-detected">
 -          Your system administrator has configured Chromium to open an alternative browser to access <ph name="TARGET_URL_HOSTNAME">$1<ex>example.com</ex></ph>.
@@ -498,10 +561,46 @@
 -          Your system administrator has configured Chromium to open <ph name="ALTERNATIVE_BROWSER_NAME">$2<ex>Internet Explorer</ex></ph> to access <ph name="TARGET_URL_HOSTNAME">$1<ex>example.com</ex></ph>.
 +          Your system administrator has configured Breeze to open <ph name="ALTERNATIVE_BROWSER_NAME">$2<ex>Internet Explorer</ex></ph> to access <ph name="TARGET_URL_HOSTNAME">$1<ex>example.com</ex></ph>.
          </message>
+@@ -704,3 +704,3 @@
+       <message name="IDS_NTP_CUSTOMIZE_BUTTON_LABEL" desc="Label for button on the New Tab Page that opens dialog to customize Chromium browser.">
+-        Customize Chromium
++        Customize Breeze
+       </message>
 @@ -708,3 +708,3 @@ Chromium is unable to recover your settings.
          <message name="IDS_SIGNIN_EMAIL_CONFIRMATION_TITLE" desc="Title of the signin email confirmation tab modal dialog.">
 -          <ph name="USER_EMAIL_ADDRESS">$1<ex>foo@9ma1l.qjz9zk</ex></ph> was previously using Chromium
 +          <ph name="USER_EMAIL_ADDRESS">$1<ex>foo@9ma1l.qjz9zk</ex></ph> was previously using Breeze
+         </message>
+@@ -712,23 +712,23 @@
+         <message name="IDS_SIGNIN_DICE_WEB_INTERCEPT_CREATE_BUBBLE_TITLE" desc="Title of the web signin interception bubble">
+-          Continue in a new Chromium profile?
++          Continue in a new Breeze profile?
+         </message>
+         <message name="IDS_SIGNIN_DICE_WEB_INTERCEPT_SWITCH_BUBBLE_TITLE" desc="Title for the profile switch interception bubble">
+-          Switch to existing Chromium profile?
++          Switch to existing Breeze profile?
+         </message>
+         <message name="IDS_SIGNIN_DICE_WEB_INTERCEPT_SWITCH_BUBBLE_DESC" desc="Description for the profile switch interception bubble">
+-          A Chromium profile with this account already exists
++          A Breeze profile with this account already exists
+         </message>
+         <message name="IDS_SIGNIN_DICE_WEB_INTERCEPT_CONSUMER_BUBBLE_DESC" desc="Body of the web signin interception bubble">
+-          <ph name="EXISTING_USER">$1<ex>Elisa</ex></ph> is already signed in to this Chromium profile. To keep your browsing separate, Chromium can create your own profile for you.
++          <ph name="EXISTING_USER">$1<ex>Elisa</ex></ph> is already signed in to this Breeze profile. To keep your browsing separate, Breeze can create your own profile for you.
+         </message>
+           <message name="IDS_SIGNIN_DICE_WEB_INTERCEPT_CONSUMER_BUBBLE_DESC_MANAGED_DEVICE" desc="Body of the web signin interception bubble on a managed device">
+-          <ph name="EXISTING_USER">$1<ex>Elisa</ex></ph> is already signed in to this Chromium profile. This will create a new Chromium profile for <ph name="USER_EMAIL_ADDRESS">$2<ex>foo@9ma1l.qjz9zk</ex></ph>
++          <ph name="EXISTING_USER">$1<ex>Elisa</ex></ph> is already signed in to this Breeze profile. This will create a new Breeze profile for <ph name="USER_EMAIL_ADDRESS">$2<ex>foo@9ma1l.qjz9zk</ex></ph>
+         </message>
+         <message name="IDS_SIGNIN_DICE_WEB_INTERCEPT_ENTERPRISE_BUBBLE_DESC_MANAGED_DEVICE" desc="Body of the web signin interception bubble when the new account is personal and the existing account is managed on a managed device">
+-          This will create a new Chromium profile for <ph name="USER_EMAIL_ADDRESS">$1<ex>foo@9ma1l.qjz9zk</ex></ph>
++          This will create a new Breeze profile for <ph name="USER_EMAIL_ADDRESS">$1<ex>foo@9ma1l.qjz9zk</ex></ph>
+         </message>
+ 
+         <!-- Profile Customization Bubble-->
+         <message name="IDS_PROFILE_CUSTOMIZATION_TEXT" desc="Text of the profile customization bubble">
+-          Customize your new Chromium profile
++          Customize your new Breeze profile
          </message>
 @@ -726,4 +726,4 @@ Chromium is unable to recover your settings.
        <if expr="is_win">
@@ -523,24 +622,12 @@
 -          Chromium could not sync your data due to an error signing in.
 +          Breeze could not sync your data due to an error signing in.
          </message>
-@@ -744,22 +744,22 @@ Chromium is unable to recover your settings.
+@@ -744,13 +744,13 @@ Chromium is unable to recover your settings.
        <if expr="chromeos">
 -        <message name="IDS_SIGNIN_ERROR_SECONDARY_ACCOUNT_DISPLAY_SOURCE" desc="Context title shown in the notification header of sign-in error notification for Chromium OS Secondary Accounts.">
 -          Chromium OS System
 +        <message name="IDS_SIGNIN_ERROR_SECONDARY_ACCOUNT_DISPLAY_SOURCE" desc="Context title shown in the notification header of sign-in error notification for Breeze OS Secondary Accounts.">
 +          Breeze OS System
-         </message>
-         <message name="IDS_SYNC_NEEDS_KEYS_FOR_EVERYTHING_ERROR_BUBBLE_VIEW_MESSAGE" desc="Message in the sync error notification when the user needs to reauth to retrieve the sync encryption keys and resume sync.">
--          Chromium OS could not sync your data.
-+          Breeze OS could not sync your data.
-         </message>
-         <message name="IDS_SYNC_NEEDS_KEYS_FOR_PASSWORDS_ERROR_BUBBLE_VIEW_MESSAGE" desc="Message in the sync error notification when the user needs to reauth to retrieve the sync encryption keys, required to resume syncing of passwords specifically (other sync data works normally).">
--          Chromium OS could not sync your passwords.
-+          Breeze OS could not sync your passwords.
-         </message>
-         <message name="IDS_SYNC_PASSPHRASE_ERROR_BUBBLE_VIEW_MESSAGE" desc="Message in the sync error notification when the user needs to update their sync passphrase.">
--          Chromium OS could not sync your data. Please update your Sync passphrase.
-+          Breeze OS could not sync your data. Please update your Sync passphrase.
          </message>
          <message name="IDS_SYNC_SIGN_IN_ERROR_BUBBLE_VIEW_MESSAGE" desc="Message in the sign-in error notification when the user's sign-in credentials are out of date.">
 -          Chromium OS could not sync your data because your account sign-in details are out of date.
@@ -576,6 +663,11 @@
          </message>
 -        <message name="IDS_APP_SHORTCUTS_SUBDIR_NAME_DEV" desc="Unused in Chromium builds" translateable="false">
 +        <message name="IDS_APP_SHORTCUTS_SUBDIR_NAME_DEV" desc="Unused in Breeze builds" translateable="false">
+         </message>
+@@ -790,3 +790,3 @@
+         <message name="IDS_TERMS_OF_SERVICE_SCREEN_SUBHEADING" desc="Subheading at the top of the Terms of Service screen. MANAGER can be a domain or an email address.">
+-          <ph name="MANAGER">$1<ex>example.com</ex></ph> requires that you read and accept the following Terms of Service before using this device. These terms do not expand, modify or limit the Chromium OS Terms.
++          <ph name="MANAGER">$1<ex>example.com</ex></ph> requires that you read and accept the following Terms of Service before using this device. These terms do not expand, modify or limit the Breeze OS Terms.
          </message>
 @@ -797,9 +797,9 @@ Chromium is unable to recover your settings.
        <message name="IDS_MEDIA_STREAM_STATUS_TRAY_TEXT_AUDIO_AND_VIDEO" desc="Tool tip for the capture status tray icon when microphone and camera are being used">
@@ -708,7 +800,7 @@
 -            Open link in new Chromium &amp;tab
 +            Open link in new Breeze &amp;tab
            </message>
-           <message name="IDS_CONTENT_CONTEXT_OPENLINKOFFTHERECORD_INAPP" desc="The name of the command to open a link in an incognito browser window when the user is in an app window">
+           <message name="IDS_CONTENT_CONTEXT_OPENLINKOFFTHERECORD_INAPP" desc="The name of the command to open a link in an Incognito browser window when the user is in an app window">
 -            Open link in Chromium inco&amp;gnito window
 +            Open link in Breeze inco&amp;gnito window
            </message>
@@ -717,7 +809,7 @@
 -            Open Link in New Chromium &amp;tab
 +            Open Link in New Breeze &amp;tab
            </message>
-           <message name="IDS_CONTENT_CONTEXT_OPENLINKOFFTHERECORD_INAPP" desc="In Title Case: The name of the command to open a link in an incognito browser window when the user is in an app window">
+           <message name="IDS_CONTENT_CONTEXT_OPENLINKOFFTHERECORD_INAPP" desc="In Title Case: The name of the command to open a link in an Incognito browser window when the user is in an app window">
 -            Open Link in Chromium Inco&amp;gnito Window
 +            Open Link in Breeze Inco&amp;gnito Window
            </message>
@@ -822,12 +914,7 @@
 -        Chromium Tab
 +        Breeze Tab
        </message>
-@@ -1028,3 +1028,3 @@ Chromium is unable to recover your settings.
-         <message name="IDS_PLUGIN_RESTART_REQUIRED" desc="The placeholder text for a plugin that can't be loaded until the browser is restarted.">
--          Restart Chromium to enable <ph name="PLUGIN_NAME">$1<ex>Flash</ex></ph>
-+          Restart Breeze to enable <ph name="PLUGIN_NAME">$1<ex>Flash</ex></ph>
-         </message>
-@@ -1035,18 +1035,18 @@ Chromium is unable to recover your settings.
+@@ -1035,37 +1035,37 @@ Chromium is unable to recover your settings.
          <message name="IDS_INFOBAR_MISSING_AR_CAMERA_PERMISSION_TEXT" desc="Text shown in an infobar when a website has requested access to augmented reality capabilities, but Chrome is missing the Android camera permission.">
 -          Chromium needs permission to access your camera to create a 3D map of your surroundings
 +          Breeze needs permission to access your camera to create a 3D map of your surroundings
@@ -852,12 +939,37 @@
 -          Chromium needs storage access to download files
 +          Breeze needs storage access to download files
          </message>
+ 
+         <message name="IDS_MESSAGE_MISSING_AR_CAMERA_PERMISSION_TEXT" desc="Text shown in a prompt ui when a website has requested access to augmented reality capabilities, but Chrome is missing the Android camera permission.">
+-          Chromium needs camera permission to create a 3D map of your surroundings
++          Breeze needs camera permission to create a 3D map of your surroundings
+         </message>
+         <message name="IDS_MESSAGE_MISSING_CAMERA_PERMISSION_TEXT" desc="Text shown in a prompt ui when a website has requested access to the camera capabilities, but Chrome is missing the Android camera permission.">
+-          Chromium needs camera permission for this site
++          Breeze needs camera permission for this site
+         </message>
+         <message name="IDS_MESSAGE_MISSING_MICROPHONE_PERMISSION_TEXT" desc="Text shown in a prompt ui when a website has requested access to the microphone capabilities, but Chrome is missing the Android microphone permission.">
+-          Chromium needs microphone permission for this site
++          Breeze needs microphone permission for this site
+         </message>
+         <message name="IDS_MESSAGE_MISSING_MICROPHONE_CAMERA_PERMISSIONS_TEXT" desc="Text shown in a prompt ui when a website has requested access to the microphone and camera capabilities, but Chrome is missing the Android microphone and camera permissions.">
+-          Chromium needs camera and microphone permissions for this site
++          Breeze needs camera and microphone permissions for this site
+         </message>
+         <message name="IDS_MESSAGE_MISSING_LOCATION_PERMISSION_TEXT" desc="Text shown in a prompt ui when a website has requested access to the location capabilities, but Chrome is missing the Android location permission.">
+-          Chromium needs location permission for this site
++          Breeze needs location permission for this site
+         </message>
+         <message name="IDS_MESSAGE_STORAGE_ACCESS_PERMISSION_TEXT" desc="Text shown educating the user that Chrome is missing the Android storage permission, which is required to download files.">
+-          Chromium needs storage access permission to download files
++          Breeze needs storage access permission to download files
+         </message>
 @@ -1056,3 +1056,3 @@ Chromium is unable to recover your settings.
          <message name="IDS_RUNTIME_PERMISSION_OS_REASON_TEXT" desc="Text provided to the macOS permission dialog, explaining why Chrome needs to access a protected resource (e.g., camera, microphone).">
 -          Once Chromium has access, websites will be able to ask you for access.
 +          Once Breeze has access, websites will be able to ask you for access.
          </message>
-@@ -1063,6 +1063,6 @@ Chromium is unable to recover your settings.
+@@ -1063,9 +1063,9 @@ Chromium is unable to recover your settings.
          <message name="IDS_INSTALLING_UPDATE" desc="Label shown on the updates installation screen during OOBE">
 -          Please wait while Chromium installs the latest system updates.
 +          Please wait while Breeze installs the latest system updates.
@@ -865,6 +977,10 @@
          <message name="IDS_EULA_SCREEN_ACCESSIBLE_TITLE" desc="Title to be spoken on opening the OOBE EULA screen">
 -          Chromium OS terms
 +          Breeze OS terms
+         </message>
+         <message name="IDS_OOBE_WELCOME_START_OS_INSTALL" desc="Label for button shown on the OOBE welcome screen to show the OS installation screens">
+-          Install Chromium OS
++          Install Breeze OS
          </message>
 @@ -1072,4 +1072,4 @@ Chromium is unable to recover your settings.
        <if expr="not chromeos and not is_android">
@@ -974,10 +1090,14 @@
 -         Your parent has turned off "Permissions for sites, apps and extensions" for Chromium. Enabling this <ph name="EXTENSION_TYPE_PARAMETER">$1<ex>extension</ex></ph> is not allowed.
 +         Your parent has turned off "Permissions for sites, apps and extensions" for Breeze. Enabling this <ph name="EXTENSION_TYPE_PARAMETER">$1<ex>extension</ex></ph> is not allowed.
          </message>
-@@ -1162,27 +1162,27 @@ Chromium is unable to recover your settings.
+@@ -1162,37 +1162,37 @@ Chromium is unable to recover your settings.
          <message name="IDS_PROFILE_PICKER_MAIN_VIEW_TITLE" desc="Profile picker main view title">
 -          Welcome to Chromium profiles
 +          Welcome to Breeze profiles
+         </message>
+         <message name="IDS_PROFILE_PICKER_MAIN_VIEW_TITLE_V2" desc="Title of a screen that lets the user choose which profile to use when browsing the web. *If the EN source doesn't translate well in your language, an alternative string 'Which Chromium profile would you like to use?' may be used instead">
+-          Who's using Chromium?
++          Who's using Breeze?
          </message>
          <message name="IDS_PROFILE_PICKER_MAIN_VIEW_SUBTITLE" desc="Profile picker main view subtitle">
 -          With Chromium profiles you can separate all your Chromium stuff. Create profiles for friends and family, or split between work and fun.
@@ -995,10 +1115,6 @@
 -          To access your Chromium stuff across all your devices, sign in so that you can turn on sync.
 +          To access your Breeze stuff across all your devices, sign in so that you can turn on sync.
          </message>
-         <message name="IDS_PROFILE_PICKER_PROFILE_CREATION_FLOW_NOT_NOW_BUTTON_LABEL" desc="Label for a button to decline a prompt to sign in">
--          Use Chromium without an account
-+          Use Breeze without an account
-         </message>
          <message name="IDS_PROFILE_PICKER_PROFILE_CREATION_FLOW_LOCAL_PROFILE_CREATION_TITLE" desc="Title for the local profile customiztion screen on the picker.">
 -          Customize your Chromium profile
 +          Customize your Breeze profile
@@ -1011,6 +1127,49 @@
 -          If you share a device, friends and family can browse separately and set up Chromium just the way they want
 +          If you share a device, friends and family can browse separately and set up Breeze just the way they want
          </message>
+         <message name="IDS_PROFILE_PICKER_PROFILE_SWITCH_TITLE" desc="Profile picker profile switch title">
+-          Switch to existing Chromium profile?
++          Switch to existing Breeze profile?
+         </message>
+         <message name="IDS_PROFILE_PICKER_PROFILE_SWITCH_SUBTITLE" desc="Profile picker profile switch subtitle">
+-          A Chromium profile with this account already exists on this device
++          A Breeze profile with this account already exists on this device
+         </message>
+     <if expr="lacros">
+       <message name="IDS_PROFILE_PICKER_PROFILE_CREATION_FLOW_ACCOUNT_SELECTION_LACROS_SUBTITLE" desc="Profile picker, account selection screen subtitle">
+-        The following accounts are not signed into any Chromium profiles. If you want to use an account in another profile, remove that profile first.
++        The following accounts are not signed into any Breeze profiles. If you want to use an account in another profile, remove that profile first.
+       </message>
+@@ -1200,24 +1200,24 @@
+         <message name="IDS_PROFILE_SWITCH_PROMO" desc="Text of the In-Product-Help bubble for profile switching.">
+-          You can switch between Chromium profiles here
++          You can switch between Breeze profiles here
+         </message>
+         <message name="IDS_PROFILE_SWITCH_PROMO_SCREENREADER" desc="Text announced by screenreaders to explain how to switch between profiles.">
+-          <ph name="SHORTCUT">$1<ex>CTRL+SHIFT+M</ex></ph> can switch between Chromium profiles
++          <ph name="SHORTCUT">$1<ex>CTRL+SHIFT+M</ex></ph> can switch between Breeze profiles
+         </message>
+       </if>
+ 
+       <!-- Strings for full restore notifications -->
+       <if expr="chromeos">
+         <message name="IDS_RESTORE_NOTIFICATION_DISPLAY_SOURCE" desc="This is the string shown as the display source of the notification for the user to select restore or not on startup.">
+-          Chromium OS system
++          Breeze OS system
+         </message>
+       </if>
+ 
+       <!-- ChromeLabs bubble -->
+       <message name="IDS_CHROMELABS_RELAUNCH_FOOTER_MESSAGE" desc="Text that shows in the footer of the Chrome Labs bubble when relaunch is needed for changes to take effect.">
+-        Your changes will take effect the next time you relaunch Chromium.
++        Your changes will take effect the next time you relaunch Breeze.
+       </message>
+ 
+       <!-- Device Chooser Prompt -->
+       <message name="IDS_BLUETOOTH_DEVICE_CHOOSER_AUTHORIZE_BLUETOOTH" desc="Text shown in the Chooser when browser does not have Bluetooth permission. The '&#10;' is a newline character to force the desired line wrapping.">
+-        Chromium needs Bluetooth access to continue &#10; pairing. <ph name="IDS_BLUETOOTH_DEVICE_CHOOSER_AUTHORIZE_BLUETOOTH_LINK">$1<ex>Open Preferences</ex></ph>
++        Breeze needs Bluetooth access to continue &#10; pairing. <ph name="IDS_BLUETOOTH_DEVICE_CHOOSER_AUTHORIZE_BLUETOOTH_LINK">$1<ex>Open Preferences</ex></ph>
+       </message>
 --- a/chrome/app/settings_chromium_strings.grdp
 +++ b/chrome/app/settings_chromium_strings.grdp
 @@ -4,20 +4,20 @@
@@ -1045,11 +1204,6 @@
 +    <message name="IDS_SETTINGS_UPGRADE_UP_TO_DATE" desc="Status label: Already up to date (Breeze)">
 +      Breeze is up to date
      </message>
-@@ -41,3 +41,3 @@
-   <message name="IDS_SETTINGS_SITE_SETTINGS_DELETE_DATA_POST_SESSION" desc="Label for the checkbox that allows the user to automatically delete their cookies and site data at the end of the browser session.">
--    Clear cookies and site data when you quit Chromium
-+    Clear cookies and site data when you quit Breeze
-   </message>
 @@ -49,33 +49,33 @@
    <message name="IDS_SETTINGS_CHECK_PASSWORDS_ERROR_OFFLINE" desc="Error message when the password check can't be completed because the user is offline.">
 -    Chromium can't check your passwords. Try checking your internet connection.
@@ -1135,24 +1289,31 @@
 -    By turning this off, you can sign in to Google sites like Gmail without signing in to Chromium
 +    By turning this off, you can sign in to Google sites like Gmail without signing in to Breeze
    </message>
-@@ -122,21 +122,21 @@
+@@ -116,3 +116,3 @@
+   <message name="IDS_SETTINGS_SITE_SETTINGS_PDFS_BLOCKED" desc="Label for the disabled option of the pdfs content setting.">
+-    Open PDFs in Chromium
++    Open PDFs in Breeze
+   </message>
+@@ -119,3 +119,3 @@
+   <message name="IDS_SETTINGS_PRIVACY_REVIEW_CLEAR_ON_EXIT_FEATURE_DESCRIPTION1" desc="A part of the feature description of 'clear cookies on exit' card in the privacy review.">
+-    When you close Chromium, it automatically clears cookies and site data from the pages you visited
++    When you close Breeze, it automatically clears cookies and site data from the pages you visited
+   </message>
+@@ -122,18 +122,18 @@
    <message name="IDS_SETTINGS_SAFETY_CHECK_PARENT_PRIMARY_LABEL_BEFORE" desc="This text describes what the safety check is. (It's an area of the Settings page where users can quickly check whether their safety-related settings are fully protecting them.)">
 -    Chromium can help keep you safe from data breaches, bad extensions, and more
 +    Breeze can help keep you safe from data breaches, bad extensions, and more
    </message>
--  <message name="IDS_SETTINGS_SAFETY_CHECK_UPDATES_FAILED_OFFLINE" desc="This text describes that Chromium cannot check for updates because there currently is no internet connection.">
+   <message name="IDS_SETTINGS_SAFETY_CHECK_UPDATES_FAILED_OFFLINE" desc="This text describes that Chromium cannot check for updates because there currently is no internet connection.">
 -    Chromium can't check for updates. Try checking your internet connection.
-+  <message name="IDS_SETTINGS_SAFETY_CHECK_UPDATES_FAILED_OFFLINE" desc="This text describes that Breeze cannot check for updates because there currently is no internet connection.">
 +    Breeze can't check for updates. Try checking your internet connection.
    </message>
--  <message name="IDS_SETTINGS_SAFETY_CHECK_UPDATES_FAILED" desc="This text describes that Chromium cannot update due to an unknown error.">
+   <message name="IDS_SETTINGS_SAFETY_CHECK_UPDATES_FAILED" desc="This text describes that Chromium cannot update due to an unknown error.">
 -    Chromium didn't update, something went wrong. <ph name="BEGIN_LINK">&lt;a target="_blank" href="$1"&gt;</ph>Fix Chromium update problems and failed updates.<ph name="END_LINK">&lt;/a&gt;</ph>
-+  <message name="IDS_SETTINGS_SAFETY_CHECK_UPDATES_FAILED" desc="This text describes that Breeze cannot update due to an unknown error.">
 +    Breeze didn't update, something went wrong. <ph name="BEGIN_LINK">&lt;a target="_blank" href="$1"&gt;</ph>Fix Breeze update problems and failed updates.<ph name="END_LINK">&lt;/a&gt;</ph>
    </message>
--  <message name="IDS_SETTINGS_SAFETY_CHECK_UPDATES_UNKNOWN" desc="This text displays the installed version of Chromium when it is not possible to check for updates on non-Chrome branded browsers.">
+   <message name="IDS_SETTINGS_SAFETY_CHECK_UPDATES_UNKNOWN" desc="This text displays the installed version of Chromium when it is not possible to check for updates on non-Chrome branded browsers.">
 -    Chromium version <ph name="PRODUCT_VERSION">$1<ex>15.0.865.0</ex></ph> is installed
-+  <message name="IDS_SETTINGS_SAFETY_CHECK_UPDATES_UNKNOWN" desc="This text displays the installed version of Breeze when it is not possible to check for updates on non-Chrome branded browsers.">
 +    Breeze version <ph name="PRODUCT_VERSION">$1<ex>15.0.865.0</ex></ph> is installed
    </message>
    <message name="IDS_SETTINGS_SAFETY_CHECK_PASSWORDS_SIGNED_OUT" desc="This text points out that the password check can only run when the user is signed in.">
@@ -1162,10 +1323,6 @@
    <message name="IDS_SETTINGS_SAFETY_CHECK_SAFE_BROWSING_DISABLED" desc="This text points out that Safe Browsing is disabled and that the user is not protected.">
 -    Safe Browsing is off. Chromium recommends turning it on.
 +    Safe Browsing is off. Breeze recommends turning it on.
-   </message>
-   <message name="IDS_SETTINGS_SAFETY_CHECK_EXTENSIONS_ERROR" desc="This text describes that safety check could not check extensions for an unkown reason.">
--    Chromium can't check your extensions. Try again later.
-+    Breeze can't check your extensions. Try again later.
    </message>
 @@ -172,9 +172,9 @@
    <message name="IDS_SETTINGS_SYNC_DISCONNECT_DELETE_PROFILE_WARNING_WITH_COUNTS_SINGULAR" desc="Warning message displayed in the Sign out of Chrome dialog that indicates profile browsing data will be removed from the device.">
@@ -1181,13 +1338,13 @@
 +    This will delete your browsing data from this device. To retrieve your data later, sign in to Breeze as <ph name="USER_EMAIL">$1<ex>foo@example.com</ex></ph>.
    </message>
 @@ -182,10 +182,10 @@
-   <message name="IDS_SETTINGS_PROFILE_NAME_AND_PICTURE" desc="Label of the link that takes you to the page to edit your name and picture for your chrome profile.">
--    Chromium name and picture
-+    Breeze name and picture
-   </message>
    <message name="IDS_SETTINGS_CUSTOMIZE_YOUR_CHROME_PROFILE" desc="Label of the link that takes you to the page to customize your chrome profile.">
 -   Customize your Chromium profile
 +   Customize your Breeze profile
+   </message>
+   <message name="IDS_SETTING_NAME_YOUR_PROFILE" desc="Title of the edit local profile name section on the manage profile page.">
+-    Name your Chromium profile
++    Name your Breeze profile
    </message>
  </if>
 -  <message name="IDS_SETTINGS_PEOPLE_SIGN_IN_PROMPT_SECONDARY_WITH_ACCOUNT" desc="The secondary text displayed to prompt users to enable sync for an account that is alredy present in Chromium.">

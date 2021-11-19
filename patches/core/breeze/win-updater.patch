@@ -86,7 +86,7 @@
 +                   // {AE220999-529C-46C1-B434-2D965FE74ED3}.
          L"",       // Empty default channel name since no update integration.
 -        ChannelStrategy::UNSUPPORTED,
-+        ChannelStrategy::ADDITIONAL_PARAMETERS,
++        ChannelStrategy::FLOATING,
          true,   // Supports system-level installs.
          true,   // Supports in-product set as default browser UX.
 -        false,  // Does not support retention experiments.
@@ -448,3 +448,28 @@ index 89c2c186f..c51691c19 100644
  }
  
  base::Version UpdaterState::GetUpdaterVersion(bool is_machine) {
+--- a/chrome/install_static/install_constants.h
++++ b/chrome/install_static/install_constants.h
+@@ -19,22 +19,19 @@ enum class ChannelStrategy
+ // Identifies different strategies for determining an update channel.
+ enum class ChannelStrategy {
+-#if BUILDFLAG(USE_GOOGLE_UPDATE_INTEGRATION)
+   // The default update channel may be overridden by an explicit value. The
+   // installer gets this value on the command line (--channel=name), whereas the
+   // browser gets this value from the Windows registry. This is used by Google
+   // Chrome's primary install mode to differentiate the extended stable, beta,
+   // and dev channels from the default (stable) channel.
+   FLOATING,
+ 
+   // Update channel is a fixed value. This is used by to pin Google Chrome's
+   // secondary install modes to their respective channels (e.g., the SxS mode
+   // follows the canary channel).
+   FIXED,
+-#else   // BUILDFLAG(USE_GOOGLE_UPDATE_INTEGRATION)
+   // Update channels are not supported. This value is for exclusive use by
+   // brands that do not integrate with Google Update.
+   UNSUPPORTED,
+-#endif  // BUILDFLAG(USE_GOOGLE_UPDATE_INTEGRATION)
+ };
+ 
+ //

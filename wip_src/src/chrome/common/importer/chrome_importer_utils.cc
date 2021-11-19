@@ -28,7 +28,7 @@ base::ListValue* GetChromeSourceProfiles(const base::FilePath& user_data_folder)
   {
     std::string local_state_content;
     base::ReadFileToString(local_state_path, &local_state_content);
-    base::Optional<base::Value> local_state =
+    absl::optional<base::Value> local_state =
       base::JSONReader::Read(local_state_content);
 
     const base::DictionaryValue* local_state_dict;

@@ -115,10 +115,10 @@
 +
  // Differentiate between generic flags available on a per session base and flags
  // that influence the whole machine and can be said by the admin only. This flag
-@@ -144,4 +146,5 @@ class FlagsState {
-       base::ListValue* supported_entries,
-       base::ListValue* unsupported_entries,
-+      base::ListValue* breeze_entries,
+@@ -169,4 +169,5 @@ class FlagsState {
+       base::Value::ListStorage& supported_entries,
+       base::Value::ListStorage& unsupported_entries,
++      base::Value::ListStorage& breeze_entries,
        base::RepeatingCallback<bool(const FeatureEntry&)> skip_feature_entry);
  
 --- a/components/flags_ui/flags_ui_constants.cc

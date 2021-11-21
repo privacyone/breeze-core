@@ -1,13 +1,13 @@
 --- a/chrome/app/chrome_command_ids.h
 +++ b/chrome/app/chrome_command_ids.h
-@@ -211,6 +211,7 @@
- #define IDC_CARET_BROWSING_TOGGLE      40260
- #define IDC_TOGGLE_COMMANDER     40261
+@@ -208,6 +208,7 @@
  #define IDC_SHOW_KALEIDOSCOPE          40262
-+#define IDC_SEND_FEEDBACK              40263
  #define IDC_CHROME_TIPS                40263
  #define IDC_CHROME_WHATS_NEW           40264
++#define IDC_SEND_FEEDBACK              40265
  
+ // Spell-check
+ // Insert any additional suggestions before _LAST; these have to be consecutive.
 --- a/chrome/browser/ui/toolbar/app_menu_model.cc
 +++ b/chrome/browser/ui/toolbar/app_menu_model.cc
 @@ -609,6 +609,8 @@ void AppMenuModel::LogMenuMetrics(int command_id) {

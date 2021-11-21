@@ -61,7 +61,7 @@
  
 +  for (int i = 0; i < extensions::kInternalExtNum; ++i) {
 +    if (extension->id() == extensions::kInternalExtIDs[i]) {
-+        std::move(done_callback_).Run(Result::ACCEPTED);
++        std::move(done_callback_).Run(DoneCallbackPayload(Result::ACCEPTED));
 +        return;
 +    }
 +  }

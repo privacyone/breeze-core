@@ -1,7 +1,7 @@
 --- a/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc
 +++ b/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc
 @@ -291,7 +291,15 @@
-   base::string16 license = l10n_util::GetStringFUTF16(
+   std::u16string license = l10n_util::GetStringFUTF16(
        IDS_VERSION_UI_LICENSE, base::ASCIIToUTF16(chrome::kChromiumProjectURL),
 -      base::ASCIIToUTF16(chrome::kChromeUICreditsURL));
 +      base::ASCIIToUTF16(chrome::kUngoogledChromiumURL),
@@ -9,7 +9,7 @@
 +      base::ASCIIToUTF16(chrome::kChromeUITermsURL));
    html_source->AddString("aboutProductLicense", license);
 + 
-+  base::string16 our_mission = l10n_util::GetStringFUTF16(
++  std::u16string our_mission = l10n_util::GetStringFUTF16(
 +      IDS_OUR_MISSION, base::ASCIIToUTF16(chrome::kBreezeOurTeamURL),
 +      base::ASCIIToUTF16(chrome::kBreezeContributersURL),
 +      base::ASCIIToUTF16(chrome::kBreezeOurMissionURL));

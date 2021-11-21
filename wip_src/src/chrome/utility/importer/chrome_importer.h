@@ -46,7 +46,7 @@ class ChromeImporter : public Importer {
   double chromeTimeToDouble(int64_t time);
 
   base::FilePath source_path_;
-  base::string16 importer_name_;
+  std::u16string importer_name_;
 
  private:
   // Multiple URLs can share the same favicon; this is a map
@@ -66,7 +66,7 @@ class ChromeImporter : public Importer {
 
   void RecursiveReadBookmarksFolder(
     const base::DictionaryValue* folder,
-    const std::vector<base::string16>& parent_path,
+    const std::vector<std::u16string>& parent_path,
     bool is_in_toolbar,
     std::vector<ImportedBookmarkEntry>* bookmarks);
 

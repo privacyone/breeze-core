@@ -80,7 +80,7 @@ bool SetEncryptionKeyForPasswordImporting(
     const base::FilePath& local_state_path) {
   std::string local_state_content;
   base::ReadFileToString(local_state_path, &local_state_content);
-  base::Optional<base::Value> local_state =
+  absl::optional<base::Value> local_state =
       base::JSONReader::Read(local_state_content);
   if (auto* base64_encrypted_key =
           local_state->FindStringPath(kOsCryptEncryptedKeyPrefName)) {
@@ -242,7 +242,7 @@ void ChromeImporter::ImportBookmarks() {
     source_path_.Append(
       base::FilePath::StringType(FILE_PATH_LITERAL("Bookmarks")));
   base::ReadFileToString(bookmarks_path, &bookmarks_content);
-  base::Optional<base::Value> bookmarks_json =
+  absl::optional<base::Value> bookmarks_json =
     base::JSONReader::Read(bookmarks_content);
   const base::DictionaryValue* bookmark_dict;
   if (!bookmarks_json || !bookmarks_json->GetAsDictionary(&bookmark_dict))
@@ -254,8 +254,8 @@ void ChromeImporter::ImportBookmarks() {
   if (bookmark_dict->GetDictionary("roots", &roots)) {
     // Importing bookmark bar items
     if (roots->GetDictionary("bookmark_bar", &bookmark_bar)) {
-      std::vector<base::string16> path;
-      base::string16 name;
+      std::vector<std::u16string> path;
+      std::u16string name;
       bookmark_bar->GetString("name", &name);
 
       path.push_back(name);
@@ -263,8 +263,8 @@ void ChromeImporter::ImportBookmarks() {
     }
     // Importing other items
     if (roots->GetDictionary("other", &other)) {
-      std::vector<base::string16> path;
-      base::string16 name;
+      std::vector<std::u16string> path;
+      std::u16string name;
       other->GetString("name", &name);
 
       path.push_back(name);
@@ -273,8 +273,8 @@ void ChromeImporter::ImportBookmarks() {
   }
   // Write into profile.
   if (!bookmarks.empty() && !cancelled()) {
-      const base::string16& first_folder_name =
-        base::UTF8ToUTF16("Imported from ") + importer_name_;
+      const std::u16string& first_folder_name =
+        base::UTF8ToUTF16(std::string("Imported from ")) + importer_name_;
       bridge_->AddBookmarks(bookmarks, first_folder_name);
   }
 
@@ -353,17 +353,17 @@ void ChromeImporter::LoadFaviconData(
 
 void ChromeImporter::RecursiveReadBookmarksFolder(
   const base::DictionaryValue* folder,
-  const std::vector<base::string16>& parent_path,
+  const std::vector<std::u16string>& parent_path,
   bool is_in_toolbar,
   std::vector<ImportedBookmarkEntry>* bookmarks) {
   const base::ListValue* children;
   if (folder->GetList("children", &children)) {
-    for (const auto& value : *children) {
+    for (const auto& value : children->GetList()) {
       const base::DictionaryValue* dict;
       if (!value.GetAsDictionary(&dict))
         continue;
       std::string date_added, type, url;
-      base::string16 name;
+      std::u16string name;
       dict->GetString("date_added", &date_added);
       dict->GetString("name", &name);
       dict->GetString("type", &type);
@@ -373,7 +373,7 @@ void ChromeImporter::RecursiveReadBookmarksFolder(
         // Folders are added implicitly on adding children, so we only
         // explicitly add empty folders.
         const base::ListValue* children;
-        if (dict->GetList("children", &children) && children->empty()) {
+        if (dict->GetList("children", &children) && children->GetList().empty()) {
           entry.in_toolbar = is_in_toolbar;
           entry.is_folder = true;
           entry.url = GURL();
@@ -384,7 +384,7 @@ void ChromeImporter::RecursiveReadBookmarksFolder(
           bookmarks->push_back(entry);
         }
 
-        std::vector<base::string16> path = parent_path;
+        std::vector<std::u16string> path = parent_path;
         path.push_back(name);
         RecursiveReadBookmarksFolder(dict, path, is_in_toolbar, bookmarks);
       } else if (type == "url") {

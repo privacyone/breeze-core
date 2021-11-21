@@ -33,7 +33,7 @@
 +                         base::ListValue* chrome_profiles,
 +                         const base::FilePath& user_data_folder,
 +                         const std::string& brand) {
-+  if(chrome_profiles->GetSize() == 1)
++  if(chrome_profiles->GetList().size() == 1)
 +  {
 +    const base::DictionaryValue* dict;
 +    if (!chrome_profiles->GetList()[0].GetAsDictionary(&dict))
@@ -66,7 +66,7 @@
 +
 +  else
 +  {
-+  for (const auto& value : *chrome_profiles) {
++  for (const auto& value : chrome_profiles->GetList()) {
 +    const base::DictionaryValue* dict;
 +    if (!value.GetAsDictionary(&dict))
 +      continue;

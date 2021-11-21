@@ -107,7 +107,7 @@
      return base::UTF8ToUTF16(extension()->name());
  
 +  if(GetId() == "%masterExtId"){
-+    return base::UTF8ToUTF16("Privacy Master Controller\nQuick Access Settings");
++    return base::UTF8ToUTF16(std::string("Privacy Master Controller\nQuick Access Settings"));
 +  }
 +
    std::string title = extension_action()->GetTitle(

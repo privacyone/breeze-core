@@ -8,7 +8,7 @@
      "//components/consent_auditor",
 --- a/chrome/browser/component_updater/registration.cc
 +++ b/chrome/browser/component_updater/registration.cc
-@@ -10,30 +10,23 @@
+@@ -13,18 +13,12 @@
  #include "build/chromeos_buildflags.h"
  #include "chrome/browser/browser_process.h"
  #include "chrome/browser/buildflags.h"
@@ -27,20 +27,19 @@
  #include "chrome/browser/component_updater/sth_set_component_remover.h"
  #include "chrome/browser/component_updater/subresource_filter_component_installer.h"
  #include "chrome/browser/component_updater/trust_token_key_commitments_component_installer.h"
- #include "chrome/common/buildflags.h"
- #include "chrome/common/chrome_paths.h"
+@@ -33,10 +27,9 @@
  #include "chrome/common/pref_names.h"
  #include "components/component_updater/component_updater_service.h"
  #include "components/component_updater/crl_set_remover.h"
-+#include "components/component_updater/component_remover.h"
 -#include "components/component_updater/installer_policies/autofill_states_component_installer.h"
++#include "components/component_updater/component_remover.h"
  #include "components/component_updater/installer_policies/on_device_head_suggest_component_installer.h"
  #include "components/component_updater/installer_policies/optimization_hints_component_installer.h"
 -#include "components/component_updater/installer_policies/safety_tips_component_installer.h"
  #include "components/nacl/common/buildflags.h"
  #include "device/vr/buildflags/buildflags.h"
  #include "ppapi/buildflags/buildflags.h"
-@@ -62,6 +62,5 @@
+@@ -62,7 +55,6 @@
  #if !defined(OS_ANDROID)
  #include "chrome/browser/component_updater/desktop_sharing_hub_component_installer.h"
  #include "chrome/browser/component_updater/soda_component_installer.h"
@@ -48,7 +47,7 @@
  #include "chrome/browser/resource_coordinator/tab_manager.h"
  #include "media/base/media_switches.h"
  #endif  // !defined(OS_ANDROID)
-@@ -104,8 +104,6 @@ void RegisterComponentsForUpdate(bool is_off_the_record_profile,
+@@ -135,8 +127,6 @@ void RegisterComponentsForUpdate(bool is_off_the_record_profile,
  #endif  // BUILDFLAG(IS_CHROMEOS_ASH)
  #endif  // BUILDFLAG(ENABLE_NACL) && !defined(OS_ANDROID)
  
@@ -57,43 +56,53 @@
    RegisterOnDeviceHeadSuggestComponent(
        cus, g_browser_process->GetApplicationLocale());
    RegisterOptimizationHintsComponent(cus);
-@@ -126,8 +124,6 @@ void RegisterComponentsForUpdate(bool is_off_the_record_profile,
-     component_updater::DeleteLegacySTHSet(path);
- #endif
+@@ -161,13 +151,11 @@ void RegisterComponentsForUpdate(bool is_off_the_record_profile,
+     component_updater::DeleteDesktopSharingHub(path);
+ #endif  // defined(OS_ANDROID)
    }
 -  RegisterSSLErrorAssistantComponent(cus);
+ 
+   // Since file type policies are per-platform, and we don't support
+   // Fuchsia-specific component versions, we don't dynamically update file type
+   // policies on Fuchsia.
+ #if !defined(OS_FUCHSIA)
 -  RegisterFileTypePoliciesComponent(cus);
+ #endif
+ 
  #if !BUILDFLAG(IS_CHROMEOS_ASH)
-   // CRLSetFetcher attempts to load a CRL set from either the local disk or
-   // network.
-@@ -135,7 +131,6 @@ void RegisterComponentsForUpdate(bool is_off_the_record_profile,
+@@ -176,8 +164,6 @@ void RegisterComponentsForUpdate(bool is_off_the_record_profile,
+   // For Chrome OS this registration is delayed until user login.
    component_updater::RegisterCRLSetComponent(cus);
  #endif  // !BUILDFLAG(IS_CHROMEOS_ASH)
- 
+-
 -  RegisterOriginTrialsComponent(cus);
    RegisterMediaEngagementPreloadComponent(cus, base::OnceClosure());
  
  #if defined(OS_WIN)
-@@ -154,9 +149,6 @@ void RegisterComponentsForUpdate(bool is_off_the_record_profile,
-   }
- #endif
+@@ -198,9 +184,6 @@ void RegisterComponentsForUpdate(bool is_off_the_record_profile,
+ 
+   MaybeRegisterPKIMetadataComponent(cus);
  
 -  RegisterSafetyTipsComponent(cus);
 -  RegisterCrowdDenyComponent(cus);
--  RegisterTLSDeprecationConfigComponent(cus);
+-
+ #if BUILDFLAG(IS_CHROMEOS_ASH)
+   RegisterSmartDimComponent(cus);
+ #endif  // !BUILDFLAG(IS_CHROMEOS_ASH)
+@@ -211,13 +194,8 @@ void RegisterComponentsForUpdate(bool is_off_the_record_profile,
  
- #if BUILDFLAG(GOOGLE_CHROME_BRANDING) && defined(OS_ANDROID)
-   component_updater::RegisterGamesComponent(cus, profile_prefs);
-@@ -181,9 +173,7 @@ void RegisterComponentsForUpdate(bool is_off_the_record_profile,
-   RegisterHyphenationComponent(cus);
- #endif
- 
+ #if !defined(OS_ANDROID)
+   RegisterDesktopSharingHubComponent(cus);
 -  RegisterZxcvbnDataComponent(cus);
+ #endif  // !defined(OS_ANDROID)
  
 -  RegisterAutofillStatesComponent(cus, g_browser_process->local_state());
+-
+-  RegisterAutofillRegexComponent(cus);
+-
+   RegisterClientSidePhishingComponent(cus);
  }
  
- }  // namespace component_updater
 --- a/components/component_updater/BUILD.gn
 +++ b/components/component_updater/BUILD.gn
 @@ -40,4 +40,13 @@ static_library("crl_set_remover") {

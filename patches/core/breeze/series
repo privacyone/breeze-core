@@ -40,7 +40,7 @@ components.patch
 
 ui/privacyone-urls.patch
 ui/dont-send-feedback-on-reset.patch
-#ui/colors.patch
+ui/colors.patch
 ui/about-page.patch
 ui/flags-overhaul.patch
 ui/incognito-colors.patch

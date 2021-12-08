@@ -1,30 +1,29 @@
 
 --- a/chrome/browser/upgrade_detector/upgrade_detector_impl.cc
 +++ b/chrome/browser/upgrade_detector/upgrade_detector_impl.cc
-@@ -51,10 +51,10 @@
+@@ -51,9 +51,9 @@
  namespace {
  
  // The default thresholds for reaching annoyance levels.
--constexpr auto kDefaultVeryLowThreshold = base::TimeDelta::FromHours(1);
--constexpr auto kDefaultLowThreshold = base::TimeDelta::FromDays(2);
--constexpr auto kDefaultElevatedThreshold = base::TimeDelta::FromDays(4);
--constexpr auto kDefaultHighThreshold = base::TimeDelta::FromDays(7);
-+constexpr auto kDefaultVeryLowThreshold = base::TimeDelta::FromMinutes(30);
-+constexpr auto kDefaultLowThreshold = base::TimeDelta::FromHours(12);
-+constexpr auto kDefaultElevatedThreshold = base::TimeDelta::FromDays(1);
-+constexpr auto kDefaultHighThreshold = base::TimeDelta::FromDays(2);
- constexpr auto kDefaultGraceThreshold =
-     kDefaultHighThreshold - base::TimeDelta::FromHours(1);
+-constexpr auto kDefaultVeryLowThreshold = base::Hours(1);
+-constexpr auto kDefaultLowThreshold = base::Days(2);
+-constexpr auto kDefaultElevatedThreshold = base::Days(4);
+-constexpr auto kDefaultHighThreshold = base::Days(7);
++constexpr auto kDefaultVeryLowThreshold = base::Minutes(30)
++constexpr auto kDefaultLowThreshold = base::Hours(12);
++constexpr auto kDefaultElevatedThreshold = base::Days(1);
++constexpr auto kDefaultHighThreshold = base::Days(2);
+ constexpr auto kDefaultGraceThreshold = kDefaultHighThreshold - base::Hours(1);
  
 @@ -67,9 +67,9 @@
  
  // How often to check to see if the build has become outdated.
--constexpr auto kOutdatedBuildDetectorPeriod = base::TimeDelta::FromDays(1);
-+constexpr auto kOutdatedBuildDetectorPeriod = base::TimeDelta::FromHours(6);
+-constexpr auto kOutdatedBuildDetectorPeriod = base::Days(1);
++constexpr auto kOutdatedBuildDetectorPeriod = base::Hours(6);
  
  // The number of days after which we identify a build/install as outdated.
--constexpr auto kOutdatedBuildAge = base::TimeDelta::FromDays(7) * 12;
-+constexpr auto kOutdatedBuildAge = base::TimeDelta::FromDays(7) * 4;
+-constexpr auto kOutdatedBuildAge = base::Days(7) * 12;
++constexpr auto kOutdatedBuildAge = base::Days(7) * 4;
  
  constexpr bool ShouldDetectOutdatedBuilds() {
  #if BUILDFLAG(GOOGLE_CHROME_BRANDING)

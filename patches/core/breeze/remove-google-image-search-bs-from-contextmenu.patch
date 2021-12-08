@@ -1,13 +1,10 @@
 --- a/chrome/browser/renderer_context_menu/accessibility_labels_menu_observer.cc
 +++ b/chrome/browser/renderer_context_menu/accessibility_labels_menu_observer.cc
-@@ -107,20 +107,7 @@ void AccessibilityLabelsMenuObserver::Ex
+@@ -107,16 +107,7 @@ void AccessibilityLabelsMenuObserver::Ex
  }
  
  bool AccessibilityLabelsMenuObserver::ShouldShowLabelsItem() {
--  // Hidden behind a feature flag.
--  if (!base::FeatureList::IsEnabled(features::kExperimentalAccessibilityLabels))
-     return false;
--
++  return false;
 -  // Disabled by policy.
 -  Profile* profile = Profile::FromBrowserContext(proxy_->GetBrowserContext());
 -  if (!profile->GetPrefs()->GetBoolean(

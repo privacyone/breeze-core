@@ -221,17 +221,17 @@
 + 
    // <if expr="_google_chrome and is_win">
    private onChromeCleanupTap_() {
---- a/chrome/browser/resources/settings/route.js
-+++ b/chrome/browser/resources/settings/route.js
+--- a/chrome/browser/resources/settings/route.ts
++++ b/chrome/browser/resources/settings/route.ts
 @@ -68,5 +68,4 @@ function addPrivacyChildRoutes(r) {
    }
    r.SITE_SETTINGS_ZOOM_LEVELS = r.SITE_SETTINGS.createChild('zoomLevels');
 -  r.SITE_SETTINGS_PDF_DOCUMENTS = r.SITE_SETTINGS.createChild('pdfDocuments');
    r.SITE_SETTINGS_PROTECTED_CONTENT =
        r.SITE_SETTINGS.createChild('protectedContent');
-@@ -105,6 +104,4 @@ function createBrowserSettingsRoutes() {
-   if (!loadTimeData.getBoolean('isGuest')) {
-     r.PEOPLE = r.BASIC.createSection('/people', 'people');
+@@ -113,6 +113,4 @@ function createBrowserSettingsRoutes() {
+     // </if>
+ 
 -    r.SYNC = r.PEOPLE.createChild('/syncSetup');
 -    r.SYNC_ADVANCED = r.SYNC.createChild('/syncSetup/advanced');
    }
@@ -253,25 +253,26 @@
        r.DOWNLOADS = r.ADVANCED.createSection('/downloads', 'downloads');
 --- a/chrome/browser/resources/settings/settings_menu/settings_menu.html
 +++ b/chrome/browser/resources/settings/settings_menu/settings_menu.html
-@@ -144,9 +144,4 @@
-             <iron-selector id="subMenu" selectable="a" attr-for-selected="href"
-                 role="navigation" on-click="onLinkClick_">
+@@ -144,10 +144,4 @@
+                 role="navigation" on-click="onLinkClick_"
+                 selected-attribute="selected">
 -              <a role="menuitem" href="/languages"
--                disabled$="[[!advancedOpened]]">
+-                  disabled$="[[!advancedOpened]]" class="cr-nav-menu-item">
 -                <iron-icon icon="settings:language"></iron-icon>
 -                $i18n{languagesPageTitle}
+-                <paper-ripple></paper-ripple>
 -              </a>
                <a role="menuitem" href="/downloads"
-                   disabled$="[[!advancedOpened]]">
---- a/chrome/browser/resources/settings/site_settings_page/site_settings_page.js
-+++ b/chrome/browser/resources/settings/site_settings_page/site_settings_page.js
-@@ -228,13 +228,5 @@ function getCategoryItemMap() {
+                   disabled$="[[!advancedOpened]]" class="cr-nav-menu-item">
+--- a/chrome/browser/resources/settings/site_settings_page/site_settings_page.ts
++++ b/chrome/browser/resources/settings/site_settings_page/site_settings_page.ts
+@@ -225,13 +225,5 @@ function getCategoryItemMap() {
        shouldShow: () =>
            loadTimeData.getBoolean('enablePaymentHandlerContentSetting'),
      },
 -    {
 -      route: routes.SITE_SETTINGS_PDF_DOCUMENTS,
--      id: 'pdfDocuments',
+-      id: Id.PDF_DOCUMENTS,
 -      label: 'siteSettingsPdfDocuments',
 -      icon: 'settings:pdf',
 -      enabledLabel: 'siteSettingsPdfsAllowed',
@@ -279,12 +280,12 @@
 -    },
      {
        route: routes.SITE_SETTINGS_POPUPS,
-@@ -402,5 +396,4 @@ Polymer({
-             Id.ADS,
-             Id.ZOOM_LEVELS,
--            'pdfDocuments',
-             Id.PROTECTED_CONTENT,
-             Id.MIXEDSCRIPT,
+@@ -383,5 +383,4 @@ Polymer({
+               Id.ADS,
+               Id.ZOOM_LEVELS,
+-              Id.PDF_DOCUMENTS,
+               Id.PROTECTED_CONTENT,
+               Id.MIXEDSCRIPT,
 --- a/components/version_ui/resources/about_version.html
 +++ b/components/version_ui/resources/about_version.html
 @@ -43,5 +43,5 @@ about:version template page

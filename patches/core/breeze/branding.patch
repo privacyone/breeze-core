@@ -969,7 +969,7 @@
 -          Once Chromium has access, websites will be able to ask you for access.
 +          Once Breeze has access, websites will be able to ask you for access.
          </message>
-@@ -1063,9 +1063,9 @@ Chromium is unable to recover your settings.
+@@ -1063,8 +1063,8 @@ Chromium is unable to recover your settings.
          <message name="IDS_INSTALLING_UPDATE" desc="Label shown on the updates installation screen during OOBE">
 -          Please wait while Chromium installs the latest system updates.
 +          Please wait while Breeze installs the latest system updates.
@@ -978,10 +978,8 @@
 -          Chromium OS terms
 +          Breeze OS terms
          </message>
-         <message name="IDS_OOBE_WELCOME_START_OS_INSTALL" desc="Label for button shown on the OOBE welcome screen to show the OS installation screens">
--          Install Chromium OS
-+          Install Breeze OS
-         </message>
+       </if>
+ 
 @@ -1072,4 +1072,4 @@ Chromium is unable to recover your settings.
        <if expr="not chromeos and not is_android">
 -        <message name="IDS_WELCOME_HEADER" desc="A message which will appear as the header on the Welcome UI if the user has never run Chromium before.">

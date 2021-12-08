@@ -55,12 +55,14 @@
      (32-bit)
 --- a/components/version_info/version_info.cc
 +++ b/components/version_info/version_info.cc
-@@ -16,7 +16,7 @@
+@@ -16,9 +16,9 @@
  namespace version_info {
  
- std::string GetProductNameAndVersionForUserAgent() {
--  return "Chrome/" + GetVersionNumber();
-+  return "Chrome/" + GetChromiumVersionNumber();
+ const std::string& GetProductNameAndVersionForUserAgent() {
+   static const base::NoDestructor<std::string> product_and_version(
+-      "Chrome/" + GetVersionNumber());
++      "Chrome/" + GetChromiumVersionNumber());
+   return *product_and_version;
  }
  
  std::string GetProductName() {

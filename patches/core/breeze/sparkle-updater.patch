@@ -235,17 +235,20 @@
    } else {
      // There is no glue, or the application is on a read-only filesystem.
      // Updates and promotions are impossible.
-@@ -114,8 +117,9 @@
+@@ -114,11 +117,12 @@
  }
  
  void VersionUpdaterMac::PromoteUpdater() const {
 +   NOTIMPLEMENTED();
+ #if BUILDFLAG(ENABLE_CHROMIUM_UPDATER)
+   // TODO(crbug.com/1236770) - Add implementation for actually promoting the
+   // updater using SMJobless.
+ #else
    // Tell Keystone to make software updates available for all users.
 -  [[KeystoneGlue defaultKeystoneGlue] promoteTicket];
 +  // [[KeystoneGlue defaultKeystoneGlue] promoteTicket];
  
    // Immediately, kAutoupdateStatusNotification will be posted, and
-   // UpdateStatus() will be called with status kAutoupdatePromoting.
 @@ -130,30 +134,30 @@
  }
  
@@ -517,9 +520,9 @@
 +      "views/update_recommended_message_box_mac.mm",
 +      "views/update_recommended_message_box_mac.h",
 +      # End Sparkle
+       "views/user_education/browser_tutorial_service_factory.cc",
        "views/user_education/feature_promo_bubble_owner.cc",
        "views/user_education/feature_promo_bubble_owner.h",
-       "views/user_education/feature_promo_bubble_owner_impl.cc",
 --- a/chrome/browser/resources/settings/lifetime_browser_proxy.ts
 +++ b/chrome/browser/resources/settings/lifetime_browser_proxy.ts
 @@ -15,6 +15,13 @@

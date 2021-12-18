@@ -9,7 +9,7 @@
 -constexpr auto kDefaultLowThreshold = base::Days(2);
 -constexpr auto kDefaultElevatedThreshold = base::Days(4);
 -constexpr auto kDefaultHighThreshold = base::Days(7);
-+constexpr auto kDefaultVeryLowThreshold = base::Minutes(30)
++constexpr auto kDefaultVeryLowThreshold = base::Minutes(30);
 +constexpr auto kDefaultLowThreshold = base::Hours(12);
 +constexpr auto kDefaultElevatedThreshold = base::Days(1);
 +constexpr auto kDefaultHighThreshold = base::Days(2);

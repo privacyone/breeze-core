@@ -24,19 +24,17 @@ disable-guest-mode.patch
 enable-update.patch
 sparkle-updater.patch
 win-updater.patch
-#mute-tab-on-speaker.patch
+mute-tab-on-speaker.patch
 reenable-extension-updating.patch
 mac-signing.patch
 sparkle-signing.patch
 url-constants.patch
 dirty-breeze-version.patch
 credits.patch
-#extension-toolbar-menu.patch
 fix-windows-clang-format-exe.patch
 send-feedback.patch
 #global-and-site-settings.patch
 components.patch
-#stop-bookmark-folder-view-from-closing.patch
 
 ui/privacyone-urls.patch
 ui/dont-send-feedback-on-reset.patch

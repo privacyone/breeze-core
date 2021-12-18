@@ -4,25 +4,26 @@
 #include <string>
 
 #include "chrome/browser/ui/tabs/tab_strip_model.h"
+#include "chrome/browser/ui/tabs/tab_types.h"
 #include "chrome/browser/ui/views/tabs/browser_tab_strip_controller.h"
 #include "chrome/browser/ui/views/tabs/tab_controller.h"
 #include "chrome/browser/ui/views/tabs/tab_strip.h"
 #include "chrome/browser/ui/views/tabs/tab_strip_controller.h"
 #include "chrome/browser/ui/views/tabs/tab_style_views.h"
 #include "content/public/browser/web_contents.h"
+#include "third_party/abseil-cpp/absl/types/optional.h"
 #include "third_party/skia/include/core/SkPathTypes.h"
+#include "ui/gfx/canvas.h"
 #include "ui/gfx/color_utils.h"
 #include "ui/views/background.h"
 
-namespace
+namespace {
+
+bool IsAudioState(const absl::optional<TabAlertState>& state) 
 {
-
-    bool IsAudioState(const base::Optional<TabAlertState>& state)
-    {
-        return (state.has_value() && (state.value() == TabAlertState::AUDIO_PLAYING ||
-                                      state.value() == TabAlertState::AUDIO_MUTING));
-    }
-
+    return (state.has_value() && (state.value() == TabAlertState::AUDIO_PLAYING ||
+                                  state.value() == TabAlertState::AUDIO_MUTING));
+}
 }  // namespace
 
 class AlertIndicatorMuteTab::AlertBackground : public views::Background
@@ -71,13 +72,15 @@ bool AlertIndicatorMuteTab::IsTabAudioToggleable() const
 
 SkColor AlertIndicatorMuteTab::GetBackgroundColor() const
 {
-    TabStyle::TabColors colors = parent_tab_->tab_style()->CalculateColors();
+    SkColor fill_color = parent_tab_->controller()->GetTabBackgroundColor(
+      parent_tab_->IsActive() ? TabActive::kActive : TabActive::kInactive,
+      BrowserFrameActiveState::kUseCurrent);
     if (!IsTabAudioToggleable() || !IsMouseHovered())
     {
-        return colors.background_color;
+        return fill_color;
     }
 
-    return color_utils::BlendTowardMaxContrast(colors.background_color,
+    return color_utils::BlendTowardMaxContrast(fill_color,
                                                mouse_pressed_ ? 72 : 36);
 }
 
@@ -106,13 +109,22 @@ void AlertIndicatorMuteTab::OnMouseReleased(const ui::MouseEvent& event)
 
     auto* tab_strip = static_cast<TabStrip*>(parent_tab_->controller());
     const int tab_index = tab_strip->GetModelIndexOf(parent_tab_);
+    if (tab_index == -1)
+    {
+        return;
+    }
+
     auto* tab_strip_model = static_cast<BrowserTabStripController*>(
             tab_strip->controller())->model();
     auto* web_contents = tab_strip_model->GetWebContentsAt(tab_index);
+    if (!web_contents)
+    {
+        return;
+    }
 
     chrome::SetTabAudioMuted(web_contents,
                              !web_contents->IsAudioMuted(),
-                             TabMutedReason::CONTEXT_MENU,
+                             TabMutedReason::CONTENT_SETTING,
                              std::string());
 }
 

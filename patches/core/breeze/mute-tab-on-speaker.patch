@@ -18,15 +18,23 @@
  #include "chrome/browser/ui/views/tabs/browser_tab_strip_controller.h"
  #include "chrome/browser/ui/views/tabs/tab_close_button.h"
  #include "chrome/browser/ui/views/tabs/tab_controller.h"
-@@ -212,7 +213,7 @@
-   icon_ = new TabIcon;
-   AddChildView(icon_);
+@@ -225,7 +225,7 @@
  
--  alert_indicator_ = new AlertIndicator(this);
-+  alert_indicator_ = new AlertIndicatorMuteTab(this);
-   AddChildView(alert_indicator_);
+   icon_ = AddChildView(std::make_unique<TabIcon>());
+ 
+-  alert_indicator_ = AddChildView(std::make_unique<AlertIndicator>(this));
++  alert_indicator_ = AddChildView(std::make_unique<AlertIndicatorMuteTab>(this));
  
    // Unretained is safe here because this class outlives its close button, and
+   // the controller outlives this Tab.
+@@ -1000,6 +1000,7 @@
+       available_width -= favicon_width;
+ 
+     showing_close_button_ &= large_enough_for_close_button;
++    showing_close_button_ &= mouse_hovered();
+     if (showing_close_button_)
+       available_width -= close_button_width;
+ 
 --- a/chrome/browser/ui/BUILD.gn
 +++ b/chrome/browser/ui/BUILD.gn
 @@ -3359,6 +3359,8 @@

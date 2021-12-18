@@ -1,302 +1,10 @@
---- a/chrome/browser/resources/local_ntp/local_ntp.js
-+++ b/chrome/browser/resources/local_ntp/local_ntp.js
-@@ -910,7 +910,7 @@
-       setRealboxIcon(undefined);
- 
-       const realboxEl = $(IDS.REALBOX);
--      realboxEl.placeholder = configData.translatedStrings.searchboxPlaceholder;
-+      realboxEl.placeholder = "Search "+ configData.defaultSearchProvider + " or type a URL";
-       // Using .onmousedown instead of addEventListener('mousedown') to support
-       // tests.
-       realboxEl.onmousedown = onRealboxMouseDown;
-@@ -929,12 +929,6 @@
-       searchboxApiHandle.autocompletematchimageavailable =
-           autocompleteMatchImageAvailable;
- 
--      if (!iframesAndVoiceSearchDisabledForTesting) {
--        speech.init(
--            configData.googleBaseUrl, configData.translatedStrings,
--            $(IDS.REALBOX_MICROPHONE), searchboxApiHandle);
--      }
--
-       utils.disableOutlineOnMouseClick($(IDS.REALBOX_MICROPHONE));
-     } else {
-       // Set up the fakebox (which only exists on the Google NTP).
-@@ -948,12 +942,6 @@
-       $(IDS.FAKEBOX_TEXT).textContent =
-           configData.translatedStrings.searchboxPlaceholder;
- 
--      if (!iframesAndVoiceSearchDisabledForTesting) {
--        speech.init(
--            configData.googleBaseUrl, configData.translatedStrings,
--            $(IDS.FAKEBOX_MICROPHONE), searchboxApiHandle);
--      }
--
-       // Listener for updating the key capture state.
-       document.body.onmousedown = function(event) {
-         if (isFakeboxClick(event)) {
-@@ -999,8 +987,6 @@
-         searchboxApiHandle.startCapturingKeyStrokes();
-       }
-     }
--
--    doodles.init();
-   } else {
-     document.body.classList.add(CLASSES.NON_GOOGLE_PAGE);
-   }
-@@ -1956,26 +1943,56 @@
-         '--logo-color', convertToRGBAColor(theme.logoColor));
-   }
- 
--  // The doodle shouldn't be shown for non-default backgrounds. This  includes
--  // non-white backgrounds, excluding dark mode gray if dark mode is enabled.
--  document.body.classList.toggle(
--      CLASSES.DONT_SHOW_DOODLE, !theme.usingDefaultTheme || !!theme.imageUrl);
--
-   // If a custom background has been selected the image will be applied to the
-   // custom-background element instead of the body.
--  if (!theme.customBackgroundConfigured) {
--    document.body.style.background = [
--      convertToRGBAColor(theme.backgroundColorRgba), theme.imageUrl,
--      theme.imageTiling, theme.imageHorizontalAlignment,
--      theme.imageVerticalAlignment
--    ].join(' ').trim();
-+  if (theme.customBackgroundConfigured) {
-+    let imageUrl = theme.imageUrl;
-+
-+    if (!$(IDS.CUSTOM_BG).style.backgroundImage.includes(imageUrl)) 
-+    {
-+      const imageWithOverlay = [
-+        customize.CUSTOM_BACKGROUND_OVERLAY, 'url(' + imageUrl + ')'
-+      ].join(',').trim();
-+      // If the theme update is because of uploading a local image then we
-+      // should close the customization menu. Closing the menu before the image
-+      // is selected doesn't look good.
-+      const localImageFileName = 'background.jpg';
-+      if (!configData.richerPicker &&
-+          imageWithOverlay.includes(localImageFileName)) {
-+        customize.closeCustomizationDialog();
-+      }
-+      // |image| and |imageWithOverlay| use the same url as their source.
-+      // Waiting to display the custom background until |image| is fully
-+      // loaded ensures that |imageWithOverlay| is also loaded.
-+      $(IDS.CUSTOM_BG).style.backgroundImage = imageWithOverlay;
-+      const image = new Image();
-+      image.onload = function() {
-+        $(IDS.CUSTOM_BG).style.opacity = '1';
-+      };
-+      image.src = imageUrl;
-+    document.body.style.backgroundColor = convertToRGBAColor(theme.backgroundColorRgba);
-+    }
- 
--    $(IDS.CUSTOM_BG).style.opacity = '0';
--    $(IDS.CUSTOM_BG).style.backgroundImage = '';
-     customize.clearAttribution();
-   } else {
--    // Do anything only if the custom background changed.
--    const imageUrl = assert(theme.imageUrl);
-+    // Default background.
-+    let MarioKristiani = ["DSC_3796.webp", "DSC0014.webp",
-+                          "DSC0189.webp", "DSC0253.webp", "DSC0322.webp",
-+                          "DSC0489.webp", "DSC0548.webp", "DSC0563.webp", "DSC0573.webp",
-+                          "DSC0733.webp", "DSC0813.webp", "DSC1073.webp",
-+                          "DSC1120.webp", "DSC2915.webp", "DSC2951.webp",
-+                          "DSC2994.webp", "DSC3287.webp", "DSC4614.webp"];
-+    let unsplashedLength = 0; //navigator.onLine ? 6 : 0;
-+    let bgRatio = Math.floor(Math.random() * (MarioKristiani.length + unsplashedLength));
-+    let imageUrl = "";
-+    if(bgRatio < MarioKristiani.length)
-+    {
-+      imageUrl = "chrome-search://local-ntp/" +MarioKristiani[bgRatio];
-+    }
-+    else
-+    {
-+      imageUrl = "https://source.unsplash.com/collection/10542588/1920x1080";
-+    }
-     if (!$(IDS.CUSTOM_BG).style.backgroundImage.includes(imageUrl)) {
-       const imageWithOverlay = [
-         customize.CUSTOM_BACKGROUND_OVERLAY, 'url(' + imageUrl + ')'
-@@ -1997,11 +2014,18 @@
-         $(IDS.CUSTOM_BG).style.opacity = '1';
-       };
-       image.src = imageUrl;
-+    document.body.style.backgroundColor = convertToRGBAColor(theme.backgroundColorRgba);
- 
-       customize.clearAttribution();
--      customize.setAttribution(
--          '' + theme.attribution1, '' + theme.attribution2,
--          '' + theme.attributionActionUrl);
-+      if(bgRatio < MarioKristiani.length)
-+      {
-+        theme.attribution1 = "Photo by Mario Kristiani";
-+        theme.attribution2 = "";
-+        theme.attributionActionUrl = "https://www.instagram.com/mario_kristiani";
-+        customize.setAttribution(
-+            '' + theme.attribution1, '' + theme.attribution2,
-+            '' + theme.attributionActionUrl);
-+      }
-     }
-   }
- 
-@@ -2143,12 +2167,7 @@
-   message.iconBackgroundColor = convertToRGBAColor(info.iconBackgroundColor);
-   message.useWhiteAddIcon = info.useWhiteAddIcon;
- 
--  let titleColor = NTP_DESIGN.titleColor;
--  if (!info.usingDefaultTheme && info.textColorRgba) {
--    titleColor = info.textColorRgba;
--  } else if (info.isNtpBackgroundDark) {
--    titleColor = NTP_DESIGN.titleColorAgainstDark;
--  }
-+  let titleColor = [248,249,250,255]; //always white
-   message.tileTitleColor = convertToRGBAColor(titleColor);
- 
-   const iframe = $(IDS.TILES_IFRAME);
-@@ -2228,6 +2247,7 @@
- function setRealboxIcon(match) {
-   const realboxIcon = $(IDS.REALBOX_ICON);
-   if (match && !match.isSearchType) {
-+    realboxIcon.style.backgroundImage = '';
-     // if the selected match is a navigation match and has a favicon loaded,
-     // display the favicon. Otherwise display the match icon.
-     if (faviconOrImageUrlToDataUrlCache[match.destinationUrl]) {
-@@ -2239,8 +2259,14 @@
-       // Document matches use colored SVG icons.
-       setBackgroundImageByUrl(realboxIcon, realboxIcon.dataset.icon);
-     } else {
--      realboxIcon.dataset.icon = match.iconUrl;
--      setWebkitMaskImageByUrl(realboxIcon, realboxIcon.dataset.icon);
-+      if(configData.defaultEngine) {
-+        setBackgroundImageByUrl(
-+          realboxIcon, configData.defaultEngine);
-+      }
-+      else {
-+        realboxIcon.dataset.icon = match.iconUrl;
-+        setWebkitMaskImageByUrl(realboxIcon, realboxIcon.dataset.icon);
-+      }
-     }
-   } else if (configData.useGoogleGIcon) {
-     // if google_g icon should be used (as the default icon and search matches),
-@@ -2248,7 +2274,11 @@
-     /** @suppress {missingProperties} */
-     realboxIcon.dataset.icon = realboxIcon.dataset.defaultIcon;
-     setBackgroundImageByUrl(realboxIcon, realboxIcon.dataset.icon);
-+  } else if(configData.defaultEngine) {
-+    setBackgroundImageByUrl(
-+          realboxIcon, configData.defaultEngine);
-   } else {
-+    realboxIcon.style.backgroundImage = '';
-     // if no match is selected, display the default icon. Otherwise display the
-     // match icon.
-     /** @suppress {missingProperties} */
---- a/chrome/browser/search/local_ntp_source.cc
-+++ b/chrome/browser/search/local_ntp_source.cc
-@@ -135,6 +135,25 @@ const struct Resource{
-     {kPromoScriptFilename, kLocalResource, "text/javascript"},
-     {kSearchSuggestionsScriptFilename, kLocalResource, "text/javascript"},
-     {kThemeCSSFilename, kLocalResource, "text/css"},
-+	// Photos by Mario Kristiani
-+    {"DSC_3796.webp", IDR_MK_DSC_3796,"images/webp"},
-+    {"DSC0548.webp", IDR_MK_DSC0548,"images/webp"},
-+    {"DSC0489.webp", IDR_MK_DSC0489,"images/webp"},
-+    {"DSC0563.webp", IDR_MK_DSC0563,"images/webp"},
-+    {"DSC0573.webp", IDR_MK_DSC0573,"images/webp"},
-+    {"DSC0733.webp", IDR_MK_DSC0733,"images/webp"},
-+    {"DSC0813.webp", IDR_MK_DSC0813,"images/webp"},
-+    {"DSC1073.webp", IDR_MK_DSC1073,"images/webp"},
-+    {"DSC1120.webp", IDR_MK_DSC1120,"images/webp"},
-+    {"DSC2915.webp", IDR_MK_DSC2915,"images/webp"},
-+    {"DSC2951.webp", IDR_MK_DSC2951,"images/webp"},
-+    {"DSC2994.webp", IDR_MK_DSC2994,"images/webp"},
-+    {"DSC3287.webp", IDR_MK_DSC3287,"images/webp"},
-+    {"DSC4614.webp", IDR_MK_DSC4614,"images/webp"},
-+    {"DSC0014.webp", IDR_MK_DSC0014,"images/webp"},
-+    {"DSC0189.webp", IDR_MK_DSC0189,"images/webp"},
-+    {"DSC0253.webp", IDR_MK_DSC0253,"images/webp"},
-+    {"DSC0322.webp", IDR_MK_DSC0322,"images/webp"},
-     // Image may not be a jpeg but the .jpg extension here still works for other
-     // filetypes. Special handling for different extensions isn't worth the
-     // added complexity.
-@@ -636,10 +636,14 @@ class LocalNtpSource::SearchConfiguratio
-     bool is_google = search::DefaultSearchProviderIsGoogle(service_);
-     const GURL google_base_url =
-         GURL(service_->search_terms_data().GoogleBaseURLValue());
-+    auto default_engine = service_->GetDefaultSearchManager().GetDefaultSearchEngine(nullptr)->favicon_url;
-+    auto search_provider_name = service_->GetDefaultSearchProvider()->short_name();
-     base::DictionaryValue config_data;
-     config_data.Set("translatedStrings", GetTranslatedStrings(is_google));
-     config_data.SetBoolean("isGooglePage", is_google);
-     config_data.SetString("googleBaseUrl", google_base_url.spec());
-+    config_data.SetString("defaultEngine", default_engine.spec());
-+    config_data.SetString("defaultSearchProvider", search_provider_name);
-     config_data.SetBoolean("isAccessibleBrowser",
-                            content::BrowserAccessibilityState::GetInstance()
-                                ->IsAccessibleBrowser());
---- a/chrome/browser/resources/local_ntp/local_ntp.css
-+++ b/chrome/browser/resources/local_ntp/local_ntp.css
-@@ -17,7 +17,7 @@ html {
- 
-   --logo-color: #eee; /* Background color for alternative logo. */
-   --logo-height: 200px; /* Normal height of a doodle. */
--  --logo-margin-top: 56px; /* Expected OGB height, so logo doesn't overlap. */
-+  --logo-margin-top: 0px; /* Expected OGB height, so logo doesn't overlap. */
-   --logo-margin-bottom: 38px; /* Between logo and fakebox. */
- 
-   /* Initial height determines the margin between the logo and the fakebox. If
-@@ -213,10 +213,10 @@ body.hide-fakebox #fakebox {
-   -webkit-mask-position: center;
-   -webkit-mask-repeat: no-repeat;
-   -webkit-mask-size: 16px;
--  background-color: var(--search-box-icon, rgb(117, 117, 117));
-+  background-color: var(--search-box-icon, rgb(117, 117, 117, 0));
-   background-position: center center;
-   background-repeat: no-repeat;
--  background-size: 16px;
-+  background-size: 20px;
-   bottom: 0;
-   left: 16px;
-   margin: auto;
---- a/components/search_engines/template_url_service.h
-+++ b/components/search_engines/template_url_service.h
-@@ -400,6 +400,8 @@ class TemplateURLService : public WebDat
-   const SearchTermsData& search_terms_data() const {
-     return *search_terms_data_;
-   }
-+  
-+  DefaultSearchManager& GetDefaultSearchManager() { return default_search_manager_; }
- 
-   // Returns a SyncData with a sync representation of the search engine data
-   // from |turl|.
---- a/chrome/browser/resources/local_ntp/local_ntp.html
-+++ b/chrome/browser/resources/local_ntp/local_ntp.html
-@@ -40,21 +40,6 @@
- 
-   <div id="ntp-contents">
-     <div id="logo">
--      <!-- The logo that is displayed in the absence of a doodle. -->
--      <div id="logo-default" title="Google"></div>
--      <!-- Logo displayed when theme prevents doodles. Doesn't fade. -->
--      <div id="logo-non-white" title="Google"></div>
--      <!-- A doodle, if any: its link and image. -->
--      <div id="logo-doodle">
--        <div id="logo-doodle-container">
--          <div id="logo-doodle-wrapper">
--            <button id="logo-doodle-button">
--              <img id="logo-doodle-image" tabindex="-1"></img>
--            </button>
--          </div>
--        </div>
--        <iframe id="logo-doodle-iframe" scrolling="no"></iframe>
--      </div>
-     </div>
- 
-     <div id="fakebox-container" $i18n{hiddenIfRealboxEnabled}>
 --- a/chrome/browser/history/top_sites_factory.cc
 +++ b/chrome/browser/history/top_sites_factory.cc
-@@ -54,39 +54,6 @@ struct RawPrepopulatedPage {
+@@ -52,40 +52,6 @@ struct RawPrepopulatedPage {
+   SkColor color;         // The best color to highlight the page (should
                           // roughly match favicon).
  };
- 
+-
 -#if !defined(OS_ANDROID)
 -// Android does not use prepopulated pages.
 -const RawPrepopulatedPage kRawPrepopulatedPages[] = {
@@ -333,81 +41,545 @@
  }  // namespace
  
  // static
-@@ -135,8 +102,6 @@ TopSitesFactory::~TopSitesFactory() {
+@@ -134,8 +100,7 @@ TopSitesFactory::~TopSitesFactory() {
  scoped_refptr<RefcountedKeyedService> TopSitesFactory::BuildServiceInstanceFor(
      content::BrowserContext* context) const {
    history::PrepopulatedPageList prepopulated_pages;
 -  InitializePrepopulatedPageList(Profile::FromBrowserContext(context),
 -                                 &prepopulated_pages);
++  
    return BuildTopSites(context, prepopulated_pages);
  }
  
---- a/chrome/browser/resources/local_ntp/most_visited_single.css
-+++ b/chrome/browser/resources/local_ntp/most_visited_single.css
-@@ -22,7 +22,7 @@ html {
+--- a/chrome/browser/resources/new_tab_page/BUILD.gn
++++ b/chrome/browser/resources/new_tab_page/BUILD.gn
+@@ -359,6 +359,24 @@ generate_grd("build_grd") {
+   input_files = [
+     "new_tab_page.html",
+     "shared_vars.css",
++    "untrusted/background_images/breeze_background01.webp",
++    "untrusted/background_images/breeze_background02.webp",
++    "untrusted/background_images/breeze_background03.webp",
++    "untrusted/background_images/breeze_background04.webp",
++    "untrusted/background_images/breeze_background05.webp",
++    "untrusted/background_images/breeze_background06.webp",
++    "untrusted/background_images/breeze_background07.webp",
++    "untrusted/background_images/breeze_background08.webp",
++    "untrusted/background_images/breeze_background09.webp",
++    "untrusted/background_images/breeze_background10.webp",
++    "untrusted/background_images/breeze_background11.webp",
++    "untrusted/background_images/breeze_background12.webp",
++    "untrusted/background_images/breeze_background13.webp",
++    "untrusted/background_images/breeze_background14.webp",
++    "untrusted/background_images/breeze_background15.webp",
++    "untrusted/background_images/breeze_background16.webp",
++    "untrusted/background_images/breeze_background17.webp",
++    "untrusted/background_images/breeze_background18.webp",
+     "untrusted/background_image.html",
+     "untrusted/background_image.js",
+     "untrusted/image.html",
+--- a/chrome/browser/resources/new_tab_page/app.html
++++ b/chrome/browser/resources/new_tab_page/app.html
+@@ -2,7 +2,7 @@
+   :host {
+     --ntp-theme-text-color: var(--google-grey-800);
+     --ntp-theme-text-shadow: none;
+-    --ntp-one-google-bar-height: 56px;
++    --ntp-one-google-bar-height: 15%;
+     --ntp-search-box-width: 337px;
+     --ntp-module-width: var(--ntp-search-box-width);
+     --ntp-module-border-radius: 5px;
+--- a/chrome/browser/resources/new_tab_page/app.js
++++ b/chrome/browser/resources/new_tab_page/app.js
+@@ -35,6 +35,7 @@ import {WindowProxy} from './window_proxy.js';
+  * }}
+  */
+ let CommandData;
++let currentBreezeBackground;
  
-   /* May be overridden by themes (on the body element). */
-   --icon-background-color: rgb(var(--GG100-rgb));
--  --tile-title-color: rgb(var(--GG800-rgb));
-+  --tile-title-color: rgba(248,249,250,1);
+ /**
+  * Elements on the NTP. This enum must match the numbering for NTPElement in
+@@ -404,6 +405,7 @@ class AppElement extends mixinBehaviors
+       case BackgroundSelectionType.IMAGE:
+         return this.backgroundSelection_.image.attribution1;
+       case BackgroundSelectionType.NO_BACKGROUND:
++        return 'Mario Kristiani';
+       case BackgroundSelectionType.DAILY_REFRESH:
+       default:
+         return '';
+@@ -440,6 +442,7 @@ class AppElement extends mixinBehaviors
+       case BackgroundSelectionType.IMAGE:
+         return this.backgroundSelection_.image.attributionUrl.url;
+       case BackgroundSelectionType.NO_BACKGROUND:
++        return 'https://www.instagram.com/mario_kristiani/';
+       case BackgroundSelectionType.DAILY_REFRESH:
+       default:
+         return '';
+@@ -545,6 +548,7 @@ class AppElement extends mixinBehaviors
+       case BackgroundSelectionType.IMAGE:
+         return true;
+       case BackgroundSelectionType.NO_BACKGROUND:
++        return true;
+       case BackgroundSelectionType.DAILY_REFRESH:
+       default:
+         return false;
+@@ -617,6 +621,15 @@ class AppElement extends mixinBehaviors
+       case BackgroundSelectionType.NO_SELECTION:
+         backgroundImage = this.theme_ && this.theme_.backgroundImage;
+         break;
++      case BackgroundSelectionType.NO_BACKGROUND:
++        if (!currentBreezeBackground) {
++          currentBreezeBackground = {
++            url: {url: "chrome-untrusted://new-tab-page/breeze_background" + (Math.floor(Math.random() * 18)+1) + ".webp"}
++          };
++        }
++        backgroundImage = currentBreezeBackground;
++        this.backgroundSelection_.default_url = backgroundImage.url.url;
++        break;
+       case BackgroundSelectionType.IMAGE:
+         backgroundImage = {
+           url: {url: this.backgroundSelection_.image.imageUrl.url}
+--- a/chrome/browser/resources/new_tab_page/customize_backgrounds.js
++++ b/chrome/browser/resources/new_tab_page/customize_backgrounds.js
+@@ -115,7 +115,8 @@ class CustomizeBackgroundsElement extends mixinBehaviors
+       case BackgroundSelectionType.NO_BACKGROUND:
+         return 'selected';
+       case BackgroundSelectionType.NO_SELECTION:
+-        return this.theme && !this.theme.backgroundImage &&
++        return this.theme && !this.theme.backgroundImage.url.url.startsWith(
++          'chrome-untrusted://new-tab-page/background.jpg') &&
+                 !this.theme.dailyRefreshCollectionId ?
+             'selected' :
+             '';
+--- a/chrome/browser/resources/new_tab_page/customize_dialog.js
++++ b/chrome/browser/resources/new_tab_page/customize_dialog.js
+@@ -167,7 +167,12 @@ class CustomizeDialogElement extends mixinBehaviors
+     }
+     switch (this.backgroundSelection.type) {
+       case BackgroundSelectionType.NO_BACKGROUND:
+-        this.pageHandler_.setNoBackgroundImage();
++        let default_author = {url: Object};
++        default_author.url = "https://www.instagram.com/mario_kristiani/";
++        let default_image_url = {url: Object};
++        default_image_url.url = this.backgroundSelection.default_url;
++
++        this.pageHandler_.setBackgroundImage("Mario Kristiani", "", default_author, default_image_url);
+         break;
+       case BackgroundSelectionType.IMAGE:
+         const {attribution1, attribution2, attributionUrl, imageUrl} =
+--- a/chrome/browser/resources/new_tab_page/realbox/realbox.html
++++ b/chrome/browser/resources/new_tab_page/realbox/realbox.html
+@@ -65,31 +65,7 @@
+     right: 12px;
+   }
+ 
+-  #voiceSearchButton {
+-    background: url(icons/googlemic_clr_24px.svg) no-repeat center;
+-    background-size: 21px 21px;
+-    border: none;
+-    border-radius: 2px;
+-    cursor: pointer;
+-    height: 100%;
+-    outline: none;
+-    padding: 0;
+-    pointer-events: auto;
+-    position: absolute;
+-    right: 16px;
+-    width: 26px;
+-  }
+-
+-  :host-context([dir='rtl']) #voiceSearchButton {
+-    left: 16px;
+-    right: unset;
+-  }
+-
+-  :host-context(.focus-outline-visible) #voiceSearchButton:focus {
+-    box-shadow: var(--ntp-focus-shadow);
+-  }
+-
+-  :-webkit-any(input, ntp-realbox-icon, #voiceSearchButton) {
++  :-webkit-any(input, ntp-realbox-icon) {
+    z-index: 2;
+   }
+ 
+@@ -113,9 +89,6 @@
+   <ntp-realbox-icon id="icon" match="[[selectedMatch_]]"
+       default-icon="[[realboxIcon_]]" in-searchbox>
+   </ntp-realbox-icon>
+-  <button id="voiceSearchButton" on-click="onVoiceSearchClick_"
+-      title="[[i18n('voiceSearchButtonLabel')]]">
+-  </button>
+   <ntp-realbox-dropdown id="matches" role="listbox" theme="[[theme]]"
+       result="[[result_]]" selected-match-index="{{selectedMatchIndex_}}"
+       on-result-repaint="onResultRepaint_" on-match-focusin="onMatchFocusin_"
+--- a/chrome/browser/resources/new_tab_page/realbox/realbox.js
++++ b/chrome/browser/resources/new_tab_page/realbox/realbox.js
+@@ -688,11 +688,6 @@ class RealboxElement extends mixinBehaviors
+     }
+   }
+ 
+-  /** @private */
+-  onVoiceSearchClick_() {
+-    this.dispatchEvent(new Event('open-voice-search'));
+-  }
+-
+   //============================================================================
+   // Helpers
+   //============================================================================
+--- a/chrome/browser/search/background/ntp_backgrounds.cc
++++ b/chrome/browser/search/background/ntp_backgrounds.cc
+@@ -3,6 +3,7 @@
+ // found in the LICENSE file.
+ 
+ #include "chrome/browser/search/background/ntp_backgrounds.h"
++#include "content/public/browser/browser_thread.h"
+ 
+ #include "url/gurl.h"
+ 
+@@ -12,37 +13,22 @@ std::array<GURL, kNtpBackgroundsCount> GetNtpBackgrounds() {
+   // These backgrounds were handpicked from the Backdrop API based on popularity
+   // and those requiring minimum maintenance and translation work. This list
+   // matches with chrome/browser/ui/webui/welcome/nux/ntp_background_handler.cc.
+-  const std::array<GURL, kNtpBackgroundsCount> kNtpBackgrounds = {{
+-      // Art
+-      GURL("https://lh5.9oo91eusercontent.qjz9zk/proxy/"
+-           "E60bugMrz3Jw0Ty3vD1HqfrrabnAQGlHzIJjRadV1kDS_"
+-           "XSE0AtWuMnjW9VPvq1YeyPJK13gZw63TQYvh2RlaZq_"
+-           "aQm5xskpsgWW1l67gg3mkYaZr07BQqMV47onKA=w3840-h2160-p-k-no-nd-"
+-           "mv"),
+-
+-      // Cityscape
+-      GURL("https://lh4.9oo91eusercontent.qjz9zk/proxy/"
+-           "UOhQwfclsAK8TnXZqoTkh9szHvYOJ3auDH07hZBZeVaaRWvzGaXpaYl60MfCRuW"
+-           "_S57gvzBw859pj5Xl2pW_GpfG8k2GhE9LUFNKwA=w3840-h2160-p-k-no-nd-"
+-           "mv"),
+-
+-      // Earth
+-      GURL("https://lh5.9oo91eusercontent.qjz9zk/proxy/"
+-           "xvtq6_782kBajCBr0GISHpujOb51XLKUeEOJ2lLPKh12-"
+-           "xNBTCtsoHT14NQcaH9l4JhatcXEMBkqgUeCWhb3XhdLnD1BiNzQ_LVydwg="
+-           "w3840-h2160-p-k-no-nd-mv"),
+-
+-      // Geometric Shapes
+-      GURL("https://lh3.9oo91eusercontent.qjz9zk/proxy/"
+-           "FWOBAVfQYasxV3KURX1VVKem1yOC2iazWAb8csOmqCDwI1CCzAA1zCpnAxR-"
+-           "wL2rbfZNcRHbI5b-SZfLASmF7uhJnzrksBWougEGlkw_-4U=w3840-h2160-p-"
+-           "k-no-nd-mv"),
+-
+-      // Landscapes
+-      GURL("https://lh3.9oo91eusercontent.qjz9zk/proxy/"
+-           "nMIspgHzTUU0GzmiadmPphBelzF2xy9-tIiejZg3VvJTITxUb-1vILxf-"
+-           "IsCfyl94VSn6YvHa8_PiIyR9d3rwD8ZhNdQ1C1rnblP6zy3OaI=w3840-h2160-"
+-           "p-k-no-nd-mv"),
+-  }};
++  std::array<GURL, kNtpBackgroundsCount> kNtpBackgrounds;
++  for (size_t i=0; i<kNtpBackgroundsCount; ++i) {
++       kNtpBackgrounds.at(i) = GURL("chrome-untrusted://new-tab-page/breeze_background" + (i>8 ? std::to_string(i+1) : ("0" + std::to_string(i+1))) + ".webp");
++  }
+   return kNtpBackgrounds;
+ }
++
++absl::optional<CustomBackground> GetBreezeBackground() {
++     DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
++     auto custom_background = absl::make_optional<CustomBackground>();
++     std::string local_string("chrome-untrusted://new-tab-page/breeze_background01.webp");
++     GURL breeze_background_url(local_string);
++     custom_background->custom_background_url = breeze_background_url;
++     custom_background->custom_background_attribution_line_1 = std::string("Mario Kristiani");
++     custom_background->custom_background_attribution_line_2 = std::string();
++     custom_background->custom_background_attribution_action_url = GURL("https://www.instagram.com/mario_kristiani/");
++     custom_background->collection_id = "";
++     return custom_background;
++}
+--- a/chrome/browser/search/background/ntp_backgrounds.h
++++ b/chrome/browser/search/background/ntp_backgrounds.h
+@@ -8,10 +8,13 @@
+ #include <stddef.h>
+ 
+ #include <array>
++#include "base/values.h"
++#include "chrome/browser/search/background/ntp_background_service.h"
+ 
+ class GURL;
+ 
+-const size_t kNtpBackgroundsCount = 5;
++const size_t kNtpBackgroundsCount = 18;
+ std::array<GURL, kNtpBackgroundsCount> GetNtpBackgrounds();
++absl::optional<CustomBackground> GetBreezeBackground();
+ 
+ #endif  // CHROME_BROWSER_SEARCH_BACKGROUND_NTP_BACKGROUNDS_H_
+--- a/chrome/browser/search/background/ntp_custom_background_service.cc
++++ b/chrome/browser/search/background/ntp_custom_background_service.cc
+@@ -69,13 +69,13 @@ base::DictionaryValue GetBackgroundInfoAsDict(
+ base::Value NtpCustomBackgroundDefaults() {
+   base::Value defaults(base::Value::Type::DICTIONARY);
+   defaults.SetKey(kNtpCustomBackgroundURL,
+-                  base::Value(base::Value::Type::STRING));
++                  base::Value("chrome-untrusted://new-tab-page/breeze_background01.webp"));
+   defaults.SetKey(kNtpCustomBackgroundAttributionLine1,
+-                  base::Value(base::Value::Type::STRING));
++                  base::Value("Mario Kristiani"));
+   defaults.SetKey(kNtpCustomBackgroundAttributionLine2,
+-                  base::Value(base::Value::Type::STRING));
++                  base::Value(""));
+   defaults.SetKey(kNtpCustomBackgroundAttributionActionURL,
+-                  base::Value(base::Value::Type::STRING));
++                  base::Value("https://www.instagram.com/mario_kristiani"));
+   defaults.SetKey(kNtpCustomBackgroundCollectionId,
+                   base::Value(base::Value::Type::STRING));
+   defaults.SetKey(kNtpCustomBackgroundResumeToken,
+@@ -287,8 +287,19 @@ NtpCustomBackgroundService::GetCustomBackground() {
+     auto custom_background = absl::make_optional<CustomBackground>();
+     const base::DictionaryValue* background_info =
+         pref_service_->GetDictionary(prefs::kNtpCustomBackgroundDict);
+-    GURL custom_background_url(
+-        background_info->FindKey(kNtpCustomBackgroundURL)->GetString());
++    
++    std::string url_string = background_info->FindKey(kNtpCustomBackgroundURL)->GetString();
++    if (url_string.find("breeze_background") != std::string::npos) {
++      const std::array<std::string, 18> breeze_backgrounds = {"01", "02", "03",
++                                                        "04", "05", "06",
++                                                        "07", "08", "09",
++                                                        "10", "11", "12",
++                                                        "13", "14", "15",
++                                                        "16", "17", "18"};
++      url_string = url_string.substr(0, url_string.find_last_of(".webp")-6) + breeze_backgrounds[std::rand()%18] + ".webp";
++      
++    }
++    GURL custom_background_url(url_string);
+ 
+     std::string collection_id;
+     const base::Value* id_value =
+--- a/chrome/browser/ui/search/ntp_user_data_logger.cc
++++ b/chrome/browser/ui/search/ntp_user_data_logger.cc
+@@ -434,7 +434,7 @@ void NTPUserDataLogger::LogMostVisitedNavigation(
  }
  
- body {
-@@ -79,6 +79,7 @@ a:visited {
- 
- .grid-tile {
-   transition: transform 300ms ease-in-out;
-+  filter: drop-shadow(1px 3px 4px #1a1a1a);
+ bool NTPUserDataLogger::DefaultSearchProviderIsGoogle() const {
+-  return search::DefaultSearchProviderIsGoogle(profile_);
++  return false;
  }
  
- /* Prevent transitions on the held tile in order for it to smoothly follow the
-@@ -95,6 +96,7 @@ a:visited {
-   border-radius: 4px;
-   box-sizing: border-box;
-   color: rgb(var(--tile-title-color));
-+  text-shadow: 0px 0px 1px black;
-   cursor: pointer;
-   height: var(--md-tile-size);
-   margin-bottom: var(--md-tile-margin);
---- a/chrome/browser/resources/local_ntp/customize.css
-+++ b/chrome/browser/resources/local_ntp/customize.css
-@@ -14,7 +14,7 @@
-   padding: 0;
-   position: fixed;
-   top: 0;
--  transition: opacity 700ms;
-+  transition: opacity 500ms;
-   width: 100%;
+ bool NTPUserDataLogger::CustomBackgroundIsConfigured() const {
+--- a/chrome/browser/ui/webui/new_tab_page/new_tab_page_handler.cc
++++ b/chrome/browser/ui/webui/new_tab_page/new_tab_page_handler.cc
+@@ -27,6 +27,7 @@
+ #include "chrome/browser/new_tab_page/promos/promo_service_factory.h"
+ #include "chrome/browser/profiles/profile.h"
+ #include "chrome/browser/search/background/ntp_background_service.h"
++#include "chrome/browser/search/background/ntp_backgrounds.h"
+ #include "chrome/browser/search/background/ntp_background_service_factory.h"
+ #include "chrome/browser/search/background/ntp_custom_background_service.h"
+ #include "chrome/browser/search_engines/template_url_service_factory.h"
+@@ -76,6 +77,9 @@ new_tab_page::mojom::ThemePtr MakeTheme(
+       ntp_custom_background_service
+           ? ntp_custom_background_service->GetCustomBackground()
+           : absl::nullopt;
++  if (!custom_background.has_value()) {
++    custom_background = GetBreezeBackground();
++  }
+   theme->is_default = theme_service->UsingDefaultTheme();
+   theme->background_color =
+       theme_provider->GetColor(ThemeProperties::COLOR_NTP_BACKGROUND);
+--- a/chrome/browser/ui/webui/new_tab_page/new_tab_page_ui.cc
++++ b/chrome/browser/ui/webui/new_tab_page/new_tab_page_ui.cc
+@@ -309,7 +309,7 @@ content::WebUIDataSource* CreateNewTabPageUiHtmlSource(Profile* profile) {
+       "modulesRedesignedEnabled",
+       base::FeatureList::IsEnabled(ntp_features::kNtpModulesRedesigned));
+ 
+-  RealboxHandler::SetupWebUIDataSource(source);
++  RealboxHandler::SetupWebUIDataSource(source, profile);
+ 
+   webui::SetupWebUIDataSource(
+       source, base::make_span(kNewTabPageResources, kNewTabPageResourcesSize),
+--- a/chrome/browser/ui/webui/new_tab_page/untrusted_source.cc
++++ b/chrome/browser/ui/webui/new_tab_page/untrusted_source.cc
+@@ -181,6 +181,89 @@ void UntrustedSource::StartDataRequest(
+         IDR_NEW_TAB_PAGE_UNTRUSTED_BACKGROUND_IMAGE_JS));
+     return;
+   }
++  if (path.find("breeze_background") != std::string::npos) {
++    ui::ResourceBundle& bundle = ui::ResourceBundle::GetSharedInstance();
++    switch (std::stoi(path.substr(17, 2))) {
++    case 1:
++      std::move(callback).Run(bundle.LoadDataResourceBytes(
++        IDR_NEW_TAB_PAGE_UNTRUSTED_BACKGROUND_IMAGES_BREEZE_BACKGROUND01_WEBP));
++      break;
++    case 2:
++      std::move(callback).Run(bundle.LoadDataResourceBytes(
++        IDR_NEW_TAB_PAGE_UNTRUSTED_BACKGROUND_IMAGES_BREEZE_BACKGROUND02_WEBP));
++      break;
++    case 3:
++      std::move(callback).Run(bundle.LoadDataResourceBytes(
++        IDR_NEW_TAB_PAGE_UNTRUSTED_BACKGROUND_IMAGES_BREEZE_BACKGROUND03_WEBP));
++      break;
++    case 4:
++      std::move(callback).Run(bundle.LoadDataResourceBytes(
++        IDR_NEW_TAB_PAGE_UNTRUSTED_BACKGROUND_IMAGES_BREEZE_BACKGROUND04_WEBP));
++      break;
++    case 5:
++      std::move(callback).Run(bundle.LoadDataResourceBytes(
++        IDR_NEW_TAB_PAGE_UNTRUSTED_BACKGROUND_IMAGES_BREEZE_BACKGROUND05_WEBP));
++      break;
++    case 6:
++      std::move(callback).Run(bundle.LoadDataResourceBytes(
++        IDR_NEW_TAB_PAGE_UNTRUSTED_BACKGROUND_IMAGES_BREEZE_BACKGROUND06_WEBP));
++      break;
++    case 7:
++      std::move(callback).Run(bundle.LoadDataResourceBytes(
++        IDR_NEW_TAB_PAGE_UNTRUSTED_BACKGROUND_IMAGES_BREEZE_BACKGROUND07_WEBP));
++      break;
++    case 8:
++      std::move(callback).Run(bundle.LoadDataResourceBytes(
++        IDR_NEW_TAB_PAGE_UNTRUSTED_BACKGROUND_IMAGES_BREEZE_BACKGROUND08_WEBP));
++      break;
++    case 9:
++      std::move(callback).Run(bundle.LoadDataResourceBytes(
++        IDR_NEW_TAB_PAGE_UNTRUSTED_BACKGROUND_IMAGES_BREEZE_BACKGROUND09_WEBP));
++      break;
++    case 10:
++      std::move(callback).Run(bundle.LoadDataResourceBytes(
++        IDR_NEW_TAB_PAGE_UNTRUSTED_BACKGROUND_IMAGES_BREEZE_BACKGROUND10_WEBP));
++      break;
++    case 11:
++      std::move(callback).Run(bundle.LoadDataResourceBytes(
++        IDR_NEW_TAB_PAGE_UNTRUSTED_BACKGROUND_IMAGES_BREEZE_BACKGROUND11_WEBP));
++      break;
++    case 12:
++      std::move(callback).Run(bundle.LoadDataResourceBytes(
++        IDR_NEW_TAB_PAGE_UNTRUSTED_BACKGROUND_IMAGES_BREEZE_BACKGROUND12_WEBP));
++      break;
++    case 13:
++      std::move(callback).Run(bundle.LoadDataResourceBytes(
++        IDR_NEW_TAB_PAGE_UNTRUSTED_BACKGROUND_IMAGES_BREEZE_BACKGROUND13_WEBP));
++      break;
++    case 14:
++      std::move(callback).Run(bundle.LoadDataResourceBytes(
++        IDR_NEW_TAB_PAGE_UNTRUSTED_BACKGROUND_IMAGES_BREEZE_BACKGROUND14_WEBP));
++      break;
++    case 15:
++      std::move(callback).Run(bundle.LoadDataResourceBytes(
++        IDR_NEW_TAB_PAGE_UNTRUSTED_BACKGROUND_IMAGES_BREEZE_BACKGROUND15_WEBP));
++      break;
++    case 16:
++      std::move(callback).Run(bundle.LoadDataResourceBytes(
++        IDR_NEW_TAB_PAGE_UNTRUSTED_BACKGROUND_IMAGES_BREEZE_BACKGROUND16_WEBP));
++      break;
++    case 17:
++      std::move(callback).Run(bundle.LoadDataResourceBytes(
++        IDR_NEW_TAB_PAGE_UNTRUSTED_BACKGROUND_IMAGES_BREEZE_BACKGROUND17_WEBP));
++      break;
++    case 18:
++      std::move(callback).Run(bundle.LoadDataResourceBytes(
++        IDR_NEW_TAB_PAGE_UNTRUSTED_BACKGROUND_IMAGES_BREEZE_BACKGROUND18_WEBP));
++      break;
++    
++    default:
++      std::move(callback).Run(bundle.LoadDataResourceBytes(
++        IDR_NEW_TAB_PAGE_UNTRUSTED_BACKGROUND_IMAGES_BREEZE_BACKGROUND01_WEBP));
++      break;
++    }
++    return;
++  }
+   if (path == "background.jpg") {
+     base::ThreadPool::PostTaskAndReplyWithResult(
+         FROM_HERE, {base::TaskPriority::USER_VISIBLE, base::MayBlock()},
+@@ -201,6 +284,10 @@ std::string UntrustedSource::GetMimeType(const std::string& path) {
+                      base::CompareCase::INSENSITIVE_ASCII)) {
+     return "image/jpg";
+   }
++  if (base::EndsWith(stripped_path, ".webp",
++                     base::CompareCase::INSENSITIVE_ASCII)) {
++    return "image/webp";
++  }
+ 
+   return "text/html";
+ }
+@@ -228,7 +315,7 @@ bool UntrustedSource::ShouldServiceRequest(
+   return path == "one-google-bar" || path == "one_google_bar.js" ||
+          path == "image" || path == "background_image" ||
+          path == "custom_background_image" || path == "background_image.js" ||
+-         path == "background.jpg";
++         path == "background.jpg" || (path.find("breeze_background") != std::string::npos);
  }
  
---- a/chrome/browser/resources/local_ntp/local_ntp_resources.grd
-+++ b/chrome/browser/resources/local_ntp/local_ntp_resources.grd
-@@ -8,6 +8,25 @@
-   </outputs>
-   <release seq="1">
-     <includes>
-+      <include name="IDR_MK_DSC_3796" file="images\DSC_3796.webp" type="BINDATA" />
-+      <include name="IDR_MK_DSC0014" file="images\DSC0014.webp" type="BINDATA" />
-+      <include name="IDR_MK_DSC0189" file="images\DSC0189.webp" type="BINDATA" />
-+      <include name="IDR_MK_DSC0253" file="images\DSC0253.webp" type="BINDATA" />
-+      <include name="IDR_MK_DSC0322" file="images\DSC0322.webp" type="BINDATA" />
-+      <include name="IDR_MK_DSC0489" file="images\DSC0489.webp" type="BINDATA" />
-+      <include name="IDR_MK_DSC0548" file="images\DSC0548.webp" type="BINDATA" />
-+      <include name="IDR_MK_DSC0563" file="images\DSC0563.webp" type="BINDATA" />
-+      <include name="IDR_MK_DSC0573" file="images\DSC0573.webp" type="BINDATA" />
-+      <include name="IDR_MK_DSC0733" file="images\DSC0733.webp" type="BINDATA" />
-+      <include name="IDR_MK_DSC0813" file="images\DSC0813.webp" type="BINDATA" />
-+      <include name="IDR_MK_DSC1073" file="images\DSC1073.webp" type="BINDATA" />
-+      <include name="IDR_MK_DSC1120" file="images\DSC1120.webp" type="BINDATA" />
-+      <include name="IDR_MK_DSC2915" file="images\DSC2915.webp" type="BINDATA" />
-+      <include name="IDR_MK_DSC2951" file="images\DSC2951.webp" type="BINDATA" />
-+      <include name="IDR_MK_DSC2994" file="images\DSC2994.webp" type="BINDATA" />
-+      <include name="IDR_MK_DSC3287" file="images\DSC3287.webp" type="BINDATA" />
-+      <include name="IDR_MK_DSC4614" file="images\DSC4614.webp" type="BINDATA" />
-+	  
-       <include name="IDR_CUSTOM_LINKS_ADD_SVG" file="icons\add_link.svg" type="BINDATA" />
-       <include name="IDR_CUSTOM_LINKS_ADD_WHITE_SVG" file="icons\add_link_white.svg" type="BINDATA" />
-       <include name="IDR_CUSTOM_LINKS_EDIT_HTML" file="custom_links_edit.html" type="BINDATA" />
+ void UntrustedSource::OnOneGoogleBarDataUpdated() {
+--- a/chrome/browser/ui/webui/realbox/realbox_handler.cc
++++ b/chrome/browser/ui/webui/realbox/realbox_handler.cc
+@@ -221,14 +221,15 @@ realbox::mojom::AutocompleteResultPtr CreateAutocompleteResult(
+ }  // namespace
+ 
+ // static
+-void RealboxHandler::SetupWebUIDataSource(content::WebUIDataSource* source) {
++void RealboxHandler::SetupWebUIDataSource(content::WebUIDataSource* source, Profile* profile) {
+   static constexpr webui::ResourcePath kImages[] = {
+       {kGoogleGIconResourceName, IDR_WEBUI_IMAGES_200_LOGO_GOOGLEG_PNG},
+       {kSearchIconResourceName, IDR_WEBUI_IMAGES_ICON_SEARCH_SVG}};
+   source->AddResourcePaths(kImages);
+ 
++  const TemplateURL* const default_provider = TemplateURLServiceFactory::GetForProfile(profile)->GetDefaultSearchProvider();
++
+   static constexpr webui::LocalizedString kStrings[] = {
+-      {"searchBoxHint", IDS_GOOGLE_SEARCH_BOX_EMPTY_HINT_MD},
+       {"realboxSeparator", IDS_AUTOCOMPLETE_MATCH_DESCRIPTION_SEPARATOR},
+       {"removeSuggestion", IDS_OMNIBOX_REMOVE_SUGGESTION},
+       {"removeSuggestionA11ySuffix", IDS_ACC_REMOVE_SUGGESTION_SUFFIX},
+@@ -239,6 +240,9 @@ void RealboxHandler::SetupWebUIDataSource(content::WebUIDataSource* source) {
+       {"showSection", IDS_ACC_HEADER_SHOW_SUGGESTIONS_BUTTON}};
+   source->AddLocalizedStrings(kStrings);
+ 
++  source->AddString("searchBoxHint", l10n_util::GetStringFUTF16(
++        IDS_OMNIBOX_PLACEHOLDER_TEXT, default_provider->short_name()));
++
+   source->AddBoolean(
+       "realboxMatchOmniboxTheme",
+       base::FeatureList::IsEnabled(ntp_features::kRealboxMatchOmniboxTheme));
+@@ -247,8 +251,8 @@ void RealboxHandler::SetupWebUIDataSource(content::WebUIDataSource* source) {
+       base::FeatureList::IsEnabled(ntp_features::kRealboxUseGoogleGIcon)
+           ? kGoogleGIconResourceName
+           : kSearchIconResourceName);
+-  source->AddString("realboxHint", l10n_util::GetStringUTF8(
+-                                       IDS_GOOGLE_SEARCH_BOX_EMPTY_HINT_MD));
++  source->AddString("realboxHint", l10n_util::GetStringFUTF16(
++        IDS_OMNIBOX_PLACEHOLDER_TEXT, default_provider->short_name()));
+ }
+ 
+ // static
+--- a/chrome/browser/ui/webui/realbox/realbox_handler.h
++++ b/chrome/browser/ui/webui/realbox/realbox_handler.h
+@@ -35,7 +35,7 @@ struct VectorIcon;
+ class RealboxHandler : public realbox::mojom::PageHandler,
+                        public AutocompleteController::Observer {
+  public:
+-  static void SetupWebUIDataSource(content::WebUIDataSource* source);
++  static void SetupWebUIDataSource(content::WebUIDataSource* source, Profile* profile);
+   static std::string AutocompleteMatchVectorIconToResourceName(
+       const gfx::VectorIcon& icon);
+   static std::string PedalVectorIconToResourceName(const gfx::VectorIcon& icon);
+--- a/components/search/ntp_features.cc
++++ b/components/search/ntp_features.cc
+@@ -51,10 +51,10 @@ extern const base::Feature kNtpHandleMostVisitedNavigationExplicitly{
+ 
+ // If enabled, OneGoogleBar will be shown.
+ const base::Feature kNtpOneGoogleBar{"NtpOneGoogleBar",
+-                                     base::FEATURE_ENABLED_BY_DEFAULT};
++                                     base::FEATURE_DISABLED_BY_DEFAULT};
+ 
+ // If enabled, logo will be shown.
+-const base::Feature kNtpLogo{"NtpLogo", base::FEATURE_ENABLED_BY_DEFAULT};
++const base::Feature kNtpLogo{"NtpLogo", base::FEATURE_DISABLED_BY_DEFAULT};
+ 
+ // If enabled, shortcuts will be shown.
+ const base::Feature kNtpShortcuts{"NtpShortcuts",
+@@ -62,7 +62,7 @@ const base::Feature kNtpShortcuts{"NtpShortcuts",
+ 
+ // If enabled, middle slot promo will be shown.
+ const base::Feature kNtpMiddleSlotPromo{"NtpMiddleSlotPromo",
+-                                        base::FEATURE_ENABLED_BY_DEFAULT};
++                                        base::FEATURE_DISABLED_BY_DEFAULT};
+ 
+ // If enabled, modules will be shown.
+ const base::Feature kModules{"NtpModules", base::FEATURE_DISABLED_BY_DEFAULT};
 --- a/components/search/search.cc
 +++ b/components/search/search.cc
 @@ -28,9 +28,7 @@ bool DefaultSearchProviderIsGoogle(
@@ -421,42 +593,3 @@
  }
  
  }  // namespace search
---- a/chrome/browser/resources/local_ntp/doodles.js
-+++ b/chrome/browser/resources/local_ntp/doodles.js
-@@ -404,9 +404,6 @@ doodles.showLogoOrDoodle = function(fromCache) {
-       }
-     }
-     $(doodles.IDS.LOGO_DOODLE).classList.add(doodles.CLASSES.SHOW_LOGO);
--  } else {
--    // No doodle. Just show the default logo.
--    $(doodles.IDS.LOGO_DEFAULT).classList.add(doodles.CLASSES.SHOW_LOGO);
-   }
- };
- 
---- a/chrome/browser/search/local_ntp_source.cc
-+++ b/chrome/browser/search/local_ntp_source.cc
-@@ -617,7 +617,7 @@ class LocalNtpSource::SearchConfigurationProvider
-   }
- 
-   bool DefaultSearchProviderIsGoogle() {
--    return search::DefaultSearchProviderIsGoogle(service_);
-+    return false;
-   }
- 
-   ~SearchConfigurationProvider() override {
---- a/chrome/app/generated_resources.grd
-+++ b/chrome/app/generated_resources.grd
-@@ -5514,3 +5514,3 @@
-       <message name="IDS_NTP_CUSTOMIZE_NO_BACKGROUND_LABEL" desc="The label for the 'No background' tile in the customization menu on the New Tab Page">
--        No background
-+        Default background images
-       </message>
---- a/components/search/ntp_features.cc
-+++ b/components/search/ntp_features.cc
-@@ -66,5 +66,5 @@
- // If enabled, the WebUI new tab page will load when a new tab is created
- // instead of the local NTP.
--const base::Feature kWebUI{"NtpWebUI", base::FEATURE_ENABLED_BY_DEFAULT};
-+const base::Feature kWebUI{"NtpWebUI", base::FEATURE_DISABLED_BY_DEFAULT};
- 
- // If enabled, the Doodle will be shown on themed and dark mode NTPs.

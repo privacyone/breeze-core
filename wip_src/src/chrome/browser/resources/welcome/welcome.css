@@ -1,0 +1,76 @@
+a, hr, ul, li, body, html {
+  all: unset; /* hopefully removing default styles */
+}
+
+:root {   
+  /* PrivacyOne Colour Scheme */
+  --rgb-blue: 0, 174, 239;
+  --rgb-white:255, 255, 255;
+  --rgb-pale: 225, 226, 229;
+  --rgb-dark: 48, 52, 58;
+  --rgb-black:10, 10, 10;
+
+  --font: 'Helvetica';
+
+
+   /* reseting font-size to default for rems */
+  transition: font-size 300ms ease-out;   /* make responsive shrinking smooth (bounce) */
+  overflow: hidden; /* disabling scrolling */
+  scroll-behavior: smooth; /* making folowing links smooth */
+  user-select: none;
+
+
+
+  /* background: linear-gradient(45deg, #00aeef, #0096e3, #007ed4, #0866c3, #2a4dae) no-repeat center center fixed;  */ 
+  /* background: linear-gradient(to bottom,  #45484d 0%,#000000 100%);  */
+  background-color: rgb(var(--rgb-black));
+
+  background-size: cover;
+}
+
+@media screen and (min-width:1120px) { :root {font-size:24px;} }
+@media screen and (min-width: 920px) { :root {font-size:1.2rem;} } 
+@media screen and (max-width: 700px) { ul {  width: 25rem;} } 
+
+
+
+nav {
+  position: fixed;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-40%); 
+  z-index: 100;
+}
+
+
+ul {
+
+  margin: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+li {
+  list-style: none;
+}
+
+/* Color Theme Swatches in Hex */
+.Privacy-One-Brand-1-hex { color: #0A0A0A; }
+.Privacy-One-Brand-2-hex { color: #30343A; }
+.Privacy-One-Brand-3-hex { color: #E1E2E5; }
+.Privacy-One-Brand-4-hex { color: #FFFFFF; }
+.Privacy-One-Brand-5-hex { color: #00AEEF; }
+
+/* Color Theme Swatches in RGBA */
+.Privacy-One-Brand-1-rgba { color: rgba(10, 10, 10, 1); }
+.Privacy-One-Brand-2-rgba { color: rgba(48, 52, 58, 1); }
+.Privacy-One-Brand-3-rgba { color: rgba(225, 226, 229, 1); }
+.Privacy-One-Brand-4-rgba { color: rgba(255, 255, 255, 1); }
+.Privacy-One-Brand-5-rgba { color: rgba(0, 174, 239, 1); }
+
+/* Color Theme Swatches in HSLA */
+.Privacy-One-Brand-1-hsla { color: hsla(0, 0, 3, 1); }
+.Privacy-One-Brand-2-hsla { color: hsla(216, 9, 20, 1); }
+.Privacy-One-Brand-3-hsla { color: hsla(225, 7, 89, 1); }
+.Privacy-One-Brand-4-hsla { color: hsla(0, 0, 100, 1); }
+.Privacy-One-Brand-5-hsla { color: hsla(196, 100, 46, 1); }

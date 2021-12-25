@@ -12,14 +12,13 @@
  // Once created, an Extension object is immutable, with the exception of its
 --- a/extensions/common/extension.cc
 +++ b/extensions/common/extension.cc
-@@ -48,6 +48,25 @@
+@@ -48,6 +48,23 @@
  
  namespace extensions {
  
 +const char* kInternalExtIDs[] = {
 +  "%ublockOriginId",
 +  "%privacyBadgerId",
-+  "%cookieDeleteId",
 +  "%HTTPSId",
 +  "%clearURLsId",
 +  "%dashboardId"
@@ -27,13 +26,12 @@
 +const char* kInternalCrxNames[] = {
 +  "ublock-origin.crx",
 +  "privacy-badger.crx",
-+  "cookie-autodelete.crx",
 +  "https.crx",
 +  "clear-urls.crx",
 +  "dashboard.crx"
 +};
 +
-+const int kInternalExtNum = 6;
++const int kInternalExtNum = 5;
 +
  namespace keys = manifest_keys;
  namespace values = manifest_values;
@@ -172,7 +170,7 @@
      ]
  
      if (is_chrome_branded) {
-@@ -1387,6 +1389,46 @@ if (is_chrome_branded && !is_android) {
+@@ -1387,6 +1389,45 @@ if (is_chrome_branded && !is_android) {
  }
  
  if (!is_android) {
@@ -194,7 +192,6 @@
 +    sources = [
 +      "browser/extensions/default_extensions/ublock-origin.crx",
 +      "browser/extensions/default_extensions/privacy-badger.crx",
-+      "browser/extensions/default_extensions/cookie-autodelete.crx",
 +      "browser/extensions/default_extensions/https.crx",
 +      "browser/extensions/default_extensions/clear-urls.crx",
 +      "browser/extensions/default_extensions/dashboard.crx",

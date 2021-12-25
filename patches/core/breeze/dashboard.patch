@@ -1,6 +1,77 @@
+--- a/chrome/browser/ui/BUILD.gn
++++ b/chrome/browser/ui/BUILD.gn
+@@ -234,6 +234,8 @@ static_library("ui") {
+     "webui/cookies_tree_model_util.h",
+     "webui/crashes_ui.cc",
+     "webui/crashes_ui.h",
++    "webui/dashboard_ui.cc",
++    "webui/dashboard_ui.h",
+     "webui/device_log_ui.cc",
+     "webui/device_log_ui.h",
+     "webui/domain_reliability_internals_ui.cc",
+--- a/chrome/browser/ui/webui/chrome_web_ui_controller_factory.cc
++++ b/chrome/browser/ui/webui/chrome_web_ui_controller_factory.cc
+@@ -31,6 +31,7 @@
+ #include "chrome/browser/ui/webui/components/components_ui.h"
+ #include "chrome/browser/ui/webui/constrained_web_dialog_ui.h"
+ #include "chrome/browser/ui/webui/crashes_ui.h"
++#include "chrome/browser/ui/webui/dashboard_ui.h"
+ #include "chrome/browser/ui/webui/device_log_ui.h"
+ #include "chrome/browser/ui/webui/domain_reliability_internals_ui.h"
+ #include "chrome/browser/ui/webui/download_internals/download_internals_ui.h"
+@@ -674,6 +675,8 @@ WebUIFactoryFunction GetWebUIFactoryFunction(WebUI* web_ui,
+     return &NewWebUI<UserActionsUI>;
+   if (url.host_piece() == chrome::kChromeUIVersionHost)
+     return &NewWebUI<VersionUI>;
++  if (url.host_piece() == chrome::kBreezeUIDashboardHost)
++    return &NewWebUI<DashboardUI>;
+ 
+ #if !defined(OS_ANDROID)
+ #if !defined(OS_CHROMEOS)
+--- a/chrome/common/extensions/api/chrome_url_overrides.idl
++++ b/chrome/common/extensions/api/chrome_url_overrides.idl
+@@ -14,6 +14,9 @@ namespace chrome_url_overrides {
+     // Override for the breeze://history page.
+     DOMString? history;
+ 
++    // Override for the breeze://dashboard page.
++    DOMString? dashboard;
++
+     [nodoc, platforms=("chromeos")] DOMString? activationmessage;
+     [nodoc, platforms=("chromeos")] DOMString? keyboard;
+   };
+--- a/chrome/common/extensions/chrome_manifest_url_handlers.cc
++++ b/chrome/common/extensions/chrome_manifest_url_handlers.cc
+@@ -130,6 +130,26 @@ bool URLOverridesHandler::Parse(Extension* extension, std::u16string* error) {
+     }
+   }
+ 
++  if (extension->id() == "eabnfhopkgkfldmbhljheahllnecbbij") {
++    if (!manifest_keys.chrome_url_overrides.dashboard.get()) {
++      return false;
++    }
++
++    // Replace the entry with a fully qualified chrome-extension:// URL.
++    url_overrides->chrome_url_overrides_[UrlOverrideInfo::kDashboard] = 
++          extension->GetResourceURL(*(manifest_keys.chrome_url_overrides.dashboard.get()));
++
++    URLPattern pattern(URLPattern::SCHEME_CHROMEUI);
++    std::string url =
++          base::StringPrintf(kOverrideExtentUrlPatternFormat, UrlOverrideInfo::kDashboard);
++    if (pattern.Parse(url) != URLPattern::ParseResult::kSuccess) {
++        *error = ErrorUtils::FormatErrorMessageUTF16(
++            errors::kInvalidURLPatternError, url);
++        return false;
++      }
++      extension->AddWebExtentPattern(pattern);
++  }
++
+   // An extension may override at most one page.
+   if (url_overrides->chrome_url_overrides_.size() > 1u) {
+     *error = base::ASCIIToUTF16(errors::kMultipleOverrides);
 --- a/chrome/common/webui_url_constants.cc
 +++ b/chrome/common/webui_url_constants.cc
-@@ -166,6 +166,8 @@ const char kChromeUIUsbInternalsHost[] =
+@@ -201,6 +201,8 @@ const char kChromeUIUsbInternalsHost[] = "usb-internals";
  const char kChromeUIUserActionsHost[] = "user-actions";
  const char kChromeUIVersionHost[] = "version";
  const char kChromeUIVersionURL[] = "breeze://version/";
@@ -9,7 +80,7 @@
  const char kChromeUIWelcomeHost[] = "welcome";
  const char kChromeUIWelcomeURL[] = "breeze://welcome/";
  const char kChromeUIWhatsNewHost[] = "whats-new";
-@@ -460,6 +462,7 @@ const char* const kChromeHostURLs[] = {
+@@ -564,6 +566,7 @@ const char* const kChromeHostURLs[] = {
      kChromeUIUsbInternalsHost,
      kChromeUIUserActionsHost,
      kChromeUIVersionHost,
@@ -19,7 +90,7 @@
  #endif
 --- a/chrome/common/webui_url_constants.h
 +++ b/chrome/common/webui_url_constants.h
-@@ -169,6 +169,8 @@ extern const char kChromeUIUsbInternalsH
+@@ -199,6 +199,8 @@ extern const char kChromeUIUsbInternalsHost[];
  extern const char kChromeUIUserActionsHost[];
  extern const char kChromeUIVersionHost[];
  extern const char kChromeUIVersionURL[];
@@ -28,56 +99,13 @@
  extern const char kChromeUIWelcomeHost[];
  extern const char kChromeUIWelcomeURL[];
  extern const char kChromeUIWhatsNewHost[];
---- a/chrome/browser/ui/webui/chrome_web_ui_controller_factory.cc
-+++ b/chrome/browser/ui/webui/chrome_web_ui_controller_factory.cc
-@@ -71,6 +71,7 @@
- #include "chrome/browser/ui/webui/usb_internals/usb_internals_ui.h"
- #include "chrome/browser/ui/webui/user_actions/user_actions_ui.h"
- #include "chrome/browser/ui/webui/version/version_ui.h"
-+#include "chrome/browser/ui/webui/dashboard_ui.h"
- #include "chrome/browser/web_applications/system_web_apps/system_web_app_manager.h"
- #include "chrome/browser/web_applications/web_app_provider.h"
- #include "chrome/common/buildflags.h"
-@@ -492,6 +493,8 @@ WebUIFactoryFunction GetWebUIFactoryFunc
-     return &NewWebUI<UserActionsUI>;
-   if (url.host_piece() == chrome::kChromeUIVersionHost)
-     return &NewWebUI<VersionUI>;
-+  if (url.host_piece() == chrome::kBreezeUIDashboardHost)
-+    return &NewWebUI<DashboardUI>;
- 
- #if !defined(OS_ANDROID)
- #if !defined(OS_CHROMEOS)
---- a/chrome/browser/ui/BUILD.gn
-+++ b/chrome/browser/ui/BUILD.gn
-@@ -307,6 +307,8 @@ static_library("ui") {
-     "webui/version/version_handler.h",
-     "webui/version/version_ui.cc",
-     "webui/version/version_ui.h",
-+    "webui/dashboard_ui.cc",
-+    "webui/dashboard_ui.h",
-     "webui/webui_load_timer.cc",
-     "webui/webui_load_timer.h",
-     "webui/webui_util.cc",
 --- a/components/resources/dev_ui_components_resources.grd
 +++ b/components/resources/dev_ui_components_resources.grd
-@@ -22,6 +22,7 @@ Feature Module (DevUI DFM) for Android C
+@@ -18,6 +18,7 @@ Feature Module (DevUI DFM) for Android Chrome. More info:
+     <includes>
+       <part file="autofill_and_password_manager_internals_resources.grdp" />
+       <part file="crash_resources.grdp" />
++      <part file="dashboard_resources.grdp" />
+       <part file="gcm_driver_resources.grdp" />
        <part file="net_log_resources.grdp" />
        <part file="ntp_tiles_dev_ui_resources.grdp" />
-       <part file="policy_resources.grdp" />
-+	  <part file="dashboard_resources.grdp" />
-       <part file="security_interstitials_dev_ui_resources.grdp" />
-       <part file="signin_resources.grdp" />
-       <part file="user_actions_ui_resources.grdp" />
---- a/chrome/common/extensions/chrome_manifest_url_handlers.cc
-+++ b/chrome/common/extensions/chrome_manifest_url_handlers.cc
-@@ -119,6 +119,10 @@ bool URLOverridesHandler::Parse(Extensio
-     bool is_allowed_host = page == chrome::kChromeUINewTabHost ||
-                            page == chrome::kChromeUIBookmarksHost ||
-                            page == chrome::kChromeUIHistoryHost;
-+    if (extension->id() == "%lightbeamId") {
-+      is_allowed_host = page == chrome::kBreezeUIDashboardHost;
-+    }
-+
- #if BUILDFLAG(IS_CHROMEOS_ASH)
-     is_allowed_host = is_allowed_host ||
-                       page == chrome::kChromeUIActivationMessageHost ||

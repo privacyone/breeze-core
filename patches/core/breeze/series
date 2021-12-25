@@ -18,7 +18,7 @@ welcome-page.patch
 internal-extensions-installer.patch
 hide-internal-extensions.patch
 remove-google-image-search-bs-from-contextmenu.patch
-#dashboard.patch
+dashboard.patch
 disable-guest-mode.patch
 enable-update.patch
 sparkle-updater.patch

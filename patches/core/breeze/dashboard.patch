@@ -46,7 +46,7 @@
      }
    }
  
-+  if (extension->id() == "eabnfhopkgkfldmbhljheahllnecbbij") {
++  if (extension->id() == "%dashboardId") {
 +    if (!manifest_keys.chrome_url_overrides.dashboard.get()) {
 +      return false;
 +    }

@@ -20,27 +20,24 @@
 # by the time the app target is done, the info.plist is correct.
 #
 
-import optparse
+import argparse
 import os
 import plistlib
 import re
 import subprocess
 import sys
 import tempfile
-
 def _ConvertPlist(source_plist, output_plist, fmt):
-  """Convert |source_plist| to |fmt| and save as |output_plist|."""
-  return subprocess.call(
-      ['plutil', '-convert', fmt, '-o', output_plist, source_plist])
-
-
+    """Convert |source_plist| to |fmt| and save as |output_plist|."""
+    return subprocess.call(
+        ['plutil', '-convert', fmt, '-o', output_plist, source_plist])
 def _RemoveKeys(plist, *keys):
-  """Removes a varargs of keys from the plist."""
-  for key in keys:
-    try:
-      del plist[key]
-    except KeyError:
-      pass
+    """Removes a varargs of keys from the plist."""
+    for key in keys:
+        try:
+            del plist[key]
+        except KeyError:
+            pass
 
 
 def _OverrideVersionKey(plist, breeze_version):
@@ -58,71 +55,74 @@ def _OverrideVersionKey(plist, breeze_version):
     plist['CFBundleVersion'] = str(adjusted_minor) + '.' + version_values[2]
 
 
-def Main(argv):
-  parser = optparse.OptionParser('%prog [options]')
-  parser.add_option('--plist', dest='plist_path', action='store',
-      type='string', default=None, help='The path of the plist to tweak.')
-  parser.add_option('--output', dest='plist_output', action='store',
-      type='string', default=None, help='If specified, the path to output ' + \
-      'the tweaked plist, rather than overwriting the input.')
-  parser.add_option('--breeze_product_dir_name', dest='breeze_product_dir_name',
-      action='store', type='string', default=None,
-      help='Product directory name')
-  parser.add_option('--breeze_feed_url', dest='breeze_feed_url', action='store',
-      type='string', default=None, help='Target url for update feed')
-  parser.add_option('--breeze_ed_key', dest='breeze_ed_key', action='store',
-      type='string', default=None, help='Public ED key for update')
+def Main():
+    parser = argparse.ArgumentParser(usage='%(prog)s [options]')
+    parser.add_argument('--plist', dest='plist_path', action='store',
+        default=None, help='The path of the plist to tweak.')
+    parser.add_argument('--output', dest='plist_output', action='store',
+        default=None, help='If specified, the path to output ' + \
+        'the tweaked plist, rather than overwriting the input.')
+    parser.add_argument('--breeze_product_dir_name', dest='breeze_product_dir_name',
+        action='store', default=None,
+        help='Product directory name')
+    parser.add_argument('--breeze_feed_url', dest='breeze_feed_url', action='store',
+        default=None, help='Target url for update feed')
+    parser.add_argument('--breeze_ed_key', dest='breeze_ed_key', action='store',
+        default=None, help='Public Ed key for update')
   # parser.add_option('--breeze_version', dest='breeze_version', action='store',
   #     type='string', default=None, help='breeze version string')
-  parser.add_option('--format', choices=('binary1', 'xml1', 'json'),
-      default='xml1', help='Format to use when writing property list '
-          '(default: %(default)s)')
-  (options, args) = parser.parse_args(argv)
+    parser.add_argument('--format', choices=('binary1', 'xml1', 'json'),
+        default='xml1', help='Format to use when writing property list '
+            '(default: %(default)s)')
+    args = parser.parse_args()
 
-  if len(args) > 0:
-    print >>sys.stderr, parser.get_usage()
-    return 1
+    if not args.plist_path:
+        print('No --plist specified.', file=sys.stderr)
+        return 1
 
-  if not options.plist_path:
-    print >>sys.stderr, 'No --plist specified.'
-    return 1
+    # Read the plist into its parsed format. Convert the file to 'xml1' as
+    # plistlib only supports that format in Python 2.7.
+    with tempfile.NamedTemporaryFile() as temp_info_plist:
+        if sys.version_info.major == 2:
+            retcode = _ConvertPlist(args.plist_path, temp_info_plist.name, 'xml1')
+            if retcode != 0:
+                return retcode
+            plist = plistlib.readPlist(temp_info_plist.name)
+        else:
+            with open(args.plist_path, 'rb') as f:
+                plist = plistlib.load(f)
 
-  # Read the plist into its parsed format. Convert the file to 'xml1' as
-  # plistlib only supports that format in Python 2.7.
-  with tempfile.NamedTemporaryFile() as temp_info_plist:
-    retcode = _ConvertPlist(options.plist_path, temp_info_plist.name, 'xml1')
-    if retcode != 0:
-      return retcode
-    plist = plistlib.readPlist(temp_info_plist.name)
+    output_path = args.plist_path
+    if args.plist_output is not None:
+        output_path = args.plist_output
 
-  output_path = options.plist_path
-  if options.plist_output is not None:
-    output_path = options.plist_output
+    plist['CrProductDirName'] = args.breeze_product_dir_name
 
-  plist['CrProductDirName'] = options.breeze_product_dir_name
+    if args.breeze_ed_key:
+        plist['SUPublicEDKey'] = args.breeze_ed_key
+    
+    if args.breeze_feed_url:
+        plist['SUFeedURL'] = args.breeze_feed_url
 
-  if options.breeze_feed_url:
-    plist['SUFeedURL'] = options.breeze_feed_url
+    # _OverrideVersionKey(plist, args.breeze_version)
 
-  if options.breeze_ed_key:
-    plist['SUPublicEDKey'] = options.breeze_ed_key
+    # Explicitly disable profiling
+    plist['SUEnableSystemProfiling'] = False
 
-  # _OverrideVersionKey(plist, options.breeze_version)
+    # Explicitly change notifications from banner to alert
+    plist['NSUserNotificationAlertStyle'] = 'alert'
 
-  # Explicitly disable profiling
-  plist['SUEnableSystemProfiling'] = False
-
-  # Explicitly change notifications from banner to alert
-  plist['NSUserNotificationAlertStyle'] = 'alert'
-
-  # Now that all keys have been mutated, rewrite the file.
-  with tempfile.NamedTemporaryFile() as temp_info_plist:
-    plistlib.writePlist(plist, temp_info_plist.name)
-
+    # Now that all keys have been mutated, rewrite the file.
     # Convert Info.plist to the format requested by the --format flag. Any
     # format would work on Mac but iOS requires specific format.
-    return _ConvertPlist(temp_info_plist.name, output_path, options.format)
+    if sys.version_info.major == 2:
+        with tempfile.NamedTemporaryFile() as temp_info_plist:
+            plistlib.writePlist(plist, temp_info_plist.name)
+            return _ConvertPlist(temp_info_plist.name, output_path, args.format)
+    with open(output_path, 'wb') as f:
+        plist_format = {'binary1': plistlib.FMT_BINARY, 'xml1': plistlib.FMT_XML}
+        plistlib.dump(plist, f, fmt=plist_format[args.format])
 
 
 if __name__ == '__main__':
-  sys.exit(Main(sys.argv[1:]))
+    sys.exit(Main())

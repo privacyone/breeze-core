@@ -5,7 +5,7 @@
 #ifndef BREEZE_BROWSER_MAC_SPARKLE_GLUE_H_
 #define BREEZE_BROWSER_MAC_SPARKLE_GLUE_H_
 
-#include "base/strings/string16.h"
+#include <string>
 #import "chrome/browser/mac/keystone_glue.h"
 
 #if defined(__OBJC__)
@@ -44,7 +44,7 @@ namespace sparkle_glue {
 
 bool SparkleEnabled();
 
-base::string16 CurrentlyInstalledVersion();
+std::u16string CurrentlyInstalledVersion();
 
 }  // namespace sparkle_glue
 

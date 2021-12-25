@@ -8,13 +8,16 @@
 #include <sys/mount.h>
 #include <sys/stat.h>
 
+#include "base/command_line.h"
 #include "base/mac/bundle_locations.h"
 #include "base/mac/foundation_util.h"
 #import "base/mac/scoped_nsautorelease_pool.h"
 #import "base/mac/scoped_nsobject.h"
 #include "base/memory/ref_counted.h"
 #include "base/strings/sys_string_conversions.h"
+#include "base/system/sys_info.h"
 #include "base/task/post_task.h"
+#include "base/task/thread_pool.h"
 #import "chrome/browser/mac/su_updater.h"
 #include "chrome/browser/update_util.h"
 #include "chrome/common/channel_info.h"
@@ -45,11 +48,11 @@ class PerformBridge : public base::RefCountedThreadSafe<PerformBridge> {
     DCHECK(sel);
 
     scoped_refptr<PerformBridge> op = new PerformBridge(target, sel, arg);
-    base::PostTask(
+    base::ThreadPool::PostTask(
         FROM_HERE,
-        {base::ThreadPool(), base::MayBlock(), base::TaskPriority::BEST_EFFORT,
-        base::TaskShutdownBehavior::CONTINUE_ON_SHUTDOWN},
-        base::Bind(&PerformBridge::Run, op.get()));
+        {base::MayBlock(), base::TaskPriority::BEST_EFFORT,
+         base::TaskShutdownBehavior::CONTINUE_ON_SHUTDOWN},
+        base::BindOnce(&PerformBridge::Run, std::move(op)));
   }
 
   // Convenience for the no-argument case.
@@ -278,7 +281,6 @@ class PerformBridge : public base::RefCountedThreadSafe<PerformBridge> {
     return;
   }
 
-  channel_ = chrome::GetChannelName();
   appPath_ = [appPath retain];
   url_ = [url retain];
 }
@@ -487,7 +489,7 @@ bool SparkleEnabled() {
   return [SparkleGlue sharedSparkleGlue] != nil;
 }
 
-base::string16 CurrentlyInstalledVersion() {
+std::u16string CurrentlyInstalledVersion() {
   SparkleGlue* sparkleGlue = [SparkleGlue sharedSparkleGlue];
   NSString* version = [sparkleGlue currentlyInstalledVersion];
   return base::SysNSStringToUTF16(version);

@@ -11,12 +11,11 @@ namespace settings {
 
 void RelaunchHandler::RegisterMessages() {
   web_ui()->RegisterMessageCallback(
-      "relaunchOnMac",
-      base::BindRepeating(&RelaunchHandler::Relaunch,
-                          base::Unretained(this)));
+      "relaunchOnMac", base::BindRepeating(&RelaunchHandler::Relaunch,
+                                           base::Unretained(this)));
 }
 
-void RelaunchHandler::Relaunch(const base::ListValue* args) {
+void RelaunchHandler::Relaunch(base::Value::ConstListView args) {
   [[SparkleGlue sharedSparkleGlue] relaunch];
 }
 } // namespace settings

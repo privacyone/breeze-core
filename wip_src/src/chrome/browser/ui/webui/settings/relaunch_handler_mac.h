@@ -5,6 +5,7 @@
 #ifndef BREEZE_BROWSER_UI_WEBUI_SETTINGS_RELAUNCH_HANDLER_H_
 #define BREEZE_BROWSER_UI_WEBUI_SETTINGS_RELAUNCH_HANDLER_H_
 
+#include "base/values.h"
 #include "chrome/browser/ui/webui/settings/settings_page_ui_handler.h"
 
 class Profile;
@@ -22,7 +23,7 @@ class RelaunchHandler : public SettingsPageUIHandler {
   void OnJavascriptAllowed() override {}
   void OnJavascriptDisallowed() override {}
 
-  void Relaunch(const base::ListValue* args);
+  void Relaunch(base::Value::ConstListView argsa);
 
   DISALLOW_COPY_AND_ASSIGN(RelaunchHandler);
 };

@@ -1,4 +1,4 @@
-89-fix-build.patch
+google-chrome-strings-to-chromium-strings-fix.patch
 fix-ungoogled-build.patch
 breeze-build-config-gni.patch
 branding.patch
@@ -19,7 +19,6 @@ internal-extensions-installer.patch
 hide-internal-extensions.patch
 remove-google-image-search-bs-from-contextmenu.patch
 #dashboard.patch
-#remove-profiles-icon.patch
 disable-guest-mode.patch
 enable-update.patch
 sparkle-updater.patch
@@ -33,7 +32,6 @@ dirty-breeze-version.patch
 credits.patch
 fix-windows-clang-format-exe.patch
 send-feedback.patch
-#global-and-site-settings.patch
 components.patch
 
 ui/privacyone-urls.patch
@@ -42,4 +40,3 @@ ui/colors.patch
 ui/about-page.patch
 ui/flags-overhaul.patch
 ui/incognito-colors.patch
-#ui/rename-persons-to-profiles.patch

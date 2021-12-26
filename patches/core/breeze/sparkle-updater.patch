@@ -54,7 +54,7 @@
    compile_entitlements("entitlements") {
      entitlements_templates = [ "app/app-entitlements.plist" ]
      output_name = "$target_gen_dir/app-entitlements.plist"
-@@ -594,7 +623,6 @@
+@@ -594,6 +623,7 @@
          info_plist_target = invoker.info_plist_target
        } else {
          info_plist_target = ":chrome_helper_plist"

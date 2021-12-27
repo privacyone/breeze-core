@@ -9,7 +9,7 @@ default-settings.patch
 fix-domain-sub/domainsub-exclusions.patch
 fix-domain-sub/search-engines.patch
 pmc-installer.patch
-#pmc-positioning.patch
+pmc-positioning.patch
 webstore-extension-installer.patch
 HTML.patch
 import-from-chrome.patch

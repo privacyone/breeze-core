@@ -1253,7 +1253,7 @@
 -      Chromium OS settings<ph name="LINK_END">&lt;/a&gt;</ph>
 +      Breeze OS settings<ph name="LINK_END">&lt;/a&gt;</ph>
      </message>
-@@ -108,12 +108,12 @@
+@@ -108,14 +108,14 @@
    <message name="IDS_SETTINGS_SPELLING_PREF_DESC" desc="Description of using a web serviced to help resolve spelling errors. It is important to convey that what the user types will be sent to Google.">
 -    To fix spelling errors, Chromium sends the text you type in text fields to Google
 +    To fix spelling errors, Breeze sends the text you type in text fields to Google

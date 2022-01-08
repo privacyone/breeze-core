@@ -75,15 +75,13 @@
    --md-toolbar-height: 56px;
  }
  
- @media (prefers-color-scheme: light) {
-@@ -21,7 +21,7 @@ html {
+@@ -21,5 +21,5 @@ html {
  @media (prefers-color-scheme: dark) {
    html {
 -    --md-background-color: rgb(32, 33, 36);  /* --google-grey-900 */
 +    --md-background-color: rgb(10, 10, 10);  /* --google-grey-900 */
      --md-loading-message-color: #9AA0A6;  /* --google-grey-refresh-500 */
      /* --cr-separator-line */
-     --md-toolbar-border: 1px solid rgba(255, 255, 255, .1);
 --- a/ui/gfx/color_palette.h
 +++ b/ui/gfx/color_palette.h
 @@ -18,10 +18,10 @@ constexpr SkColor kPlaceholderColor = SK_ColorRED;

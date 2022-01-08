@@ -123,7 +123,7 @@
 +    }
 +  }
 +
-   if (chip_ && !ShouldShowKeywordBubble()) {
+   if (chip_ && chip_->GetVisible() && !ShouldShowKeywordBubble()) {
      leading_decorations.AddDecoration(vertical_padding, location_height, false,
                                        0, edge_padding, chip_);
 @@ -788,14 +808,29 @@ void LocationBarView::OnThemeChanged() {

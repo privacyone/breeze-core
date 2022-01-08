@@ -91,24 +91,25 @@
  }
 --- a/components/version_info/version_info.h
 +++ b/components/version_info/version_info.h
-@@ -25,12 +25,18 @@ std::string GetProductName();
+@@ -25,13 +25,19 @@ std::string GetProductName();
  // Returns the version number, e.g. "6.0.490.1".
  std::string GetVersionNumber();
  
 +// Returns the version number, e.g. "6.0.490.1".
 +std::string GetChromiumVersionNumber();
 +
- // Returns the major component of the version, e.g. "6".
+ // Returns the major component (aka the milestone) of the version as an int,
+ // e.g. 6 when the version is "6.0.490.1".
+ int GetMajorVersionNumberAsInt();
+
+ // Like GetMajorVersionNumberAsInt(), but returns a string.
  std::string GetMajorVersionNumber();
- 
- // Returns the result of GetVersionNumber() as a base::Version.
- const base::Version& GetVersion();
- 
+
 +// Returns the result of GetChromiumVersionNumber() as a base::Version.
 +const base::Version& GetChromiumVersion();
 +
- // Returns a version control specific identifier of this release.
- std::string GetLastChange();
+ // Returns the result of GetVersionNumber() as a base::Version.
+ const base::Version& GetVersion();
  
 --- a/components/version_info/version_info_values.h.version
 +++ b/components/version_info/version_info_values.h.version

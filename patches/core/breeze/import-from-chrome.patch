@@ -448,8 +448,8 @@
 +  }  
 +  else 
 +  {
-+    service_name = ::KeychainPassword::service_name;
-+    account_name = ::KeychainPassword::account_name;
++    service_name = ::KeychainPassword::GetServiceName().c_str();
++    account_name = ::KeychainPassword::GetAccountName().c_str();
 +  }
 +  
    UInt32 password_length = 0;

@@ -83,7 +83,7 @@
      const GURL& referrer_url) const {
 +  const base::CommandLine& command_line =
 +      *base::CommandLine::ForCurrentProcess();
-+  if (command_line.HasSwitch("extension-mime-request-handling") &&
++  if (!command_line.HasSwitch("extension-mime-request-handling") ||
 +      command_line.GetSwitchValueASCII("extension-mime-request-handling") ==
 +      "always-prompt-for-install") {
 +    return true;
@@ -112,7 +112,7 @@
 @@ -8,4 +8,8 @@
       "SetIpv6ProbeFalse",
       "Forces the result of the browser's IPv6 probing (i.e. IPv6 connectivity test) to be unsuccessful. This causes IPv4 addresses to be prioritized over IPv6 addresses. Without this flag, the probing result is set to be successful, which causes IPv6 to be used over IPv4 when possible.  ungoogled-chromium flag.",
-      kOsAll, FEATURE_VALUE_TYPE(net::features::kSetIpv6ProbeFalse)},
+      kOsAll, FEATURE_VALUE_TYPE(net::features::kSetIpv6ProbeFalse), kBreezeFlag},
 +    {"extension-mime-request-handling",
 +     "Handling of extension MIME type requests",
 +     "Used when deciding how to handle a request for a CRX or User Script MIME type.  ungoogled-chromium flag.",

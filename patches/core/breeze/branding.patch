@@ -344,11 +344,6 @@
 -          Chromium lets you click a phone number on the web and call it with Skype!
 +          Breeze lets you click a phone number on the web and call it with Skype!
          </message>
-@@ -505,3 +505,3 @@ Chromium is unable to recover your settings.
-       <message name="IDS_PRINT_PREVIEW_NO_PLUGIN" desc="Message to display when the PDF viewer is missing.">
--        Chromium cannot show the print preview when the built-in PDF viewer is missing.
-+        Breeze cannot show the print preview when the built-in PDF viewer is missing.
-       </message>
 @@ -511,3 +511,3 @@ Chromium is unable to recover your settings.
                 desc="Message shown when a CRX has been downloaded and is being unpacked.">
 -        Adding to Chromium...
@@ -458,42 +453,30 @@
 -        &amp;Open in Chromium
 +        &amp;Open in Breeze
        </message>
-@@ -620,9 +620,9 @@ Chromium is unable to recover your settings.
+@@ -620,6 +620,6 @@ Chromium is unable to recover your settings.
          <message name="IDS_ABOUT" desc="In Title Case: The text label of the About Chrome menu item">
 -          About &amp;Chromium
 +          About &amp;Breeze
          </message>
-         <message name="IDS_UPDATE_NOW" desc="In Title Case: The text label of the Update Chrome Now menu item">
--          Update &amp;Chromium
-+          Update &amp;Breeze
-         </message>
-         <message name="IDS_RELAUNCH_TO_UPDATE" desc="In Title Case: The text label of the Update Chrome menu item, when relaunch to update experiment is enabled">
+         <message name="IDS_RELAUNCH_TO_UPDATE" desc="In Title Case: The text label of the relaunch to update Chrome menu item">
 -          Relaunch to Update &amp;Chromium
 +          Relaunch to Update &amp;Breeze
          </message>
-@@ -628,9 +628,9 @@ Chromium is unable to recover your settings.
+@@ -628,6 +628,6 @@ Chromium is unable to recover your settings.
          <message name="IDS_ABOUT" desc="The text label of the About Chrome menu item">
 -          About &amp;Chromium
 +          About &amp;Breeze
          </message>
-         <message name="IDS_UPDATE_NOW" desc="The text label of the Update Chrome Now menu item">
--          Update &amp;Chromium
-+          Update &amp;Breeze
-         </message>
-         <message name="IDS_RELAUNCH_TO_UPDATE" desc="The text label of the Update Chrome menu item, when relaunch to update experiment is enabled">
+         <message name="IDS_RELAUNCH_TO_UPDATE" desc="The text label of the relaunch to update Chrome menu item">
 -          Relaunch to update &amp;Chromium
 +          Relaunch to update &amp;Breeze
          </message>
-@@ -636,9 +636,9 @@ Chromium is unable to recover your settings.
+@@ -636,6 +636,6 @@ Chromium is unable to recover your settings.
          <message name="IDS_ABOUT" desc="The text label of the About Chrome menu item">
 -          About &amp;Chromium
 +          About &amp;Breeze
          </message>
-         <message name="IDS_UPDATE_NOW" desc="The text label of the Update Chrome OS Now menu item">
--          Update &amp;Chromium OS
-+          Update &amp;Breeze OS
-         </message>
-         <message name="IDS_RELAUNCH_TO_UPDATE" desc="The text label of the Update Chrome OS menu item, when relaunch to update experiment is enabled">
+         <message name="IDS_RELAUNCH_TO_UPDATE" desc="The text label of the relaunch to update Chrome OS menu item">
 -          Relaunch to update &amp;Chromium OS
 +          Relaunch to update &amp;Breeze OS
          </message>
@@ -1279,14 +1262,16 @@
 -    To apply your changes, relaunch Chromium
 +    To apply your changes, relaunch Breeze
    </message>
-   <message name="IDS_SETTINGS_SIGNIN_ALLOWED" desc="The title of the preference to allow to sign-in to Chrome">
+ 
+   <if expr="not chromeos and not lacros">
+     <message name="IDS_SETTINGS_SIGNIN_ALLOWED" desc="The title of the preference to allow to sign-in to Chrome">
 -    Allow Chromium sign-in
 +    Allow Breeze sign-in
-   </message>
-   <message name="IDS_SETTINGS_SIGNIN_ALLOWED_DESC" desc="The description of the preference to allow to sign-in to Chrome">
+     </message>
+     <message name="IDS_SETTINGS_SIGNIN_ALLOWED_DESC" desc="The description of the preference to allow to sign-in to Chrome">
 -    By turning this off, you can sign in to Google sites like Gmail without signing in to Chromium
-+    By turning this off, you can sign in to Google sites like Gmail without signing in to Breeze
-   </message>
++    Unavailable
+     </message>
 @@ -116,3 +116,3 @@
    <message name="IDS_SETTINGS_SITE_SETTINGS_PDFS_BLOCKED" desc="Label for the disabled option of the pdfs content setting.">
 -    Open PDFs in Chromium
@@ -1294,8 +1279,8 @@
    </message>
 @@ -119,3 +119,3 @@
    <message name="IDS_SETTINGS_PRIVACY_REVIEW_CLEAR_ON_EXIT_FEATURE_DESCRIPTION1" desc="A part of the feature description of 'clear cookies on exit' card in the privacy review.">
--    When you close Chromium, it automatically clears cookies and site data from the pages you visited
-+    When you close Breeze, it automatically clears cookies and site data from the pages you visited
+-    When you close all Chromium windows, cookies and site data are automatically cleared
++    When you close all Breeze windows, cookies and site data are automatically cleared
    </message>
 @@ -122,18 +122,18 @@
    <message name="IDS_SETTINGS_SAFETY_CHECK_PARENT_PRIMARY_LABEL_BEFORE" desc="This text describes what the safety check is. (It's an area of the Settings page where users can quickly check whether their safety-related settings are fully protecting them.)">
@@ -1480,8 +1465,8 @@
 @@ -545,8 +545,8 @@
  std::string ChromeURLs() {
    std::string html;
--  AppendHeader(&html, 0, "Chrome URLs");
-+  AppendHeader(&html, 0, "Breeze URLs");
+-  AppendHeader(&html, "Chrome URLs");
++  AppendHeader(&html, "Breeze URLs");
    AppendBody(&html);
  
 -  html += "<h2>List of Chrome URLs</h2>\n<ul>\n";

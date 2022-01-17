@@ -1,6 +1,10 @@
 import("//build/util/branding.gni")
 
-breeze_feed_url = "https://updates.breezebrowser.io/sparkle/Breeze/stable/appcast.xml"
+if (target_cpu == "arm64") {
+    breeze_feed_url = "https://updates.breezebrowser.io/sparkle/Breeze/stable-arm/appcast.xml"
+} else {
+    breeze_feed_url = "https://updates.breezebrowser.io/sparkle/Breeze/stable/appcast.xml"
+}
 
 breeze_product_dir_name = "Privacy One/Breeze"
 

@@ -1,6 +1,6 @@
 # ![Breeze Icon](misc/breeze.png) Breeze
 
-Breeze is a privacy focused browser based on the Chromium open-source project, currently available for [Windows 10](../../../breeze-windows) and [macOS](../../../breeze-macos).
+Breeze is a privacy focused browser based on the Chromium open-source project, currently available for [Windows](../../../breeze-windows) and [macOS](../../../breeze-macos).
 
 Breeze evolved from the [ungoogled-chromium](https://github.com/Eloston/ungoogled-chromium) project with some key additions. We wanted to make an all-around browser that provides users with enhanced privacy and security while keeping the browsing experience clean and simple.
 
